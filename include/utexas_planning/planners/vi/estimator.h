@@ -6,19 +6,25 @@
 #include <utexas_planning/common/Action.h>
 #include <utexas_planning/common/State.h>
 
-class VIEstimator {
-  public:
-    VIEstimator () {}
-    virtual ~VIEstimator () {}
+namespace utexas_planning {
+  
+  namespace vi {
 
-    virtual float getValue(const State &state) = 0;
-    virtual void updateValue(const State &state, float value) = 0;
-    virtual Action getBestAction(const State &state) = 0;
-    virtual void setBestAction(const State &state, const Action& action) = 0;
+    class Estimator {
+      public:
+        Estimator () {}
+        virtual ~Estimator () {}
 
-    virtual void saveEstimatedValues(const std::string& file) = 0;
-    virtual void loadEstimatedValues(const std::string& file) = 0;
-};
+        virtual void getValueAndBestActionIdx(unsigned int state_idx, float &value, unsigned int &action_idx) const = 0;
+        virtual void setValueAndBestActionIdx(unsigned int state_idx, float value, unsigned int action_idx) = 0;
+
+        virtual void saveEstimatedValues(const std::string& file) const = 0;
+        virtual void loadEstimatedValues(const std::string& file) = 0;
+    };
+    
+  } /* vi */
+
+} /* utexas_planning */
 
 
 #endif /* end of include guard: UTEXAS_PLANNING_VI_ESTIMATOR_H_ */

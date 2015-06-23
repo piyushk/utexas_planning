@@ -20,7 +20,7 @@ namespace utexas_planning {
       DeclarativeModel () {}
       virtual ~DeclarativeModel () {}
 
-      virtual void getStateVector(boost::shared_array<const State> &states) const = 0;
+      virtual void getStateVector(boost::shared_array<const State> &states, unsigned int num_states) const = 0;
 
       virtual void getTransitionDynamics(const State &state,
                                          const Action &action,
