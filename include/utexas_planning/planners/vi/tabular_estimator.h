@@ -7,34 +7,47 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include <utexas_planning/planning/vi/estimator.h>
 
 namespace utexas_planning {
-  
+
   namespace vi {
 
     class TabularEstimator : public Estimator {
 
       public:
-        TabularEstimator (const boost::shared_ptr<const DeclarativeModel> &model) {
-          boost::shared_array<const State> states;
-          unsigned int num_states;
-          model->getStateVector(states, num_states);
-          value_cache_.resize(num_states);
-          best_action_idx_cache_.resize(num_states);
-        }
+
+        typedef std::map<boost::shared_ptr<State>, std::pair<float, boost::shared_ptr<Action> >, LessState> EstimatorTable;
 
         virtual ~TabularEstimator () {}
 
-        virtual void getValueAndBestActionIdx(unsigned int state_idx, float &value, unsigned int &action_idx) const {
-          value = value_cache_[state_idx];
-          action_idx = best_action_idx_cache_[state_idx];
+        virtual void getValueAndBestAction(const State& state, float &value, Action& action) const {
+          boost::shared_ptr<State> state_ptr(new State(state));
+          EstimatorTable::const_iterator it = cache_.find(state_ptr);
+          if (it != cache_.end()) {
+            value = it->second.first;
+            action = *(it->second.second);
+          } else {
+            value = 0;
+          }
         }
 
-        virtual void setValueAndBestActionIdx(unsigned int state_idx, float value, unsigned int action_idx) {
-          value_cache_[state_idx] = value;
-          best_action_idx_cache_[state_idx] = action_idx;
+        virtual void setValueAndBestAction(const State& state, float value, const Action& action) {
+          boost::shared_ptr<State> state_ptr(new State(state));
+          EstimatorTable::iterator it = cache_.find(state_ptr);
+          if (it != cache_.end()) {
+            it->second.first = value;
+            action = *(it->second.second);
+          } else {
+            boost::shared_ptr<Action> action_ptr(new Action(action));
+            std::pair<float, boost::shared_ptr<Action> > pair(value, action_ptr);
+            cache_[state_ptr] = pair;
+          }
+          value_cache_[state] = value;
+          best_action_cache_[state] = action;
         }
 
         virtual void loadEstimatedValues(const std::string& file) {
@@ -51,14 +64,18 @@ namespace utexas_planning {
 
       private:
 
-        std::vector<float> value_cache_;
-        std::vector<int> best_action_idx_cache_;
+        struct LessState : public std::binary_function<const State*, const State*, bool> {
+          bool  operator() (const State *lhs, const Vehicle *rhs) const {
+            return *lhs < *rhs;
+          }
+        };
+
+        EstimatorTable cache_;
 
         friend class boost::serialization::access;
         template<class Archive>
         void serialize(Archive & ar, const unsigned int version) {
-          ar & BOOST_SERIALIZATION_NVP(value_cache_);
-          ar & BOOST_SERIALIZATION_NVP(best_action_idx_cache_);
+          ar & BOOST_SERIALIZATION_NVP(cache_);
         }
 
     };

@@ -8,6 +8,7 @@
 
 #include <utexas_planning/common/Params.h>
 #include <utexas_planning/core/DeclartiveModel.h>
+#include <utexas_planning/planners/abstract_planner.h>
 #include <utexas_planning/planners/vi/estimator.h>
 #include <utexas_planning/planners/vi/tabular_estimator.h>
 
@@ -34,10 +35,6 @@ namespace utexas_planning {
       Params_STRUCT(PARAMS)
 #undef PARAMS
 
-        ValueIteration (boost::shared_ptr<DeclarativeModel> model,
-                        boost::shared_ptr<Estimator> value_estimator = boost::shared_ptr<Estimator>(),
-                        Params params = Params());
-
         virtual ~ValueIteration () {}
 
         void computePolicy();
@@ -55,7 +52,7 @@ namespace utexas_planning {
 
     };
 
-    ValueIteration::ValueIteration(boost::shared_ptr<DeclarativeModel> model,
+    ValueIteration::init(boost::shared_ptr<DeclarativeModel> model,
                                    boost::shared_ptr<Estimator> value_estimator,
                                    Params params) :
       model_(model),
