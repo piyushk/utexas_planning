@@ -16,8 +16,7 @@ namespace utexas_planning {
     public:
       typedef boost::shared_ptr<GenerativeModel> Ptr;
 
-      GenerativeModel () {}
-      virtual ~GenerativeModel () {}
+      virtual ~GenerativeModel ();
 
       virtual bool isTerminalState(const State &state) const = 0;
 
