@@ -12,10 +12,10 @@ namespace utexas_planning {
     public:
       ~AbstractPlanner() {}
 
-      virtual void init(boost::shared_ptr<GenerativeModel> model, YAML::Node params, std::string output_directory) = 0;
-      virtual void performEpisodeStartProcessing(float timeout, const State &start_state) = 0;
+      virtual void init(const boost::shared_ptr<const GenerativeModel> &model, const YAML::Node &params, const std::string &output_directory) = 0;
+      virtual void performEpisodeStartProcessing(const State &start_state, float timeout = NO_TIMEOUT) = 0;
       virtual Action getBestAction(const State &state) = 0;
-      virtual void performPostActionProcessing(const State& state, const Action& action, float timeout) = 0;
+      virtual void performPostActionProcessing(const State& state, const Action& action, float timeout = NO_TIMEOUT) = 0;
       virtual std::string getSolverName() = 0;
       virtual std::map<std::string, std::string> getParamsAsMap() = 0;
   };
