@@ -19,13 +19,30 @@ namespace utexas_planning {
       EstimatorTable::const_iterator it = cache_.find(state_ptr);
       if (it != cache_.end()) {
         value = it->second.first;
-        action = *(it->second.second);
+        if (it->second.second) {
+          action = *(it->second.second);
+        }
       } else {
         value = 0;
       }
     }
 
     void TabularEstimator::setValueAndBestAction(const State& state, float value, const Action& action) {
+      boost::shared_ptr<State> state_ptr(new State(state));
+      EstimatorTable::iterator it = cache_.find(state_ptr);
+      if (it != cache_.end()) {
+        it->second.first = value;
+        *(it->second.second) = action;
+      } else {
+        boost::shared_ptr<Action> action_ptr(new Action(action));
+        std::pair<float, boost::shared_ptr<Action> > pair(value, action_ptr);
+        cache_[state_ptr] = pair;
+      }
+      value_cache_[state] = value;
+      best_action_cache_[state] = action;
+    }
+
+    void TabularEstimator::setValue(const State& state, float value, const Action& action) {
       boost::shared_ptr<State> state_ptr(new State(state));
       EstimatorTable::iterator it = cache_.find(state_ptr);
       if (it != cache_.end()) {

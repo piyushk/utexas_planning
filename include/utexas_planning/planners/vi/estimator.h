@@ -14,8 +14,10 @@ namespace utexas_planning {
       public:
         virtual ~Estimator ();
 
-        virtual void getValueAndBestAction(const State& state, float &value, Action& action) const = 0;
-        virtual void setValueAndBestAction(const State& state, float value, const Action& action) = 0;
+        virtual void getValueAndBestAction(const State& state, float &value, boost::shared_ptr<const Action> &action) const = 0;
+        virtual void setValueAndBestAction(const State& state,
+                                           float value,
+                                           const boost::shared_ptr<const Action> &action = boost::shared_ptr<const Action>()) = 0;
 
         virtual void saveEstimatedValues(const std::string& file) const = 0;
         virtual void loadEstimatedValues(const std::string& file) = 0;

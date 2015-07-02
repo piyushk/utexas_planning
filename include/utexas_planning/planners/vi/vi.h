@@ -49,7 +49,7 @@ namespace utexas_planning {
         std::string policy_file_location_;
 
         boost::shared_ptr<DeclarativeModel> model_;
-        boost::shared_array<const State> states_;
+        std::vector<boost::shared_ptr<const State> > states_;
         unsigned int num_states_;
         boost::shared_ptr<Estimator> value_estimator_;
 

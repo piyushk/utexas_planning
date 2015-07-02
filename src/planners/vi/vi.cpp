@@ -30,7 +30,7 @@ namespace utexas_planning {
         throw std::runtime_error("Supplied model " + model->getModelName() + " needs to extend DeclarativeModel!");
       }
       try {
-        model_->getStateVector(states_, num_states_);
+        states_ = model_->getStateVector();
       } catch (const std::runtime_error& error) {
         throw std::runtime_error(std::string("Value Iteration: ") + std::string(error.what()));
       }
@@ -94,22 +94,17 @@ namespace utexas_planning {
         float max_value_change = -std::numeric_limits<float>::max();
         count++;
         VI_OUTPUT("Iteration #" << count);
-        boost::shared_array<State> states;
-        unsigned int num_states;
-        model_->getStateVector(states, num_states);
-        for (int state_idx = 0; state_idx < num_states; ++state_idx) {
-          const State& state = states[state_idx];
+        for (int state_idx = 0; state_idx < states_.size(); ++state_idx) {
+          const State& state = *(states_[state_idx]);
           if (model_->isTerminalState(state)) {
-            value_estimator_->updateValue(state, 0);
+            value_estimator_->setValueAndBestAction(state, 0);
             continue; // nothing to do here, move along
           }
-          boost::shared_array<Action> actions;
-          int num_actions;
-          model_->getActionsAtState(state, actions, num_actions);
+          std::vector<boost::shared_ptr<const Action> > actions;
+          model_->getActionsAtState(state, actions);
           float value = -std::numeric_limits<float>::max();
-          int best_action_idx;
-          for (int best_action_idx = 0; action_idx < num_actions; ++action_idx) {
-            const Action& action = actions[action_idx];
+          for (int action_idx = 0; action_idx < actions.size; ++action_idx) {
+            const Action& action = *(actions[action_idx]);
             float action_value = 0;
             boost::shared_array<State> next_states;
             std::vector<float> rewards, probabilities;

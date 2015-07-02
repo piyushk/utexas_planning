@@ -1,7 +1,6 @@
 #ifndef UTEXAS_PLANNING_GENERATIVE_MODEL_H_
 #define UTEXAS_PLANNING_GENERATIVE_MODEL_H_
 
-#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -31,8 +30,7 @@ namespace utexas_planning {
                               boost::shared_ptr<RNG> rng) const = 0;
 
       virtual void getActionsAtState(const State &state,
-                                     boost::shared_array<Action>& actions,
-                                     int &num_actions) const = 0;
+                                     std::vector<boost::shared_ptr<const Action> > &actions) const = 0;
   };
 
 } /* utexas_planning */
