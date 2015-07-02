@@ -18,6 +18,8 @@ namespace utexas_planning {
 
       virtual ~GenerativeModel ();
 
+      virtual std::string getModelName() const = 0;
+
       virtual bool isTerminalState(const State &state) const = 0;
 
       virtual void takeAction(const State &state,

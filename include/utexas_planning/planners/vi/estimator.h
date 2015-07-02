@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <utexas_planning/common/Action.h>
-#include <utexas_planning/common/State.h>
+#include <utexas_planning/core/action.h>
+#include <utexas_planning/core/state.h>
 
 namespace utexas_planning {
 
@@ -12,7 +12,7 @@ namespace utexas_planning {
 
     class Estimator {
       public:
-        virtual ~Estimator () {}
+        virtual ~Estimator ();
 
         virtual void getValueAndBestAction(const State& state, float &value, Action& action) const = 0;
         virtual void setValueAndBestAction(const State& state, float value, const Action& action) = 0;

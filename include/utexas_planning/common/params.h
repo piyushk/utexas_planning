@@ -4,6 +4,7 @@
 #include <boost/lexical_cast.hpp>
 #include <map>
 #include <string>
+#include <yaml-cpp/yaml.h>
 
 #define SET_FROM_YAML(type) \
   inline void setFromYaml(const YAML::Node &node, const char *key, type &val) { \
@@ -20,7 +21,7 @@ SET_FROM_YAML(std::string)
 
 #define PARAM_DECL(type,var,key,val) type var;
 #define PARAM_INIT(type,var,key,val) var = val;
-#define PARAM_SET(type,var,key,val) setFromYaml(opts,#key,var);
+#define PARAM_SET(type,var,key,val) setFromYaml(node,#key,var);
 #define PARAM_OUT(type,var,key,val) os << #var << ": " << p.var << " ";
 #define PARAM_MAP(type,var,key,val) stringMap[#var] = boost::lexical_cast<std::string>(var);
 
@@ -32,8 +33,8 @@ SET_FROM_YAML(std::string)
       params(PARAM_INIT) \
     } \
     \
-    void fromYaml(const YAML::NODE &node) { \
-      (void)opts; /* to remove any compiler warnings if params is empty */ \
+    void fromYaml(const YAML::Node &node) { \
+      (void)node; /* to remove any compiler warnings if params is empty */ \
       params(PARAM_SET) \
     } \
     std::map<std::string, std::string> asMap() { \

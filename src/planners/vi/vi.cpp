@@ -1,16 +1,11 @@
-#ifndef UTEXAS_PLANNING_VI_H_
-#define UTEXAS_PLANNING_VI_H_
-
-#include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <cmath>
 #include <limits>
 #include <stdexcept>
-#include <cmath>
 
-#include <utexas_planning/common/Params.h>
-#include <utexas_planning/core/DeclartiveModel.h>
-#include <utexas_planning/planners/abstract_planner.h>
-#include <utexas_planning/planners/vi/estimator.h>
 #include <utexas_planning/planners/vi/tabular_estimator.h>
+#include <utexas_planning/planners/vi/vi.h>
 
 #ifdef VI_DEBUG
 #define VI_OUTPUT(x) std::cout << x << std::endl
@@ -22,50 +17,8 @@ namespace utexas_planning {
 
   namespace vi {
 
-    class ValueIteration {
-      public:
-
-#define PARAMS(_) \
-      _(float,gamma,gamma,1.0) \
-      _(float,epsilon,epsilon,1e-2) \
-      _(unsigned int,max_iter,max_iter,1000) \
-      _(float,max_value,max_value,std::numeric_limits<float>::max()) \
-      _(float,min_value,min_value,-std::numeric_limits<float>::max())
-
-      Params_STRUCT(PARAMS)
-#undef PARAMS
-
-        ValueIteration() {}
-        virtual ~ValueIteration () {}
-
-        virtual void init(const boost::shared_ptr<const GenerativeModel> &model,
-                          const YAML::Node params,
-                          const std::string &output_directory);
-        virtual void performEpisodeStartProcessing(const State &start_state, float timeout = NO_TIMEOUT) = 0;
-        virtual Action getBestAction(const State &state) const = 0;
-        virtual void performPostActionProcessing(const State& state, const Action& action, float timeout = NO_TIMEOUT) = 0;
-        virtual std::string getSolverName() const = 0;
-        virtual std::map<std::string, std::string> getParamsAsMap() const = 0;
-
-      private:
-
-        void computePolicy();
-        void loadPolicy(const std::string& file);
-        void savePolicy(const std::string& file) const;
-        std::string generatePolicyFileName() const;
-
-        boost::shared_ptr<DeclarativeModel> model_;
-        boost::shared_array<const State> states_;
-        unsigned int num_states_;
-        boost::shared_ptr<Estimator> value_estimator_;
-
-        Params params_;
-        bool initialized_;
-        bool policy_available_;
-
-    };
-
     ValueIteration::ValueIteration() : initialized_(false), policy_available_(false) {}
+    ValueIteration::~ValueIteration() {}
 
     void ValueIteration::init(const boost::shared_ptr<const GenerativeModel> &model,
                          const YAML::Node params,
@@ -74,22 +27,22 @@ namespace utexas_planning {
       // Validate that the model can be used with value iteration.
       model_ = boost::dynamic_pointer_cast<const DeclarativeModel>(model);
       if (!model_) {
-        throw std::runtime_error("Supplied model " + model->getName() + " needs to extend DeclarativeModel!");
+        throw std::runtime_error("Supplied model " + model->getModelName() + " needs to extend DeclarativeModel!");
       }
       try {
         model_->getStateVector(states_, num_states_);
       } catch (const std::runtime_error& error) {
-        throw std::runtime_error("Value Iteration: " + erro.what());
+        throw std::runtime_error(std::string("Value Iteration: ") + std::string(error.what()));
       }
 
       // Read params from YAML file.
-      params_.fromYAML(params);
+      params_.fromYaml(params);
 
       // TODO: parametrize which value estimator to use.
       value_estimator_.reset(new TabularEstimator);
 
       // Ensure that output directory exists, so that we can write to it.
-      if (params_.reusePolicyFromFile) {
+      if (params_.reuse_policy_from_file) {
         if (!boost::filesystem::is_directory(output_directory) &&
             !boost::filesystem::create_directory(output_directory)) {
           std::cerr << "Output directory (" << output_directory << ") does not exist, but unable to create it. " <<
@@ -107,8 +60,8 @@ namespace utexas_planning {
       initialized_ = true;
     }
 
-    virtual void performEpisodeStartProcessing(float timeout, const State &start_state) {
-      if (params_.reusePolicyFromFile) {
+    void ValueIteration::performEpisodeStartProcessing(const State &start_state, float timeout) {
+      if (params_.reuse_policy_from_file) {
         if (boost::filesystem::is_regular_file(policy_file_location_)) {
           loadPolicy(policy_file_location_);
         }
@@ -120,7 +73,7 @@ namespace utexas_planning {
           timeout = params_.policy_computation_timeout;
         }
         computePolicy(timeout);
-        if (params_.reusePolicyFromFile) {
+        if (params_.reuse_policy_from_file) {
           savePolicy(policy_file_location_);
         }
       }
@@ -142,7 +95,7 @@ namespace utexas_planning {
         count++;
         VI_OUTPUT("Iteration #" << count);
         boost::shared_array<State> states;
-        int num_states;
+        unsigned int num_states;
         model_->getStateVector(states, num_states);
         for (int state_idx = 0; state_idx < num_states; ++state_idx) {
           const State& state = states[state_idx];
@@ -194,7 +147,7 @@ namespace utexas_planning {
       policy_available_ = true;
     }
 
-    void ValueIteration::savePolicy(const std::string& file) {
+    void ValueIteration::savePolicy(const std::string& file) const {
       if (!policy_available_) {
         throw std::runtime_error("VI::savePolicy(): No policy available. Please call computePolicy() or loadPolicy() first.");
       }
@@ -212,17 +165,17 @@ namespace utexas_planning {
       // VI does not need to anything here.
     }
 
-    virtual std::string getSolverName() const {
+    std::string ValueIteration::getSolverName() const {
       return std::string("ValueIteration");
     };
 
-    virtual std::map<std::string, std::string> getParamsAsMap() const {
+    std::map<std::string, std::string> ValueIteration::getParamsAsMap() const {
       return params_.asMap();
     }
 
     std::string ValueIteration::generatePolicyFileName() const {
       std::map<std::string, std::string> all_params = model->getParamsAsMap();
-      all_params["model_name"] = model->getName();
+      all_params["model_name"] = model->getModelName();
       std::map<std::string, std::string> solver_params = params_.asMap();
       all_params.insert(solver_params.begin(), solver_params.end());
       all_params["solver_name"] = getSolverName();
@@ -232,5 +185,3 @@ namespace utexas_planning {
   } /* vi */
 
 } /* utexas_planning */
-
-#endif /* end of include guard: UTEXAS_PLANNING_VI_H_ */
