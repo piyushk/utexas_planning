@@ -2,6 +2,6 @@
 
 namespace utexas_planning {
 
-  ~GenerativeModel::GenerativeModel () {}
+  GenerativeModel::~GenerativeModel() {}
 
 } /* utexas_planning */

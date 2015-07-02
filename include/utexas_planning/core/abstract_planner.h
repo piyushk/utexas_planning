@@ -2,6 +2,7 @@
 #define UTEXAS_PLANNING_ABSTRACT_PLANNER_H_
 
 #include <boost/shared_ptr.hpp>
+#include <yaml-cpp/yaml.h>
 
 #include <utexas_planning/core/generative_model.h>
 #include <utexas_planning/common/utils.h>

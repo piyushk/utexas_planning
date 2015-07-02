@@ -6,7 +6,7 @@ namespace utexas_planning {
   class State
   {
     public:
-      virtual ~State()=0 {}
+      virtual ~State() {}
   };
 
 } /* utexas_planning */

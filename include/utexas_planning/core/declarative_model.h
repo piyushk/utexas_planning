@@ -11,7 +11,7 @@
 
 namespace utexas_planning {
 
-  class DeclarativeModel : public Generative Model {
+  class DeclarativeModel : public GenerativeModel {
 
     public:
       typedef boost::shared_ptr<DeclarativeModel> Ptr;

@@ -6,7 +6,7 @@ namespace utexas_planning {
   class Action
   {
     public:
-      virtual ~Action()=0 {}
+      virtual ~Action() {}
   };
 
 } /* utexas_planning */
