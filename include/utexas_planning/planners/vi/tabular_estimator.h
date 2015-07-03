@@ -24,12 +24,17 @@ namespace utexas_planning {
         typedef std::map<boost::shared_ptr<State>, std::pair<float, boost::shared_ptr<Action> >, LessState> EstimatorTable;
 
         virtual ~TabularEstimator ();
-        virtual void getValueAndBestAction(const State& state, float &value, boost::shared_ptr<const Action> &action) const;
-        virtual void setValueAndBestAction(const State& state,
+
+        virtual void getValueAndBestAction(const boost::shared_ptr<const State> &state,
+                                           float &value,
+                                           boost::shared_ptr<const Action> &action) const;
+
+        virtual void setValueAndBestAction(const boost::shared_ptr<const State> &state,
                                            float value,
                                            const boost::shared_ptr<const Action> &action = boost::shared_ptr<const Action>());
-        virtual void loadEstimatedValues(const std::string& file);
+
         virtual void saveEstimatedValues(const std::string& file) const;
+        virtual void loadEstimatedValues(const std::string& file);
 
       private:
 

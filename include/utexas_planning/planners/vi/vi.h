@@ -35,7 +35,7 @@ namespace utexas_planning {
                           const YAML::Node params,
                           const std::string &output_directory);
         virtual void performEpisodeStartProcessing(const State &start_state, float timeout = NO_TIMEOUT);
-        virtual Action getBestAction(const State &state) const;
+        virtual const Action& getBestAction(const State &state) const;
         virtual void performPostActionProcessing(const State& state, const Action& action, float timeout = NO_TIMEOUT);
         virtual std::string getSolverName() const;
         virtual std::map<std::string, std::string> getParamsAsMap() const;
@@ -48,7 +48,7 @@ namespace utexas_planning {
         std::string generatePolicyFileName() const;
         std::string policy_file_location_;
 
-        boost::shared_ptr<DeclarativeModel> model_;
+        boost::shared_ptr<const DeclarativeModel> model_;
         std::vector<boost::shared_ptr<const State> > states_;
         unsigned int num_states_;
         boost::shared_ptr<Estimator> value_estimator_;

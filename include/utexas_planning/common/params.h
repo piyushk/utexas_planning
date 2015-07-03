@@ -37,7 +37,7 @@ SET_FROM_YAML(std::string)
       (void)node; /* to remove any compiler warnings if params is empty */ \
       params(PARAM_SET) \
     } \
-    std::map<std::string, std::string> asMap() { \
+    std::map<std::string, std::string> asMap() const { \
       std::map<std::string, std::string> stringMap; \
       params(PARAM_MAP) \
       return stringMap; \

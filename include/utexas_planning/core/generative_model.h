@@ -2,6 +2,7 @@
 #define UTEXAS_PLANNING_GENERATIVE_MODEL_H_
 
 #include <boost/shared_ptr.hpp>
+#include <map>
 #include <string>
 
 #include <utexas_planning/common/rng.h>
@@ -31,6 +32,9 @@ namespace utexas_planning {
 
       virtual void getActionsAtState(const State &state,
                                      std::vector<boost::shared_ptr<const Action> > &actions) const = 0;
+
+      virtual std::map<std::string, std::string> getParamsAsMap() const = 0;
+
   };
 
 } /* utexas_planning */

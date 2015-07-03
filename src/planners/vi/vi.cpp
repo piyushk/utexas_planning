@@ -97,23 +97,25 @@ namespace utexas_planning {
         for (int state_idx = 0; state_idx < states_.size(); ++state_idx) {
           const State& state = *(states_[state_idx]);
           if (model_->isTerminalState(state)) {
-            value_estimator_->setValueAndBestAction(state, 0);
+            value_estimator_->setValueAndBestAction(states_[state_idx], 0);
             continue; // nothing to do here, move along
           }
           std::vector<boost::shared_ptr<const Action> > actions;
           model_->getActionsAtState(state, actions);
           float value = -std::numeric_limits<float>::max();
-          for (int action_idx = 0; action_idx < actions.size; ++action_idx) {
+          int best_action_idx = 0;
+          for (int action_idx = 0; action_idx < actions.size(); ++action_idx) {
             const Action& action = *(actions[action_idx]);
             float action_value = 0;
-            boost::shared_array<State> next_states;
+            std::vector<boost::shared_ptr<State> > next_states;
             std::vector<float> rewards, probabilities;
             model_->getTransitionDynamics(state, action, next_states, rewards, probabilities);
             for (size_t ns_counter = 0; ns_counter < rewards.size(); ++ns_counter) {
-              const State& ns = next_states[ns_counter];
               float& reward = rewards[ns_counter];
               float& probability =  probabilities[ns_counter];
-              float ns_value = value_estimator_->getValue(ns);
+              float ns_value;
+              boost::shared_ptr<const Action> unused_best_action;
+              value_estimator_->getValueAndBestAction(next_states[ns_counter], ns_value, unused_best_action);
               action_value += probability * (reward + params_.gamma * ns_value);
             }
 
@@ -124,10 +126,12 @@ namespace utexas_planning {
           }
           value = std::max(params_.min_value, value);
           value = std::min(params_.max_value, value);
-          float value_change = fabs(value_estimator_->getValue(state) - value);
+          boost::shared_ptr<const Action> unused_best_action;
+          float current_value;
+          value_estimator_->getValueAndBestAction(states_[state_idx], current_value, unused_best_action);
+          float value_change = fabs(current_value - value);
           max_value_change = std::max(max_value_change, value_change);
-          value_estimator_->updateValue(state, value);
-          value_estimator_->setBestAction(state, actions[best_action_idx]);
+          value_estimator_->setValueAndBestAction(states_[state_idx], value, actions[best_action_idx]);
           /* VI_OUTPUT("  State #" << state << " value is " << value); */
         }
         VI_OUTPUT("  max change = " << max_value_change);
@@ -149,14 +153,17 @@ namespace utexas_planning {
       value_estimator_->saveEstimatedValues(file);
     }
 
-    Action ValueIteration::getBestAction(const State& state) const {
+    const Action& ValueIteration::getBestAction(const State& state) const {
       if (!policy_available_) {
         throw std::runtime_error("VI::getBestAction(): No policy available. Please call computePolicy() or loadPolicy() first.");
       }
-      return value_estimator_->getBestAction(state);
+      boost::shared_ptr<const Action> best_action;
+      float unused_value;
+      value_estimator_->getValueAndBestAction(state, unused_value, best_action);
+      return *best_action;
     }
 
-    void ValueIteration::performPostActionProcessing(const State& state, const Action& action, float timeout = NO_TIMEOUT) {
+    void ValueIteration::performPostActionProcessing(const State& state, const Action& action, float timeout) {
       // VI does not need to anything here.
     }
 
@@ -169,8 +176,8 @@ namespace utexas_planning {
     }
 
     std::string ValueIteration::generatePolicyFileName() const {
-      std::map<std::string, std::string> all_params = model->getParamsAsMap();
-      all_params["model_name"] = model->getModelName();
+      std::map<std::string, std::string> all_params = model_->getParamsAsMap();
+      all_params["model_name"] = model_->getModelName();
       std::map<std::string, std::string> solver_params = params_.asMap();
       all_params.insert(solver_params.begin(), solver_params.end());
       all_params["solver_name"] = getSolverName();
