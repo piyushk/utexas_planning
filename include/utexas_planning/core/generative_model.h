@@ -15,23 +15,24 @@ namespace utexas_planning {
 
     public:
       typedef boost::shared_ptr<GenerativeModel> Ptr;
+      typedef boost::shared_ptr<const GenerativeModel> ConstPtr;
 
       virtual ~GenerativeModel ();
 
       virtual std::string getModelName() const = 0;
 
-      virtual bool isTerminalState(const State &state) const = 0;
+      virtual bool isTerminalState(const State::ConstPtr &state) const = 0;
 
-      virtual void takeAction(const State &state,
-                              const Action &action,
+      virtual void takeAction(const State::ConstPtr &state,
+                              const Action::ConstPtr &action,
                               float &reward,
-                              State &next_state,
+                              State::ConstPtr &next_state,
                               bool &terminal,
                               int &depth_count,
                               boost::shared_ptr<RNG> rng) const = 0;
 
-      virtual void getActionsAtState(const State &state,
-                                     std::vector<boost::shared_ptr<const Action> > &actions) const = 0;
+      virtual void getActionsAtState(const State::ConstPtr &state,
+                                     std::vector<Action::ConstPtr> &actions) const = 0;
 
       virtual std::map<std::string, std::string> getParamsAsMap() const = 0;
 

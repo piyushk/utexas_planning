@@ -13,8 +13,12 @@ namespace utexas_planning {
 
   namespace vi {
 
-    class ValueIteration {
+    class ValueIteration : public AbstractPlanner {
+
       public:
+
+        typedef boost::shared_ptr<ValueIteration> Ptr;
+        typedef boost::shared_ptr<const ValueIteration> ConstPtr;
 
 #define PARAMS(_) \
       _(float,gamma,gamma,1.0) \
@@ -31,12 +35,15 @@ namespace utexas_planning {
         ValueIteration();
         virtual ~ValueIteration ();
 
-        virtual void init(const boost::shared_ptr<const GenerativeModel> &model,
+        virtual void init(const GenerativeModel::ConstPtr &model,
                           const YAML::Node params,
                           const std::string &output_directory);
-        virtual void performEpisodeStartProcessing(const State &start_state, float timeout = NO_TIMEOUT);
-        virtual const Action& getBestAction(const State &state) const;
-        virtual void performPostActionProcessing(const State& state, const Action& action, float timeout = NO_TIMEOUT);
+        virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state,
+                                                   float timeout = NO_TIMEOUT);
+        virtual const Action& getBestAction(const State::ConstPtr &state) const;
+        virtual void performPostActionProcessing(const State::ConstPtr& state,
+                                                 const Action::ConstPtr& action,
+                                                 float timeout = NO_TIMEOUT);
         virtual std::string getSolverName() const;
         virtual std::map<std::string, std::string> getParamsAsMap() const;
 
@@ -48,10 +55,10 @@ namespace utexas_planning {
         std::string generatePolicyFileName() const;
         std::string policy_file_location_;
 
-        boost::shared_ptr<const DeclarativeModel> model_;
-        std::vector<boost::shared_ptr<const State> > states_;
+        DeclarativeModel::ConstPtr model_;
+        std::vector<State::ConstPtr> states_;
         unsigned int num_states_;
-        boost::shared_ptr<Estimator> value_estimator_;
+        Estimator::Ptr value_estimator_;
 
         Params params_;
         bool initialized_;

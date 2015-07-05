@@ -10,8 +10,6 @@
 
 namespace utexas_planning {
 
-  static const float NO_TIMEOUT = -1.0f;
-
   inline std::string createHashFromStringMap(const std::map<std::string, std::string> &string_map) {
     typedef std::pair<std::string, std::string> SSPair;
     std::string hash_str = "";

@@ -14,15 +14,19 @@ namespace utexas_planning {
 
     class Estimator {
       public:
+
+        typedef boost::shared_ptr<Estimator> Ptr;
+        typedef boost::shared_ptr<const Estimator> ConstPtr;
+
         virtual ~Estimator ();
 
-        virtual void getValueAndBestAction(const boost::shared_ptr<const State> &state,
+        virtual void getValueAndBestAction(const State::ConstPtr &state,
                                            float &value,
-                                           boost::shared_ptr<const Action> &action) const = 0;
+                                           Action::ConstPtr &action) const = 0;
 
-        virtual void setValueAndBestAction(const boost::shared_ptr<const State> &state,
+        virtual void setValueAndBestAction(const State::ConstPtr &state,
                                            float value,
-                                           const boost::shared_ptr<const Action> &action = boost::shared_ptr<const Action>()) = 0;
+                                           const Action::ConstPtr &action = Action::ConstPtr()) = 0;
 
         virtual void saveEstimatedValues(const std::string& file) const = 0;
         virtual void loadEstimatedValues(const std::string& file) = 0;

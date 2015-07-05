@@ -20,7 +20,7 @@ namespace utexas_planning {
     ValueIteration::ValueIteration() : initialized_(false), policy_available_(false) {}
     ValueIteration::~ValueIteration() {}
 
-    void ValueIteration::init(const boost::shared_ptr<const GenerativeModel> &model,
+    void ValueIteration::init(const GenerativeModel::ConstPtr &model,
                          const YAML::Node params,
                          const std::string &output_directory) {
 
@@ -60,7 +60,7 @@ namespace utexas_planning {
       initialized_ = true;
     }
 
-    void ValueIteration::performEpisodeStartProcessing(const State &start_state, float timeout) {
+    void ValueIteration::performEpisodeStartProcessing(const State::ConstPtr& /* start_state */, float timeout) {
       if (params_.reuse_policy_from_file) {
         if (boost::filesystem::is_regular_file(policy_file_location_)) {
           loadPolicy(policy_file_location_);
@@ -94,18 +94,16 @@ namespace utexas_planning {
         float max_value_change = -std::numeric_limits<float>::max();
         count++;
         VI_OUTPUT("Iteration #" << count);
-        for (int state_idx = 0; state_idx < states_.size(); ++state_idx) {
-          const State& state = *(states_[state_idx]);
+        BOOST_FOREACH(const State::ConstPtr& state, states_) {
           if (model_->isTerminalState(state)) {
-            value_estimator_->setValueAndBestAction(states_[state_idx], 0);
+            value_estimator_->setValueAndBestAction(state, 0);
             continue; // nothing to do here, move along
           }
           std::vector<boost::shared_ptr<const Action> > actions;
           model_->getActionsAtState(state, actions);
           float value = -std::numeric_limits<float>::max();
-          int best_action_idx = 0;
-          for (int action_idx = 0; action_idx < actions.size(); ++action_idx) {
-            const Action& action = *(actions[action_idx]);
+          Action::ConstPtr best_action;
+          BOOST_FOREACH(const Action::ConstPtr& action, actions) {
             float action_value = 0;
             std::vector<boost::shared_ptr<State> > next_states;
             std::vector<float> rewards, probabilities;
@@ -121,17 +119,17 @@ namespace utexas_planning {
 
             if (action_value > value) {
               value = action_value;
-              best_action_idx = action_idx;
+              best_action = action;
             }
           }
           value = std::max(params_.min_value, value);
           value = std::min(params_.max_value, value);
           boost::shared_ptr<const Action> unused_best_action;
           float current_value;
-          value_estimator_->getValueAndBestAction(states_[state_idx], current_value, unused_best_action);
+          value_estimator_->getValueAndBestAction(state, current_value, unused_best_action);
           float value_change = fabs(current_value - value);
           max_value_change = std::max(max_value_change, value_change);
-          value_estimator_->setValueAndBestAction(states_[state_idx], value, actions[best_action_idx]);
+          value_estimator_->setValueAndBestAction(state, value, best_action);
           /* VI_OUTPUT("  State #" << state << " value is " << value); */
         }
         VI_OUTPUT("  max change = " << max_value_change);
@@ -153,7 +151,7 @@ namespace utexas_planning {
       value_estimator_->saveEstimatedValues(file);
     }
 
-    const Action& ValueIteration::getBestAction(const State& state) const {
+    const Action& ValueIteration::getBestAction(const State::ConstPtr& state) const {
       if (!policy_available_) {
         throw std::runtime_error("VI::getBestAction(): No policy available. Please call computePolicy() or loadPolicy() first.");
       }
@@ -163,7 +161,9 @@ namespace utexas_planning {
       return *best_action;
     }
 
-    void ValueIteration::performPostActionProcessing(const State& state, const Action& action, float timeout) {
+    void ValueIteration::performPostActionProcessing(const State::ConstPtr& /* state */,
+                                                     const Action::ConstPtr& /* action */,
+                                                     float /* timeout */) {
       // VI does not need to anything here.
     }
 

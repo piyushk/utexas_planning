@@ -8,16 +8,15 @@ namespace utexas_planning {
 
   namespace vi {
 
-    bool TabularEstimator::LessState::operator() (const State *lhs, const State *rhs) const {
-      //TODO return *lhs < *rhs;
-      return true;
+    bool TabularEstimator::LessState::operator() (const State::ConstPtr &lhs, const State::ConstPtr &rhs) const {
+      return *lhs < *rhs;
     }
 
     TabularEstimator::~TabularEstimator () {}
 
-    void TabularEstimator::getValueAndBestAction(const boost::shared_ptr<const State> &state,
+    void TabularEstimator::getValueAndBestAction(const State::ConstPtr &state,
                                                  float &value,
-                                                 boost::shared_ptr<const Action> &action) const {
+                                                 Action::ConstPtr &action) const {
       EstimatorTable::const_iterator it = cache_.find(state);
       if (it != cache_.end()) {
         value = it->second.first;
@@ -29,15 +28,15 @@ namespace utexas_planning {
       }
     }
 
-    void TabularEstimator::setValueAndBestAction(const boost::shared_ptr<const State> &state,
+    void TabularEstimator::setValueAndBestAction(const State::ConstPtr &state,
                                                  float value,
-                                                 const boost::shared_ptr<const Action> &action = boost::shared_ptr<const Action>());
+                                                 const Action::ConstPtr &action) {
       EstimatorTable::iterator it = cache_.find(state);
       if (it != cache_.end()) {
         it->second.first = value;
         it->second.second = action;
       } else {
-        std::pair<float, boost::shared_ptr<Action> > pair(value, action);
+        std::pair<float, Action::ConstPtr> pair(value, action);
         cache_[state] = pair;
       }
     }

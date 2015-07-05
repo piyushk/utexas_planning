@@ -5,26 +5,30 @@
 #include <yaml-cpp/yaml.h>
 
 #include <utexas_planning/core/generative_model.h>
-#include <utexas_planning/common/utils.h>
+#include <utexas_planning/common/constants.h>
 
 namespace utexas_planning {
 
   class AbstractPlanner {
 
     public:
+
+      typedef boost::shared_ptr<AbstractPlanner> Ptr;
+      typedef boost::shared_ptr<const AbstractPlanner> ConstPtr;
+
       ~AbstractPlanner() {}
 
-      virtual void init(const boost::shared_ptr<const GenerativeModel> &model,
+      virtual void init(const GenerativeModel::ConstPtr &model,
                         const YAML::Node &params,
                         const std::string &output_directory) = 0;
 
-      virtual void performEpisodeStartProcessing(const State &start_state,
+      virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state,
                                                  float timeout = NO_TIMEOUT) = 0;
 
-      virtual const Action& getBestAction(const State &state) const = 0;
+      virtual const Action& getBestAction(const State::ConstPtr &state) const = 0;
 
-      virtual void performPostActionProcessing(const State& state,
-                                               const Action& action,
+      virtual void performPostActionProcessing(const State::ConstPtr& state,
+                                               const Action::ConstPtr& action,
                                                float timeout = NO_TIMEOUT) = 0;
 
       virtual std::string getSolverName() const = 0;

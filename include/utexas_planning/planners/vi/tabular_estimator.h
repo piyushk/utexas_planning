@@ -17,21 +17,24 @@ namespace utexas_planning {
 
       public:
 
-        struct LessState : public std::binary_function<const State*, const State*, bool> {
-          bool operator() (const State *lhs, const State *rhs) const;
+        typedef boost::shared_ptr<TabularEstimator> Ptr;
+        typedef boost::shared_ptr<const TabularEstimator> ConstPtr;
+
+        struct LessState : public std::binary_function<const State::ConstPtr, const State::ConstPtr, bool> {
+          bool operator() (const State::ConstPtr &lhs, const State::ConstPtr &rhs) const;
         };
 
-        typedef std::map<boost::shared_ptr<State>, std::pair<float, boost::shared_ptr<Action> >, LessState> EstimatorTable;
+        typedef std::map<State::ConstPtr, std::pair<float, Action::ConstPtr>, LessState> EstimatorTable;
 
         virtual ~TabularEstimator ();
 
-        virtual void getValueAndBestAction(const boost::shared_ptr<const State> &state,
+        virtual void getValueAndBestAction(const State::ConstPtr &state,
                                            float &value,
-                                           boost::shared_ptr<const Action> &action) const;
+                                           Action::ConstPtr &action) const;
 
-        virtual void setValueAndBestAction(const boost::shared_ptr<const State> &state,
+        virtual void setValueAndBestAction(const State::ConstPtr &state,
                                            float value,
-                                           const boost::shared_ptr<const Action> &action = boost::shared_ptr<const Action>());
+                                           const Action::ConstPtr &action = Action::ConstPtr());
 
         virtual void saveEstimatedValues(const std::string& file) const;
         virtual void loadEstimatedValues(const std::string& file);

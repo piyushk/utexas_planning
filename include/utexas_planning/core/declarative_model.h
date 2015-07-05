@@ -15,14 +15,15 @@ namespace utexas_planning {
 
     public:
       typedef boost::shared_ptr<DeclarativeModel> Ptr;
+      typedef boost::shared_ptr<DeclarativeModel const> ConstPtr;
 
       virtual ~DeclarativeModel ();
 
-      virtual const std::vector<boost::shared_ptr<const State> >& getStateVector() const;
+      virtual const std::vector<State::ConstPtr>& getStateVector() const;
 
-      virtual void getTransitionDynamics(const State &state,
-                                         const Action &action,
-                                         std::vector<boost::shared_ptr<State> > &next_states,
+      virtual void getTransitionDynamics(const State::ConstPtr &state,
+                                         const Action::ConstPtr &action,
+                                         std::vector<State::Ptr> &next_states,
                                          std::vector<float> &rewards,
                                          std::vector<float> &probabilities) const = 0;
 
