@@ -27,14 +27,13 @@ namespace utexas_planning {
                               const Action::ConstPtr &action,
                               float &reward,
                               State::ConstPtr &next_state,
-                              bool &terminal,
                               int &depth_count,
                               boost::shared_ptr<RNG> rng) const = 0;
 
       virtual void getActionsAtState(const State::ConstPtr &state,
                                      std::vector<Action::ConstPtr> &actions) const = 0;
 
-      virtual std::map<std::string, std::string> getParamsAsMap() const = 0;
+      virtual std::map<std::string, std::string> getParamsAsMap() const;
 
   };
 

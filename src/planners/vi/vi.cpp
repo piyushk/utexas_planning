@@ -105,7 +105,7 @@ namespace utexas_planning {
           Action::ConstPtr best_action;
           BOOST_FOREACH(const Action::ConstPtr& action, actions) {
             float action_value = 0;
-            std::vector<boost::shared_ptr<State> > next_states;
+            std::vector<State::ConstPtr> next_states;
             std::vector<float> rewards, probabilities;
             model_->getTransitionDynamics(state, action, next_states, rewards, probabilities);
             for (size_t ns_counter = 0; ns_counter < rewards.size(); ++ns_counter) {

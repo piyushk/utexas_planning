@@ -23,9 +23,16 @@ namespace utexas_planning {
 
       virtual void getTransitionDynamics(const State::ConstPtr &state,
                                          const Action::ConstPtr &action,
-                                         std::vector<State::Ptr> &next_states,
+                                         std::vector<State::ConstPtr> &next_states,
                                          std::vector<float> &rewards,
                                          std::vector<float> &probabilities) const = 0;
+
+      virtual void takeAction(const State::ConstPtr &state,
+                              const Action::ConstPtr &action,
+                              float &reward,
+                              State::ConstPtr &next_state,
+                              int &depth_count,
+                              boost::shared_ptr<RNG> rng) const;
 
   };
 
