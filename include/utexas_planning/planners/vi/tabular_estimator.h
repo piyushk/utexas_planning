@@ -28,9 +28,8 @@ namespace utexas_planning {
 
         virtual ~TabularEstimator ();
 
-        virtual void getValueAndBestAction(const State::ConstPtr &state,
-                                           float &value,
-                                           Action::ConstPtr &action) const;
+        virtual float getValue(const State::ConstPtr &state) const;
+        virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const;
 
         virtual void setValueAndBestAction(const State::ConstPtr &state,
                                            float value,

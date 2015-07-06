@@ -111,9 +111,7 @@ namespace utexas_planning {
             for (size_t ns_counter = 0; ns_counter < rewards.size(); ++ns_counter) {
               float& reward = rewards[ns_counter];
               float& probability =  probabilities[ns_counter];
-              float ns_value;
-              boost::shared_ptr<const Action> unused_best_action;
-              value_estimator_->getValueAndBestAction(next_states[ns_counter], ns_value, unused_best_action);
+              float ns_value = value_estimator_->getValue(next_states[ns_counter]);
               action_value += probability * (reward + params_.gamma * ns_value);
             }
 
@@ -124,9 +122,7 @@ namespace utexas_planning {
           }
           value = std::max(params_.min_value, value);
           value = std::min(params_.max_value, value);
-          boost::shared_ptr<const Action> unused_best_action;
-          float current_value;
-          value_estimator_->getValueAndBestAction(state, current_value, unused_best_action);
+          float current_value = value_estimator_->getValue(state);
           float value_change = fabs(current_value - value);
           max_value_change = std::max(max_value_change, value_change);
           value_estimator_->setValueAndBestAction(state, value, best_action);
@@ -151,13 +147,14 @@ namespace utexas_planning {
       value_estimator_->saveEstimatedValues(file);
     }
 
-    const Action::ConstPtr ValueIteration::getBestAction(const State::ConstPtr& state) const {
+    Action::ConstPtr ValueIteration::getBestAction(const State::ConstPtr& state) const {
       if (!policy_available_) {
         throw std::runtime_error("VI::getBestAction(): Policy unavailable. Call computePolicy()/loadPolicy() first.");
       }
-      boost::shared_ptr<const Action> best_action;
-      float unused_value;
-      value_estimator_->getValueAndBestAction(state, unused_value, best_action);
+      Action::ConstPtr best_action = value_estimator_->getBestAction(state);
+      if (!best_action) {
+        throw std::runtime_error("VI::getBestAction(): getBestAction called with an invalid state.");
+      }
       return best_action;
     }
 

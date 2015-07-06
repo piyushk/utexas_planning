@@ -15,6 +15,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_library(utexas_planning_core
   src/lib/common/farmhash.cc
   src/lib/core/abstract_planner.cpp
+  src/lib/core/action.cpp
   src/lib/core/declarative_model.cpp
   src/lib/core/generative_model.cpp
   src/lib/core/state.cpp

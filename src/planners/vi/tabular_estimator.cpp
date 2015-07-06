@@ -12,18 +12,14 @@ namespace utexas_planning {
 
     TabularEstimator::~TabularEstimator () {}
 
-    void TabularEstimator::getValueAndBestAction(const State::ConstPtr &state,
-                                                 float &value,
-                                                 Action::ConstPtr &action) const {
+    float TabularEstimator::getValue(const State::ConstPtr &state) const {
       EstimatorTable::const_iterator it = cache_.find(state);
-      if (it != cache_.end()) {
-        value = it->second.first;
-        if (it->second.second) {
-          action = it->second.second;
-        }
-      } else {
-        value = 0;
-      }
+      return (it != cache_.end()) ? it->second.first : 0.0f;
+    }
+
+    Action::ConstPtr TabularEstimator::getBestAction(const State::ConstPtr &state) const {
+      EstimatorTable::const_iterator it = cache_.find(state);
+      return (it != cache_.end()) ? it->second.second : Action::ConstPtr();
     }
 
     void TabularEstimator::setValueAndBestAction(const State::ConstPtr &state,

@@ -13,7 +13,13 @@ namespace utexas_planning {
       typedef boost::shared_ptr<Action> Ptr;
       typedef boost::shared_ptr<const Action> ConstPtr;
 
-      virtual ~Action() {}
+      virtual ~Action();
+
+      virtual bool operator<(const Action &other) const;
+      virtual bool operator==(const Action &other) const;
+      virtual std::size_t hash() const;
+
+      virtual void serialize(std::ostream &stream) const = 0;
 
     private:
 
@@ -23,6 +29,11 @@ namespace utexas_planning {
 
   };
 
+  struct ActionHasher {
+    std::size_t operator()(const Action& action) const;
+  };
+
 } /* utexas_planning */
 
+std::ostream& operator<<(std::ostream& stream, const utexas_planning::Action& a);
 #endif /* end of include guard: UTEXAS_PLANNING_ACTION_H_ */

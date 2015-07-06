@@ -21,7 +21,10 @@ namespace utexas_planning {
 
       virtual ~State();
 
-      virtual bool operator<(const State &other) const = 0;
+      virtual bool operator<(const State &other) const;
+      virtual bool operator==(const State &other) const;
+      virtual std::size_t hash() const;
+
       virtual void serialize(std::ostream &stream) const = 0;
 
     private:
@@ -32,8 +35,11 @@ namespace utexas_planning {
 
   };
 
+  struct StateHasher {
+    std::size_t operator()(const State& state) const;
+  };
+
 } /* utexas_planning */
 
 std::ostream& operator<<(std::ostream& stream, const utexas_planning::State& s);
-
 #endif /* end of include guard: UTEXAS_PLANNING_STATE_H_ */

@@ -56,6 +56,18 @@ enum ActionType {
 class Action : public utexas_planning::Action {
   public:
     ActionType type;
+    void serialize(std::ostream& stream) const {
+      if (type == UP) {
+        stream << "Up";
+      } else if (type == DOWN) {
+        stream << "Down";
+      } else if (type == LEFT) {
+        stream << "Left";
+      } else {
+        stream << "Right";
+      }
+    }
+
   private:
   friend class boost::serialization::access;
   template <typename Archive> void serialize(Archive &ar, const unsigned int version) {
@@ -64,18 +76,7 @@ class Action : public utexas_planning::Action {
   }
 };
 
-std::ostream& operator<<(std::ostream& stream, const Action& action) {
-  if (action.type == UP) {
-    stream << "Up";
-  } else if (action.type == DOWN) {
-    stream << "Down";
-  } else if (action.type == LEFT) {
-    stream << "Left";
-  } else {
-    stream << "Right";
-  }
-  return stream;
-}
+BOOST_CLASS_EXPORT(Action);
 
 class State : public utexas_planning::State {
   public:
@@ -111,9 +112,7 @@ class State : public utexas_planning::State {
   }
 };
 
-// TODO: http://stackoverflow.com/questions/3396330/where-to-put-boost-class-export-for-boostserialization
 BOOST_CLASS_EXPORT(State);
-BOOST_CLASS_EXPORT(Action);
 
 class GridModel : public utexas_planning::DeclarativeModel {
 
@@ -160,7 +159,7 @@ class GridModel : public utexas_planning::DeclarativeModel {
       }
     };
 
-    const std::vector<utexas_planning::State::ConstPtr>& getStateVector() const {
+    std::vector<utexas_planning::State::ConstPtr> getStateVector() const {
       return complete_state_vector_;
     }
 

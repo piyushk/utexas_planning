@@ -19,7 +19,7 @@ namespace utexas_planning {
 
       virtual ~DeclarativeModel ();
 
-      virtual const std::vector<State::ConstPtr>& getStateVector() const;
+      virtual std::vector<State::ConstPtr> getStateVector() const;
 
       virtual void getTransitionDynamics(const State::ConstPtr &state,
                                          const Action::ConstPtr &action,

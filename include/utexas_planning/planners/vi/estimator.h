@@ -20,9 +20,8 @@ namespace utexas_planning {
 
         virtual ~Estimator ();
 
-        virtual void getValueAndBestAction(const State::ConstPtr &state,
-                                           float &value,
-                                           Action::ConstPtr &action) const = 0;
+        virtual float getValue(const State::ConstPtr &state) const = 0;
+        virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const = 0;
 
         virtual void setValueAndBestAction(const State::ConstPtr &state,
                                            float value,
