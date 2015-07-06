@@ -36,11 +36,11 @@ namespace utexas_planning {
         virtual ~ValueIteration ();
 
         virtual void init(const GenerativeModel::ConstPtr &model,
-                          const YAML::Node params,
+                          const YAML::Node &params,
                           const std::string &output_directory);
-        virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state,
+        virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state = State::ConstPtr(),
                                                    float timeout = NO_TIMEOUT);
-        virtual const Action& getBestAction(const State::ConstPtr &state) const;
+        virtual const Action::ConstPtr getBestAction(const State::ConstPtr &state) const;
         virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                  const Action::ConstPtr& action,
                                                  float timeout = NO_TIMEOUT);

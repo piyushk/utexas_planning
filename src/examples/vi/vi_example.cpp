@@ -36,8 +36,12 @@
  *
  **/
 
-#include <boost/serialization/export.
+#include <boost/serialization/export.hpp>
+
+#include <utexas_planning/core/abstract_planner.h>
 #include <utexas_planning/core/declarative_model.h>
+
+#include <utexas_planning/planners/vi/vi.h>
 
 #define GRID_SIZE 10
 
@@ -73,13 +77,17 @@ class State : public utexas_planning::State {
     int y;
 
     // boost serialize
-    bool operator<(const utexas_planning::State& other) const {
-      //TODO need dynamic cast here
-      if (x < other.x) return true;
-      if (x > other.x) return false;
+    bool operator<(const utexas_planning::State& other_base) const {
+      try {
+        const State& other = dynamic_cast<const State&>(other_base);
+        if (x < other.x) return true;
+        if (x > other.x) return false;
 
-      if (y < other.y) return true;
-      if (y > other.y) return false;
+        if (y < other.y) return true;
+        if (y > other.y) return false;
+      } catch(std::bad_cast exp) {
+        throw std::runtime_error("Unable to cast other in operator< in State class in GridModel example");
+      }
     }
 
   private:
@@ -90,8 +98,7 @@ class State : public utexas_planning::State {
   }
 };
 
-// TODO: not sure what the hell is going on with this.
-// http://stackoverflow.com/questions/3396330/where-to-put-boost-class-export-for-boostserialization
+// TODO: http://stackoverflow.com/questions/3396330/where-to-put-boost-class-export-for-boostserialization
 BOOST_CLASS_EXPORT(State);
 
 std::ostream& operator<<(std::ostream& stream, const State& s) {
@@ -109,7 +116,7 @@ class GridModel : public utexas_planning::DeclarativeModel {
       for (int x = 0; x < GRID_SIZE; ++x) {
         for (int y = 0; y < GRID_SIZE; ++y) {
           utexas_planning::State::Ptr s_base(new State);
-          boost::shared_ptr<State> s_derived = boost::static_pointer_cast<State>(s_base);
+          boost::shared_ptr<State> s = boost::static_pointer_cast<State>(s_base);
           s->x = x;
           s->y = y;
           complete_state_vector_.push_back(s_base);
@@ -124,29 +131,28 @@ class GridModel : public utexas_planning::DeclarativeModel {
       }
     }
 
-    std::string getModelName() {
+    std::string getModelName() const {
       return std::string("GridModel");
     }
 
     bool isTerminalState(const utexas_planning::State::ConstPtr &state_base) const {
-      boost::shared_ptr<State> state = boost::dynamic_pointer_cast<State>(state_base);
+      boost::shared_ptr<const State> state = boost::dynamic_pointer_cast<const State>(state_base);
       if (!state) {
         throw std::runtime_error("GridModel: Unable to type cast State::ConstPtr to derived type in isTerminalState");
       }
-      return ((state->x == GRID_SIZE / 2) &&
-              (state->y == GRID_SIZE / 2));
+      return ((state->x == GRID_SIZE / 2) && (state->y == GRID_SIZE / 2));
     }
 
     void getActionsAtState(const utexas_planning::State::ConstPtr &state,
-                           std::vector<utexas_planning::Action::ConstPtr>& actions) {
+                           std::vector<utexas_planning::Action::ConstPtr>& actions) const {
       actions.clear();
       if (!isTerminalState(state)) {
         actions = default_action_list_;
       }
     };
 
-    void getStateVector(std::vector<utexas_planning::State::ConstPtr>& states) {
-      states = complete_state_vector_;
+    const std::vector<utexas_planning::State::ConstPtr>& getStateVector() const {
+      return complete_state_vector_;
     }
 
     virtual void getTransitionDynamics(const utexas_planning::State::ConstPtr &state_base,
@@ -159,11 +165,18 @@ class GridModel : public utexas_planning::DeclarativeModel {
       rewards.clear();
       probabilities.clear();
 
-      boost::shared_ptr<State> state = boost::dynamic_pointer_cast<State>(state_base);
-      boost::shared_ptr<Action> action = boost::dynamic_pointer_cast<Action>(action_base);
+      boost::shared_ptr<const State> state = boost::dynamic_pointer_cast<const State>(state_base);
+      if (!state) {
+        throw std::runtime_error("GridModel::getTransitionDynamics unable to cast state.");
+      }
+
+      boost::shared_ptr<const Action> action = boost::dynamic_pointer_cast<const Action>(action_base);
+      if (!action) {
+        throw std::runtime_error("GridModel::getTransitionDynamics unable to cast action.");
+      }
 
       if (!isTerminalState(state)) {
-        utexas_planning::NextState::Ptr ns(new State);
+        boost::shared_ptr<State> ns(new State);
         ns->x = state->x;
         ns->y = (state->y == 0) ? GRID_SIZE - 1 : state->y - 1;
         next_states.push_back(ns);
@@ -205,46 +218,43 @@ class GridModel : public utexas_planning::DeclarativeModel {
     std::vector<utexas_planning::Action::ConstPtr> default_action_list_;
 };
 
-// int main(int argc, char **argv) {
-//   boost::shared_ptr<PredictiveModel<State, Action> > model(new GridModel);
-//   boost::shared_ptr<VIEstimator<State, Action> > estimator(new VITabularEstimator<State, Action>);
-//
-//   ValueIteration<State, Action> vi(model, estimator);
-//   std::cout << "Computing policy..." << std::endl;
-//   vi.computePolicy();
-//
-//   std::vector<State> test_states;
-//   State test;
-//   test.x = 5;
-//   test.y = 2;
-//   test_states.push_back(test);
-//   test.x = 2;
-//   test.y = 5;
-//   test_states.push_back(test);
-//   test.x = 5;
-//   test.y = 8;
-//   test_states.push_back(test);
-//   test.x = 8;
-//   test.y = 5;
-//   test_states.push_back(test);
-//
-//   BOOST_FOREACH(const State& s, test_states) {
-//     std::cout << "Best action at state " << s << " is " << vi.getBestAction(s) << std::endl;
-//     // std::vector<Action> actions;
-//     // model->getActionsAtState(s, actions);
-//     // BOOST_FOREACH(const Action& a, actions) {
-//     //   std::cout << "  Next state distributions after taking action " << a << std::endl;
-//     //   std::vector<State> ns;
-//     //   std::vector<float> r;
-//     //   std::vector<float> p;
-//     //   model->getTransitionDynamics(s, a, ns, r, p);
-//     //   int counter = 0;
-//     //   BOOST_FOREACH(const State& s2, ns) {
-//     //     std::cout << "    One possible next state is " << s2 << " with probability " << p[counter] << " and reward " << r[counter] << std::endl;
-//     //     ++counter;
-//     //   }
-//     // }
-//   }
-//
-//   return 0;
-// }
+int main(int argc, char **argv) {
+
+  utexas_planning::GenerativeModel::Ptr model(new GridModel);
+  utexas_planning::AbstractPlanner::Ptr solver(new utexas_planning::vi::ValueIteration);
+  YAML::Node empty_params;
+  std::string out_dir = "/tmp/test";
+  solver->init(model, empty_params, out_dir);
+  std::cout << "Computing policy..." << std::endl;
+
+  solver->performEpisodeStartProcessing(State::ConstPtr());
+
+  std::vector<boost::shared_ptr<State> > test_states;
+  boost::shared_ptr<State> test(new State);
+  test->x = 5;
+  test->y = 2;
+  test_states.push_back(test);
+  test.reset(new State);
+  test->x = 2;
+  test->y = 5;
+  test.reset(new State);
+  test_states.push_back(test);
+  test->x = 5;
+  test->y = 8;
+  test_states.push_back(test);
+  test.reset(new State);
+  test->x = 8;
+  test->y = 5;
+  test_states.push_back(test);
+
+  BOOST_FOREACH(const boost::shared_ptr<State>& s, test_states) {
+    utexas_planning::Action::ConstPtr action_base = solver->getBestAction(s);
+    boost::shared_ptr<const Action> action = boost::dynamic_pointer_cast<const Action>(action_base);
+    if (!action) {
+      throw std::runtime_error("main() to cast action.");
+    }
+    std::cout << "Best action at state " << *s << " is " << *action << std::endl;
+  }
+
+  return 0;
+}

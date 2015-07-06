@@ -21,7 +21,7 @@ namespace utexas_planning {
     ValueIteration::~ValueIteration() {}
 
     void ValueIteration::init(const GenerativeModel::ConstPtr &model,
-                         const YAML::Node params,
+                         const YAML::Node &params,
                          const std::string &output_directory) {
 
       // Validate that the model can be used with value iteration.
@@ -151,14 +151,14 @@ namespace utexas_planning {
       value_estimator_->saveEstimatedValues(file);
     }
 
-    const Action& ValueIteration::getBestAction(const State::ConstPtr& state) const {
+    const Action::ConstPtr ValueIteration::getBestAction(const State::ConstPtr& state) const {
       if (!policy_available_) {
         throw std::runtime_error("VI::getBestAction(): No policy available. Please call computePolicy() or loadPolicy() first.");
       }
       boost::shared_ptr<const Action> best_action;
       float unused_value;
       value_estimator_->getValueAndBestAction(state, unused_value, best_action);
-      return *best_action;
+      return best_action;
     }
 
     void ValueIteration::performPostActionProcessing(const State::ConstPtr& /* state */,
