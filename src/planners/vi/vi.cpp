@@ -90,7 +90,7 @@ namespace utexas_planning {
 
       while((change) &&
             (count < params_.max_iter) &&
-            (timeout > 0 && current_time < start_time + timeout_duration)) {
+            (timeout < 0 || current_time < start_time + timeout_duration)) {
         float max_value_change = -std::numeric_limits<float>::max();
         count++;
         VI_OUTPUT("Iteration #" << count);
@@ -130,7 +130,7 @@ namespace utexas_planning {
           float value_change = fabs(current_value - value);
           max_value_change = std::max(max_value_change, value_change);
           value_estimator_->setValueAndBestAction(state, value, best_action);
-          /* VI_OUTPUT("  State #" << state << " value is " << value); */
+          /* VI_OUTPUT("  State #" << *state << " value is " << value); */
         }
         VI_OUTPUT("  max change = " << max_value_change);
         change = max_value_change > params_.epsilon;
@@ -146,14 +146,14 @@ namespace utexas_planning {
 
     void ValueIteration::savePolicy(const std::string& file) const {
       if (!policy_available_) {
-        throw std::runtime_error("VI::savePolicy(): No policy available. Please call computePolicy() or loadPolicy() first.");
+        throw std::runtime_error("VI::savePolicy(): Policy unavailable. Call computePolicy()/loadPolicy() first.");
       }
       value_estimator_->saveEstimatedValues(file);
     }
 
     const Action::ConstPtr ValueIteration::getBestAction(const State::ConstPtr& state) const {
       if (!policy_available_) {
-        throw std::runtime_error("VI::getBestAction(): No policy available. Please call computePolicy() or loadPolicy() first.");
+        throw std::runtime_error("VI::getBestAction(): Policy unavailable. Call computePolicy()/loadPolicy() first.");
       }
       boost::shared_ptr<const Action> best_action;
       float unused_value;

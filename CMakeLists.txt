@@ -17,6 +17,7 @@ add_library(utexas_planning_core
   src/lib/core/abstract_planner.cpp
   src/lib/core/declarative_model.cpp
   src/lib/core/generative_model.cpp
+  src/lib/core/state.cpp
 )
 target_link_libraries(utexas_planning_core
   ${Boost_LIBRARIES}

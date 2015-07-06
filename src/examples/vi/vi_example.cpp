@@ -56,6 +56,12 @@ enum ActionType {
 class Action : public utexas_planning::Action {
   public:
     ActionType type;
+  private:
+  friend class boost::serialization::access;
+  template <typename Archive> void serialize(Archive &ar, const unsigned int version) {
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(utexas_planning::Action);
+    ar & BOOST_SERIALIZATION_NVP(type);
+  }
 };
 
 std::ostream& operator<<(std::ostream& stream, const Action& action) {
@@ -85,26 +91,29 @@ class State : public utexas_planning::State {
 
         if (y < other.y) return true;
         if (y > other.y) return false;
+
+        return false;
       } catch(std::bad_cast exp) {
         throw std::runtime_error("Unable to cast other in operator< in State class in GridModel example");
       }
     }
 
+    void serialize(std::ostream& stream) const {
+      stream << "(" << x << "," << y << ")";
+    }
+
   private:
   friend class boost::serialization::access;
   template <typename Archive> void serialize(Archive &ar, const unsigned int version) {
-    ar & x;
-    ar & y;
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(utexas_planning::State);
+    ar & BOOST_SERIALIZATION_NVP(x);
+    ar & BOOST_SERIALIZATION_NVP(y);
   }
 };
 
 // TODO: http://stackoverflow.com/questions/3396330/where-to-put-boost-class-export-for-boostserialization
 BOOST_CLASS_EXPORT(State);
-
-std::ostream& operator<<(std::ostream& stream, const State& s) {
-  stream << "(" << s.x << "," << s.y << ")";
-  return stream;
-}
+BOOST_CLASS_EXPORT(Action);
 
 class GridModel : public utexas_planning::DeclarativeModel {
 
@@ -161,10 +170,6 @@ class GridModel : public utexas_planning::DeclarativeModel {
                                        std::vector<float> &rewards,
                                        std::vector<float> &probabilities) const {
 
-      next_states.clear();
-      rewards.clear();
-      probabilities.clear();
-
       boost::shared_ptr<const State> state = boost::dynamic_pointer_cast<const State>(state_base);
       if (!state) {
         throw std::runtime_error("GridModel::getTransitionDynamics unable to cast state.");
@@ -174,6 +179,10 @@ class GridModel : public utexas_planning::DeclarativeModel {
       if (!action) {
         throw std::runtime_error("GridModel::getTransitionDynamics unable to cast action.");
       }
+
+      next_states.clear();
+      rewards.clear();
+      probabilities.clear();
 
       if (!isTerminalState(state)) {
         boost::shared_ptr<State> ns(new State);
@@ -213,7 +222,6 @@ class GridModel : public utexas_planning::DeclarativeModel {
     };
 
   private:
-
     std::vector<utexas_planning::State::ConstPtr> complete_state_vector_;
     std::vector<utexas_planning::Action::ConstPtr> default_action_list_;
 };
@@ -237,8 +245,8 @@ int main(int argc, char **argv) {
   test.reset(new State);
   test->x = 2;
   test->y = 5;
-  test.reset(new State);
   test_states.push_back(test);
+  test.reset(new State);
   test->x = 5;
   test->y = 8;
   test_states.push_back(test);
@@ -249,6 +257,9 @@ int main(int argc, char **argv) {
 
   BOOST_FOREACH(const boost::shared_ptr<State>& s, test_states) {
     utexas_planning::Action::ConstPtr action_base = solver->getBestAction(s);
+    if (!action_base) {
+      throw std::runtime_error("main() action_base is also empty!");
+    }
     boost::shared_ptr<const Action> action = boost::dynamic_pointer_cast<const Action>(action_base);
     if (!action) {
       throw std::runtime_error("main() to cast action.");

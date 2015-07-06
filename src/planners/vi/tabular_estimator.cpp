@@ -1,5 +1,3 @@
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
 #include <fstream>
 
 #include <utexas_planning/planners/vi/tabular_estimator.h>
@@ -9,7 +7,7 @@ namespace utexas_planning {
   namespace vi {
 
     bool TabularEstimator::LessState::operator() (const State::ConstPtr &lhs, const State::ConstPtr &rhs) const {
-      return *lhs < *rhs;
+      return (*lhs < *rhs);
     }
 
     TabularEstimator::~TabularEstimator () {}

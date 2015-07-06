@@ -2,7 +2,13 @@
 #define UTEXAS_PLANNING_STATE_H_
 
 #include <boost/serialization/serialization.hpp>
+
+/* Included here so that BOOST_CLASS_EXPORT works as expected. */
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+
 #include <boost/shared_ptr.hpp>
+#include <iostream>
 
 namespace utexas_planning {
 
@@ -13,9 +19,10 @@ namespace utexas_planning {
       typedef boost::shared_ptr<State> Ptr;
       typedef boost::shared_ptr<const State> ConstPtr;
 
-      virtual ~State() {}
+      virtual ~State();
 
       virtual bool operator<(const State &other) const = 0;
+      virtual void serialize(std::ostream &stream) const = 0;
 
     private:
 
@@ -26,5 +33,7 @@ namespace utexas_planning {
   };
 
 } /* utexas_planning */
+
+std::ostream& operator<<(std::ostream& stream, const utexas_planning::State& s);
 
 #endif /* end of include guard: UTEXAS_PLANNING_STATE_H_ */
