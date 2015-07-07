@@ -32,7 +32,7 @@ int processOptions(int argc, char** argv) {
     ("data-directory", po::value<std::string>(&base_directory_), "Data directory (defaults to runtime directory).") 
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")  
     ("num-instances", po::value<int>(&num_instances_), "Number of Instances") 
-    ("precompute-only", po::value<int>(&precompute_only_), "Run offline precomputation for each solver.");
+    ("precompute-only", po::value<int>(&precompute_only_), "Run offline precomputation for each planner.");
 
   po::variables_map vm; 
 
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
       domains.push_back(domain);
     }
   } catch(pluginlib::PluginlibException& ex) {
-    // Print an error should any solver fail to load.
+    // Print an error should any planner fail to load.
     ROS_FATAL("Unable to load specified domain. Error: %s", ex.what());
     return -1;
   }

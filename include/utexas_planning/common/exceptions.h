@@ -8,7 +8,7 @@ namespace utexas_planning {
   class UnimplementedFunctionException : public std::runtime_error {
     public:
       UnimplementedFunctionException(const std::string& name, const std::string& function_name) :
-        std::runtime_error(name + " does not implement " + function_name + ", but one of the solvers " +
+        std::runtime_error(name + " does not implement " + function_name + ", but one of the planners " +
                            "being used requires this function to be implemented.") {}
   };
 

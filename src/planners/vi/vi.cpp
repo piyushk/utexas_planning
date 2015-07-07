@@ -163,10 +163,6 @@ namespace utexas_planning {
       // VI does not need to anything here.
     }
 
-    std::string ValueIteration::getName() const {
-      return std::string("ValueIteration");
-    };
-
     std::map<std::string, std::string> ValueIteration::getParamsAsMap() const {
       return params_.asMap();
     }
@@ -174,9 +170,9 @@ namespace utexas_planning {
     std::string ValueIteration::generatePolicyFileName() const {
       std::map<std::string, std::string> all_params = model_->getParamsAsMap();
       all_params["model_name"] = model_->getName();
-      std::map<std::string, std::string> solver_params = params_.asMap();
-      all_params.insert(solver_params.begin(), solver_params.end());
-      all_params["solver_name"] = getName();
+      std::map<std::string, std::string> planner_params = params_.asMap();
+      all_params.insert(planner_params.begin(), planner_params.end());
+      all_params["planner_name"] = getName();
       return createHashFromStringMap(all_params);
     }
 

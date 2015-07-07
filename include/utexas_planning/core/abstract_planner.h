@@ -31,7 +31,7 @@ namespace utexas_planning {
                                                const Action::ConstPtr& action,
                                                float timeout = NO_TIMEOUT) = 0;
 
-      virtual std::string getName() const = 0;
+      virtual std::string getName() const;
 
       virtual std::map<std::string, std::string> getParamsAsMap() const;
   };

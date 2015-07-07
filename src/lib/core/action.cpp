@@ -19,6 +19,10 @@ namespace utexas_planning {
     throw UnimplementedFunctionException(getName(), "hash()");
   }
 
+  std::string Action::getName() const {
+    return typeid(*this).name();
+  };
+
   std::size_t ActionHasher::operator() (const Action& action) const {
     return action.hash(); // Call polymorphic version.
   }
