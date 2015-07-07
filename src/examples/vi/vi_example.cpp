@@ -38,6 +38,7 @@
 
 #include <boost/serialization/export.hpp>
 
+#include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/core/abstract_planner.h>
 #include <utexas_planning/core/declarative_model.h>
 
@@ -99,7 +100,7 @@ class State : public utexas_planning::State {
 
         return false;
       } catch(std::bad_cast exp) {
-        throw std::runtime_error("Unable to cast other in operator< in State class in GridModel example");
+        throw utexas_planning::DowncastException("State", "GridState");
       }
     }
 
@@ -154,7 +155,7 @@ class GridModel : public utexas_planning::DeclarativeModel {
     bool isTerminalState(const utexas_planning::State::ConstPtr &state_base) const {
       boost::shared_ptr<const State> state = boost::dynamic_pointer_cast<const State>(state_base);
       if (!state) {
-        throw std::runtime_error("GridModel: Unable to type cast State::ConstPtr to derived type in isTerminalState");
+        throw utexas_planning::DowncastException("State", "GridState");
       }
       return ((state->x == GRID_SIZE / 2) && (state->y == GRID_SIZE / 2));
     }
@@ -179,12 +180,12 @@ class GridModel : public utexas_planning::DeclarativeModel {
 
       boost::shared_ptr<const State> state = boost::dynamic_pointer_cast<const State>(state_base);
       if (!state) {
-        throw std::runtime_error("GridModel::getTransitionDynamics unable to cast state.");
+        throw utexas_planning::DowncastException("State", "GridState");
       }
 
       boost::shared_ptr<const Action> action = boost::dynamic_pointer_cast<const Action>(action_base);
       if (!action) {
-        throw std::runtime_error("GridModel::getTransitionDynamics unable to cast action.");
+        throw utexas_planning::DowncastException("Action", "GridAction");
       }
 
       next_states.clear();
@@ -264,12 +265,9 @@ int main(int argc, char **argv) {
 
   BOOST_FOREACH(const boost::shared_ptr<State>& s, test_states) {
     utexas_planning::Action::ConstPtr action_base = solver->getBestAction(s);
-    if (!action_base) {
-      throw std::runtime_error("main() action_base is also empty!");
-    }
     boost::shared_ptr<const Action> action = boost::dynamic_pointer_cast<const Action>(action_base);
     if (!action) {
-      throw std::runtime_error("main() to cast action.");
+      throw utexas_planning::DowncastException("Action", "GridAction");
     }
     std::cout << "Best action at state " << *s << " is " << *action << std::endl;
   }

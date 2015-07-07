@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 
+#include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/core/declarative_model.h>
 
 namespace utexas_planning {
@@ -8,8 +9,7 @@ namespace utexas_planning {
   DeclarativeModel::~DeclarativeModel() {}
 
   std::vector<State::ConstPtr> DeclarativeModel::getStateVector() const {
-    throw std::runtime_error("DeclarativeModel " + getName() + " does not support state enumeration. " +
-                             "Perhaps you forgot to implement the getStateVector function in the model?");
+    throw UnimplementedFunctionException(getName(), "getStateVector()");
   }
 
   void DeclarativeModel::takeAction(const State::ConstPtr &state,
