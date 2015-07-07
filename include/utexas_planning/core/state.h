@@ -26,6 +26,7 @@ namespace utexas_planning {
       virtual std::size_t hash() const;
 
       virtual void serialize(std::ostream &stream) const = 0;
+      virtual std::string getName() const = 0;
 
     private:
 

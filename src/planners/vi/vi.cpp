@@ -4,6 +4,7 @@
 #include <limits>
 #include <stdexcept>
 
+#include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/planners/vi/tabular_estimator.h>
 #include <utexas_planning/planners/vi/vi.h>
 
@@ -27,12 +28,14 @@ namespace utexas_planning {
       // Validate that the model can be used with value iteration.
       model_ = boost::dynamic_pointer_cast<const DeclarativeModel>(model);
       if (!model_) {
-        throw std::runtime_error("Supplied model " + model->getModelName() + " needs to extend DeclarativeModel!");
+        throw IncorrectUsageException("ValueIteration: Supplied model " + model->getName() +
+                                      " needs to extend DeclarativeModel for use with VI!");
       }
       try {
         states_ = model_->getStateVector();
-      } catch (const std::runtime_error& error) {
-        throw std::runtime_error(std::string("Value Iteration: ") + std::string(error.what()));
+      } catch (const UnimplementedFunctionException& error) {
+        throw IncorrectUsageException(std::string("ValueIteration requires the following to be implemented: ") +
+                                      std::string(error.what()));
       }
 
       // Read params from YAML file.
@@ -141,19 +144,15 @@ namespace utexas_planning {
     }
 
     void ValueIteration::savePolicy(const std::string& file) const {
-      if (!policy_available_) {
-        throw std::runtime_error("VI::savePolicy(): Policy unavailable. Call computePolicy()/loadPolicy() first.");
-      }
       value_estimator_->saveEstimatedValues(file);
     }
 
     Action::ConstPtr ValueIteration::getBestAction(const State::ConstPtr& state) const {
-      if (!policy_available_) {
-        throw std::runtime_error("VI::getBestAction(): Policy unavailable. Call computePolicy()/loadPolicy() first.");
-      }
       Action::ConstPtr best_action = value_estimator_->getBestAction(state);
       if (!best_action) {
-        throw std::runtime_error("VI::getBestAction(): getBestAction called with an invalid state.");
+        throw IncorrectUsageException("ValueIteration::getBestAction(): provided state has not been seen before! "
+                                      "Either this state is not a valid state, or performEpisodeStartProcessing() "
+                                      "was not called prior to requesting the best action.");
       }
       return best_action;
     }
@@ -164,7 +163,7 @@ namespace utexas_planning {
       // VI does not need to anything here.
     }
 
-    std::string ValueIteration::getSolverName() const {
+    std::string ValueIteration::getName() const {
       return std::string("ValueIteration");
     };
 
@@ -174,10 +173,10 @@ namespace utexas_planning {
 
     std::string ValueIteration::generatePolicyFileName() const {
       std::map<std::string, std::string> all_params = model_->getParamsAsMap();
-      all_params["model_name"] = model_->getModelName();
+      all_params["model_name"] = model_->getName();
       std::map<std::string, std::string> solver_params = params_.asMap();
       all_params.insert(solver_params.begin(), solver_params.end());
-      all_params["solver_name"] = getSolverName();
+      all_params["solver_name"] = getName();
       return createHashFromStringMap(all_params);
     }
 

@@ -1,21 +1,22 @@
 #include <boost/serialization/export.hpp>
 #include <stdexcept>
 #include <utexas_planning/core/state.h>
+#include <utexas_planning/common/exceptions.h>
 
 namespace utexas_planning {
 
   State::~State() {}
 
   bool State::operator<(const State &other) const {
-    throw std::runtime_error("State derivative does not implement operator<, but it is being used by a solver.");
+    throw UnimplementedFunctionException(getName(), "operator<()");
   }
 
   bool State::operator==(const State &other) const {
-    throw std::runtime_error("State derivative does not implement operator==, but it is being used by a solver.");
+    throw UnimplementedFunctionException(getName(), "operator==()");
   }
 
   std::size_t State::hash() const {
-    throw std::runtime_error("State derivative does not implement hash(), but it is being used by a solver.");
+    throw UnimplementedFunctionException(getName(), "hash()");
   }
 
   std::size_t StateHasher::operator() (const State& state) const {

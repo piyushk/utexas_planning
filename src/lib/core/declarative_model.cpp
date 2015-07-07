@@ -8,7 +8,7 @@ namespace utexas_planning {
   DeclarativeModel::~DeclarativeModel() {}
 
   std::vector<State::ConstPtr> DeclarativeModel::getStateVector() const {
-    throw std::runtime_error("DeclarativeModel " + getModelName() + " does not support state enumeration. " +
+    throw std::runtime_error("DeclarativeModel " + getName() + " does not support state enumeration. " +
                              "Perhaps you forgot to implement the getStateVector function in the model?");
   }
 

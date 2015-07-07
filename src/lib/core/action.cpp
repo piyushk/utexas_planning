@@ -1,21 +1,22 @@
 #include <boost/serialization/export.hpp>
 #include <stdexcept>
 #include <utexas_planning/core/action.h>
+#include <utexas_planning/common/exceptions.h>
 
 namespace utexas_planning {
 
   Action::~Action() {}
 
   bool Action::operator<(const Action &other) const {
-    throw std::runtime_error("Action derivative does not implement operator<, but it is being used by a solver.");
+    throw UnimplementedFunctionException(getName(), "operator<()");
   }
 
   bool Action::operator==(const Action &other) const {
-    throw std::runtime_error("Action derivative does not implement operator==, but it is being used by a solver.");
+    throw UnimplementedFunctionException(getName(), "operator==()");
   }
 
   std::size_t Action::hash() const {
-    throw std::runtime_error("Action derivative does not implement hash(), but it is being used by a solver.");
+    throw UnimplementedFunctionException(getName(), "hash()");
   }
 
   std::size_t ActionHasher::operator() (const Action& action) const {

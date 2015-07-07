@@ -44,7 +44,7 @@ namespace utexas_planning {
         virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                  const Action::ConstPtr& action,
                                                  float timeout = NO_TIMEOUT);
-        virtual std::string getSolverName() const;
+        virtual std::string getName() const;
         virtual std::map<std::string, std::string> getParamsAsMap() const;
 
       private:

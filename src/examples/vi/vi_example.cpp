@@ -68,6 +68,10 @@ class Action : public utexas_planning::Action {
       }
     }
 
+    std::string getName() const {
+      return std::string("GridAction");
+    }
+
   private:
   friend class boost::serialization::access;
   template <typename Archive> void serialize(Archive &ar, const unsigned int version) {
@@ -101,6 +105,10 @@ class State : public utexas_planning::State {
 
     void serialize(std::ostream& stream) const {
       stream << "(" << x << "," << y << ")";
+    }
+
+    std::string getName() const {
+      return std::string("GridState");
     }
 
   private:
@@ -139,7 +147,7 @@ class GridModel : public utexas_planning::DeclarativeModel {
       }
     }
 
-    std::string getModelName() const {
+    std::string getName() const {
       return std::string("GridModel");
     }
 
