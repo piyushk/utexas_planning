@@ -18,15 +18,15 @@ namespace utexas_planning {
 
       ~AbstractPlanner() {}
 
-      virtual void init(const GenerativeModel::ConstPtr &model,
-                        const YAML::Node &params,
-                        const std::string &output_directory,
-                        const boost::shared_ptr<RNG> &rng) = 0;
+      virtual void init(const GenerativeModel::ConstPtr& model,
+                        const YAML::Node& params,
+                        const std::string& output_directory,
+                        const boost::shared_ptr<RNG>& rng) = 0;
 
-      virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state,
+      virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state,
                                                  float timeout = NO_TIMEOUT) = 0;
 
-      virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const = 0;
+      virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const = 0;
 
       virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                const Action::ConstPtr& action,

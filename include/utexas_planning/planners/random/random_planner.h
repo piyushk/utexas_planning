@@ -19,13 +19,13 @@ namespace utexas_planning {
 
         virtual ~RandomPlanner ();
 
-        virtual void init(const GenerativeModel::ConstPtr &model,
-                          const YAML::Node &params,
-                          const std::string &output_directory,
-                          const boost::shared_ptr<RNG> &rng);
-        virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state = State::ConstPtr(),
+        virtual void init(const GenerativeModel::ConstPtr& model,
+                          const YAML::Node& params,
+                          const std::string& output_directory,
+                          const boost::shared_ptr<RNG>& rng);
+        virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
                                                    float timeout = NO_TIMEOUT);
-        virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const;
+        virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
         virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                  const Action::ConstPtr& action,
                                                  float timeout = NO_TIMEOUT);

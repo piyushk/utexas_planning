@@ -16,12 +16,12 @@
 
 namespace utexas_planning {
 
-  namespace vi {
+  namespace planners {
 
-    ValueIteration::ValueIteration() : initialized_(false), policy_available_(false) {}
-    ValueIteration::~ValueIteration() {}
+    VI::VI() : initialized_(false), policy_available_(false) {}
+    VI::~VI() {}
 
-    void ValueIteration::init(const GenerativeModel::ConstPtr& model,
+    void VI::init(const GenerativeModel::ConstPtr& model,
                               const YAML::Node& params,
                               const std::string& output_directory,
                               const boost::shared_ptr<RNG>& /* rng */) {
@@ -29,13 +29,13 @@ namespace utexas_planning {
       // Validate that the model can be used with value iteration.
       model_ = boost::dynamic_pointer_cast<const DeclarativeModel>(model);
       if (!model_) {
-        throw IncorrectUsageException("ValueIteration: Supplied model " + model->getName() +
+        throw IncorrectUsageException("VI: Supplied model " + model->getName() +
                                       " needs to extend DeclarativeModel for use with VI!");
       }
       try {
         states_ = model_->getStateVector();
       } catch (const UnimplementedFunctionException& error) {
-        throw IncorrectUsageException(std::string("ValueIteration requires the following to be implemented: ") +
+        throw IncorrectUsageException(std::string("VI requires the following to be implemented: ") +
                                       std::string(error.what()));
       }
 
@@ -43,7 +43,7 @@ namespace utexas_planning {
       params_.fromYaml(params);
 
       // TODO: parametrize which value estimator to use.
-      value_estimator_.reset(new TabularEstimator);
+      value_estimator_.reset(new vi::TabularEstimator);
 
       // Ensure that output directory exists, so that we can write to it.
       if (params_.reuse_policy_from_file) {
@@ -63,7 +63,7 @@ namespace utexas_planning {
       initialized_ = true;
     }
 
-    void ValueIteration::performEpisodeStartProcessing(const State::ConstPtr& /* start_state */, float timeout) {
+    void VI::performEpisodeStartProcessing(const State::ConstPtr& /* start_state */, float timeout) {
       if (params_.reuse_policy_from_file) {
         if (boost::filesystem::is_regular_file(policy_file_location_)) {
           loadPolicy(policy_file_location_);
@@ -82,7 +82,7 @@ namespace utexas_planning {
       }
     }
 
-    void ValueIteration::computePolicy(float timeout) {
+    void VI::computePolicy(float timeout) {
 
       bool change = true;
       size_t count = 0;
@@ -138,36 +138,36 @@ namespace utexas_planning {
       policy_available_ = true;
     }
 
-    void ValueIteration::loadPolicy(const std::string& file) {
+    void VI::loadPolicy(const std::string& file) {
       value_estimator_->loadEstimatedValues(file);
       policy_available_ = true;
     }
 
-    void ValueIteration::savePolicy(const std::string& file) const {
+    void VI::savePolicy(const std::string& file) const {
       value_estimator_->saveEstimatedValues(file);
     }
 
-    Action::ConstPtr ValueIteration::getBestAction(const State::ConstPtr& state) const {
+    Action::ConstPtr VI::getBestAction(const State::ConstPtr& state) const {
       Action::ConstPtr best_action = value_estimator_->getBestAction(state);
       if (!best_action) {
-        throw IncorrectUsageException("ValueIteration::getBestAction(): provided state has not been seen before! "
+        throw IncorrectUsageException("VI::getBestAction(): provided state has not been seen before! "
                                       "Either this state is not a valid state, or performEpisodeStartProcessing() "
                                       "was not called prior to requesting the best action.");
       }
       return best_action;
     }
 
-    void ValueIteration::performPostActionProcessing(const State::ConstPtr& /* state */,
+    void VI::performPostActionProcessing(const State::ConstPtr& /* state */,
                                                      const Action::ConstPtr& /* action */,
                                                      float /* timeout */) {
       // VI does not need to anything here.
     }
 
-    std::map<std::string, std::string> ValueIteration::getParamsAsMap() const {
+    std::map<std::string, std::string> VI::getParamsAsMap() const {
       return params_.asMap();
     }
 
-    std::string ValueIteration::generatePolicyFileName() const {
+    std::string VI::generatePolicyFileName() const {
       std::map<std::string, std::string> all_params = model_->getParamsAsMap();
       all_params["model_name"] = model_->getName();
       std::map<std::string, std::string> planner_params = params_.asMap();

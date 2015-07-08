@@ -34,9 +34,9 @@ namespace utexas_planning {
 
     private:
       friend class boost::serialization::access;
-      template <typename Archive> void serialize(Archive &ar, const unsigned int version) {
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Action);
-        ar & BOOST_SERIALIZATION_NVP(type);
+      template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
+        ar&  BOOST_SERIALIZATION_BASE_OBJECT_NVP(Action);
+        ar&  BOOST_SERIALIZATION_NVP(type);
       }
   };
 
@@ -62,7 +62,7 @@ namespace utexas_planning {
           if (y > other.y) return false;
 
           return false;
-        } catch(const std::bad_cast &exp) {
+        } catch(const std::bad_cast& exp) {
           throw DowncastException("State", "GridState");
         }
       }
@@ -73,10 +73,10 @@ namespace utexas_planning {
 
     private:
       friend class boost::serialization::access;
-      template <typename Archive> void serialize(Archive &ar, const unsigned int version) {
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(State);
-        ar & BOOST_SERIALIZATION_NVP(x);
-        ar & BOOST_SERIALIZATION_NVP(y);
+      template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
+        ar&  BOOST_SERIALIZATION_BASE_OBJECT_NVP(State);
+        ar&  BOOST_SERIALIZATION_NVP(x);
+        ar&  BOOST_SERIALIZATION_NVP(y);
       }
   };
 
@@ -109,7 +109,7 @@ namespace utexas_planning {
         }
       }
 
-      bool isTerminalState(const State::ConstPtr &state_base) const {
+      bool isTerminalState(const State::ConstPtr& state_base) const {
         boost::shared_ptr<const GridState> state = boost::dynamic_pointer_cast<const GridState>(state_base);
         if (!state) {
           throw DowncastException("State", "GridState");
@@ -117,7 +117,7 @@ namespace utexas_planning {
         return ((state->x == GRID_SIZE / 2) && (state->y == GRID_SIZE / 2));
       }
 
-      void getActionsAtState(const State::ConstPtr &state,
+      void getActionsAtState(const State::ConstPtr& state,
                              std::vector<Action::ConstPtr>& actions) const {
         actions.clear();
         if (!isTerminalState(state)) {
@@ -129,11 +129,11 @@ namespace utexas_planning {
         return complete_state_vector_;
       }
 
-      virtual void getTransitionDynamics(const State::ConstPtr &state_base,
-                                         const Action::ConstPtr &action_base,
-                                         std::vector<State::ConstPtr> &next_states,
-                                         std::vector<float> &rewards,
-                                         std::vector<float> &probabilities) const {
+      virtual void getTransitionDynamics(const State::ConstPtr& state_base,
+                                         const Action::ConstPtr& action_base,
+                                         std::vector<State::ConstPtr>& next_states,
+                                         std::vector<float>& rewards,
+                                         std::vector<float>& probabilities) const {
 
         boost::shared_ptr<const GridState> state = boost::dynamic_pointer_cast<const GridState>(state_base);
         if (!state) {

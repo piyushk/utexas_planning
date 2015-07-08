@@ -7,11 +7,11 @@ namespace utexas_planning {
 
   State::~State() {}
 
-  bool State::operator<(const State &other) const {
+  bool State::operator<(const State& other) const {
     throw UnimplementedFunctionException(getName(), "operator<()");
   }
 
-  bool State::operator==(const State &other) const {
+  bool State::operator==(const State& other) const {
     throw UnimplementedFunctionException(getName(), "operator==()");
   }
 

@@ -7,7 +7,7 @@
 #include <yaml-cpp/yaml.h>
 
 #define SET_FROM_YAML(type) \
-  inline void setFromYaml(const YAML::Node &node, const char *key, type &val) { \
+  inline void setFromYaml(const YAML::Node& node, const char *key, type& val) { \
     if (node[key]) \
       val = node[key].as<type>(); \
   }
@@ -33,7 +33,7 @@ SET_FROM_YAML(std::string)
       params(PARAM_INIT) \
     } \
     \
-    void fromYaml(const YAML::Node &node) { \
+    void fromYaml(const YAML::Node& node) { \
       (void)node; /* to remove any compiler warnings if params is empty */ \
       params(PARAM_SET) \
     } \
@@ -42,7 +42,7 @@ SET_FROM_YAML(std::string)
       params(PARAM_MAP) \
       return stringMap; \
     } \
-    friend std::ostream& operator<<(std::ostream &os, const Params &p) { \
+    friend std::ostream& operator<<(std::ostream& os, const Params& p) { \
       params(PARAM_OUT) \
       return os; \
     } \

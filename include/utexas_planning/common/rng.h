@@ -43,7 +43,7 @@ class RNG : public boost::mt19937 {
       return gen();
     }
 
-    inline void randomOrdering(std::vector<unsigned int> &inds) {
+    inline void randomOrdering(std::vector<unsigned int>& inds) {
       unsigned int j;
       unsigned int temp;
       for (unsigned int i = 0; i < inds.size(); i++) {

@@ -7,11 +7,11 @@ namespace utexas_planning {
 
   Action::~Action() {}
 
-  bool Action::operator<(const Action &other) const {
+  bool Action::operator<(const Action& other) const {
     throw UnimplementedFunctionException(getName(), "operator<()");
   }
 
-  bool Action::operator==(const Action &other) const {
+  bool Action::operator==(const Action& other) const {
     throw UnimplementedFunctionException(getName(), "operator==()");
   }
 

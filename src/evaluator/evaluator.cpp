@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
 
   // See if this is a precomputation request only.
   if (precompute_only_ != -1) {
-    BOOST_FOREACH(boost::shared_ptr<Domain> &domain, domains) {
+    BOOST_FOREACH(boost::shared_ptr<Domain>& domain, domains) {
       for (int i = 0; i < num_instances_; ++i) {
         domain->precomputeAndSavePolicy(precompute_only_ + i);
       }
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   }
 
   // Otherwise let's start testing instances!
-  BOOST_FOREACH(boost::shared_ptr<Domain> &domain, domains) {
+  BOOST_FOREACH(boost::shared_ptr<Domain>& domain, domains) {
     for (int i = 0; i < num_instances_; ++i) {
       domain->testInstance(seed_ + i);
     }

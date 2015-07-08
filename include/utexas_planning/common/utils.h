@@ -10,7 +10,7 @@
 
 namespace utexas_planning {
 
-  inline std::string createHashFromStringMap(const std::map<std::string, std::string> &string_map) {
+  inline std::string createHashFromStringMap(const std::map<std::string, std::string>& string_map) {
     typedef std::pair<std::string, std::string> SSPair;
     std::string hash_str = "";
     BOOST_FOREACH(const SSPair& pair, string_map) {

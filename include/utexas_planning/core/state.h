@@ -21,17 +21,17 @@ namespace utexas_planning {
 
       virtual ~State();
 
-      virtual bool operator<(const State &other) const;
-      virtual bool operator==(const State &other) const;
+      virtual bool operator<(const State& other) const;
+      virtual bool operator==(const State& other) const;
       virtual std::size_t hash() const;
 
-      virtual void serialize(std::ostream &stream) const = 0;
+      virtual void serialize(std::ostream& stream) const = 0;
       virtual std::string getName() const;
 
     private:
 
       friend class boost::serialization::access;
-      template<class Archive> void serialize(Archive & ar, const unsigned int version) {
+      template<class Archive> void serialize(Archive&  ar, const unsigned int version) {
       }
 
   };

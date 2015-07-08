@@ -12,11 +12,11 @@ namespace utexas_planning {
     throw UnimplementedFunctionException(getName(), "getStateVector()");
   }
 
-  void DeclarativeModel::takeAction(const State::ConstPtr &state,
-                                    const Action::ConstPtr &action,
-                                    float &reward,
-                                    State::ConstPtr &next_state,
-                                    int &depth_count,
+  void DeclarativeModel::takeAction(const State::ConstPtr& state,
+                                    const Action::ConstPtr& action,
+                                    float& reward,
+                                    State::ConstPtr& next_state,
+                                    int& depth_count,
                                     boost::shared_ptr<RNG> rng) const {
 
     // NOTE: This default implementation is definitely not optimized for every domain. However this implementation is

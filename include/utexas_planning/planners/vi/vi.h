@@ -13,12 +13,12 @@ namespace utexas_planning {
 
   namespace planners {
 
-    class ValueIteration : public AbstractPlanner {
+    class VI : public AbstractPlanner {
 
       public:
 
-        typedef boost::shared_ptr<ValueIteration> Ptr;
-        typedef boost::shared_ptr<const ValueIteration> ConstPtr;
+        typedef boost::shared_ptr<VI> Ptr;
+        typedef boost::shared_ptr<const VI> ConstPtr;
 
 #define PARAMS(_) \
       _(float,gamma,gamma,1.0) \
@@ -32,16 +32,16 @@ namespace utexas_planning {
       Params_STRUCT(PARAMS)
 #undef PARAMS
 
-        ValueIteration();
-        virtual ~ValueIteration ();
+        VI();
+        virtual ~VI ();
 
-        virtual void init(const GenerativeModel::ConstPtr &model,
-                          const YAML::Node &params,
-                          const std::string &output_directory,
-                          const boost::shared_ptr<RNG> &rng = boost::shared_ptr<RNG>());
-        virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state = State::ConstPtr(),
+        virtual void init(const GenerativeModel::ConstPtr& model,
+                          const YAML::Node& params,
+                          const std::string& output_directory,
+                          const boost::shared_ptr<RNG>& rng = boost::shared_ptr<RNG>());
+        virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
                                                    float timeout = NO_TIMEOUT);
-        virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const;
+        virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
         virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                  const Action::ConstPtr& action,
                                                  float timeout = NO_TIMEOUT);

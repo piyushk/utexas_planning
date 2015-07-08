@@ -20,12 +20,12 @@ namespace utexas_planning {
 
         virtual ~Estimator ();
 
-        virtual float getValue(const State::ConstPtr &state) const = 0;
-        virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const = 0;
+        virtual float getValue(const State::ConstPtr& state) const = 0;
+        virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const = 0;
 
-        virtual void setValueAndBestAction(const State::ConstPtr &state,
+        virtual void setValueAndBestAction(const State::ConstPtr& state,
                                            float value,
-                                           const Action::ConstPtr &action = Action::ConstPtr()) = 0;
+                                           const Action::ConstPtr& action = Action::ConstPtr()) = 0;
 
         virtual void saveEstimatedValues(const std::string& file) const = 0;
         virtual void loadEstimatedValues(const std::string& file) = 0;

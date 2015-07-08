@@ -6,25 +6,25 @@ namespace utexas_planning {
 
   namespace vi {
 
-    bool TabularEstimator::LessState::operator() (const State::ConstPtr &lhs, const State::ConstPtr &rhs) const {
+    bool TabularEstimator::LessState::operator() (const State::ConstPtr& lhs, const State::ConstPtr& rhs) const {
       return (*lhs < *rhs);
     }
 
     TabularEstimator::~TabularEstimator () {}
 
-    float TabularEstimator::getValue(const State::ConstPtr &state) const {
+    float TabularEstimator::getValue(const State::ConstPtr& state) const {
       EstimatorTable::const_iterator it = cache_.find(state);
       return (it != cache_.end()) ? it->second.first : 0.0f;
     }
 
-    Action::ConstPtr TabularEstimator::getBestAction(const State::ConstPtr &state) const {
+    Action::ConstPtr TabularEstimator::getBestAction(const State::ConstPtr& state) const {
       EstimatorTable::const_iterator it = cache_.find(state);
       return (it != cache_.end()) ? it->second.second : Action::ConstPtr();
     }
 
-    void TabularEstimator::setValueAndBestAction(const State::ConstPtr &state,
+    void TabularEstimator::setValueAndBestAction(const State::ConstPtr& state,
                                                  float value,
-                                                 const Action::ConstPtr &action) {
+                                                 const Action::ConstPtr& action) {
       EstimatorTable::iterator it = cache_.find(state);
       if (it != cache_.end()) {
         it->second.first = value;

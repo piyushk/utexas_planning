@@ -12,7 +12,7 @@ namespace utexas_planning {
     void RandomPlanner::init(const GenerativeModel::ConstPtr& model,
                              const YAML::Node& /* params */,
                              const std::string& /* output_directory */,
-                             const boost::shared_ptr<RNG> &rng) {
+                             const boost::shared_ptr<RNG>& rng) {
       model_ = model;
       rng_ = rng;
     }
@@ -20,7 +20,7 @@ namespace utexas_planning {
     void RandomPlanner::performEpisodeStartProcessing(const State::ConstPtr& /* start_state */,
                                                       float /* timeout */) {}
 
-    Action::ConstPtr RandomPlanner::getBestAction(const State::ConstPtr &state) const {
+    Action::ConstPtr RandomPlanner::getBestAction(const State::ConstPtr& state) const {
       std::vector<Action::ConstPtr> actions;
       model_->getActionsAtState(state, actions);
       return actions[rng_->randomInt(actions.size() - 1)];

@@ -21,17 +21,17 @@ namespace utexas_planning {
 
       virtual std::string getName() const;
 
-      virtual bool isTerminalState(const State::ConstPtr &state) const = 0;
+      virtual bool isTerminalState(const State::ConstPtr& state) const = 0;
 
-      virtual void takeAction(const State::ConstPtr &state,
-                              const Action::ConstPtr &action,
-                              float &reward,
-                              State::ConstPtr &next_state,
-                              int &depth_count,
+      virtual void takeAction(const State::ConstPtr& state,
+                              const Action::ConstPtr& action,
+                              float& reward,
+                              State::ConstPtr& next_state,
+                              int& depth_count,
                               boost::shared_ptr<RNG> rng) const = 0;
 
-      virtual void getActionsAtState(const State::ConstPtr &state,
-                                     std::vector<Action::ConstPtr> &actions) const = 0;
+      virtual void getActionsAtState(const State::ConstPtr& state,
+                                     std::vector<Action::ConstPtr>& actions) const = 0;
 
       virtual std::map<std::string, std::string> getParamsAsMap() const;
 
