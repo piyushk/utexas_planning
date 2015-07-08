@@ -26,6 +26,7 @@ target_link_libraries(utexas_planning_core
 )
 
 add_library(utexas_planning_planners
+  src/planners/random/random_planner.cpp
   src/planners/vi/vi.cpp
   src/planners/vi/estimator.cpp
   src/planners/vi/tabular_estimator.cpp

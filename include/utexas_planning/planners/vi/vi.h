@@ -11,7 +11,7 @@
 
 namespace utexas_planning {
 
-  namespace vi {
+  namespace planners {
 
     class ValueIteration : public AbstractPlanner {
 
@@ -37,7 +37,8 @@ namespace utexas_planning {
 
         virtual void init(const GenerativeModel::ConstPtr &model,
                           const YAML::Node &params,
-                          const std::string &output_directory);
+                          const std::string &output_directory,
+                          const boost::shared_ptr<RNG> &rng = boost::shared_ptr<RNG>());
         virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state = State::ConstPtr(),
                                                    float timeout = NO_TIMEOUT);
         virtual Action::ConstPtr getBestAction(const State::ConstPtr &state) const;
@@ -57,7 +58,7 @@ namespace utexas_planning {
         DeclarativeModel::ConstPtr model_;
         std::vector<State::ConstPtr> states_;
         unsigned int num_states_;
-        Estimator::Ptr value_estimator_;
+        vi::Estimator::Ptr value_estimator_;
 
         Params params_;
         bool initialized_;
@@ -65,7 +66,7 @@ namespace utexas_planning {
 
     };
 
-  } /* vi */
+  } /* planners */
 
 } /* utexas_planning */
 

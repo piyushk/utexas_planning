@@ -20,53 +20,30 @@
 #define MCTS_OUTPUT(x) ((void) 0)
 #endif
 
-class StateActionInfo {
-  public:
-    StateActionInfo(unsigned int visits = 0, float val = 0.0f) :
-      visits(visits),
-      val(val) {}
-    unsigned int visits;
-    float val;
-};
+class StateActionNode;
 
-class StateInfo {
+class StateNode {
   public:
-    StateInfo(unsigned int num_actions = 0, unsigned int initial_visits = 0) :
-        action_infos(num_actions),
-        state_visits(initial_visits) {}
-
-    std::vector<StateActionInfo> action_infos;
+    StateNode(unsigned int num_actions = 0) : action_infos(num_actions), state_visits(0) {}
+    std::vector<StateActionNode> actions;
     unsigned int state_visits;
 };
 
-class ChanceNode;
-
-class DecisionNode {
+class StateActionNode {
   public:
-    DecisionNode(unsigned int num_actions = 0) : action_infos(num_actions), state_visits(0) {}
-    std::vector<ChanceNode> actions;
-    unsigned int state_visits;
-};
-
-class ChanceNode {
-  public:
-    StateActionInfo(unsigned int visits = 0, float val = 0.0f) : visits(visits), value(value) {}
-    std::map<State::ConstPtr, DecisionNode> next_states;
+    StateActionNode(unsigned int visits = 0, float val = 0.0f) : visits(visits), value(value) {}
+    std::map<State::ConstPtr, StateNode> next_states;
     unsigned int visits;
     float value;
 };
 
-template<class State, class StateHash, class Action>
-class MultiThreadedMCTS {
+class MCTS : public AbstractPlanner {
+
   public:
 
     typedef boost::shared_ptr<MultiThreadedMCTS<State, StateHash, Action> > Ptr;
-    typedef typename DefaultPolicy<State,Action>::Ptr DefaultPolicyPtr;
     typedef typename ModelUpdater<State,Action>::Ptr ModelUpdaterPtr;
-    typedef typename Model<State,Action>::Ptr ModelPtr;
     typedef typename StateMapping<State>::Ptr StateMappingPtr;
-    typedef typename tbb::concurrent_unordered_map<State, StateInfo, StateHash> StateInfoTable;
-    /* typedef typename std::map<State, StateInfo> StateInfoTable; */
 
     class HistoryStep {
       public:
@@ -91,9 +68,13 @@ class MultiThreadedMCTS {
     Params_STRUCT(PARAMS)
 #undef PARAMS
 
-    MultiThreadedMCTS (DefaultPolicyPtr defaultPolicy, ModelUpdaterPtr modelUpdater,
-        StateMappingPtr stateMapping, boost::shared_ptr<RNG> masterRng, const Params &p);
-    virtual ~MultiThreadedMCTS () {}
+    MCTS(DefaultPolicyPtr defaultPolicy,
+         ModelUpdaterPtr modelUpdater,
+         StateMappingPtr stateMapping,
+         boost::shared_ptr<RNG> masterRng,
+         const Params &p);
+
+    virtual ~MCTS() {}
 
     unsigned int search(const State &startState,
                         unsigned int& termination_count,
@@ -104,11 +85,9 @@ class MultiThreadedMCTS {
                         unsigned int& termination_count,
                         double maxPlanningtime = 1.0,
                         int maxPlayouts = 0);
-    void singleThreadedSearch();
     Action selectWorldAction(const State &state);
     void printBestTrajectory(const State &state, Action action);
     void restart();
-    std::string generateDescription(unsigned int indentation = 0);
 
   private:
 

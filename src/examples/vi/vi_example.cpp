@@ -48,7 +48,7 @@ using namespace utexas_planning;
 int main(int argc, char **argv) {
 
   GenerativeModel::Ptr model(new GridModel);
-  AbstractPlanner::Ptr planner(new vi::ValueIteration);
+  vi::ValueIteration::Ptr planner(new vi::ValueIteration);
   YAML::Node empty_params;
   std::string out_dir = "/tmp/test";
   planner->init(model, empty_params, out_dir);

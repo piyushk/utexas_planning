@@ -20,7 +20,8 @@ namespace utexas_planning {
 
       virtual void init(const GenerativeModel::ConstPtr &model,
                         const YAML::Node &params,
-                        const std::string &output_directory) = 0;
+                        const std::string &output_directory,
+                        const boost::shared_ptr<RNG> &rng) = 0;
 
       virtual void performEpisodeStartProcessing(const State::ConstPtr &start_state,
                                                  float timeout = NO_TIMEOUT) = 0;

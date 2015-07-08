@@ -21,9 +21,10 @@ namespace utexas_planning {
     ValueIteration::ValueIteration() : initialized_(false), policy_available_(false) {}
     ValueIteration::~ValueIteration() {}
 
-    void ValueIteration::init(const GenerativeModel::ConstPtr &model,
-                         const YAML::Node &params,
-                         const std::string &output_directory) {
+    void ValueIteration::init(const GenerativeModel::ConstPtr& model,
+                              const YAML::Node& params,
+                              const std::string& output_directory,
+                              const boost::shared_ptr<RNG>& /* rng */) {
 
       // Validate that the model can be used with value iteration.
       model_ = boost::dynamic_pointer_cast<const DeclarativeModel>(model);
@@ -50,7 +51,6 @@ namespace utexas_planning {
             !boost::filesystem::create_directory(output_directory)) {
           std::cerr << "Output directory (" << output_directory << ") does not exist, but unable to create it. " <<
             "The situation can still be valid if another process created the directory at the same time." << std::endl;
-
         }
 
         // Cache the policy file name for convenience
