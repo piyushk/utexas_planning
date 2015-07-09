@@ -24,192 +24,140 @@ class StateActionNode;
 
 class StateNode {
   public:
+
+    typdef boost::shared_ptr<StateNode> Ptr;
+    typdef boost::shared_ptr<StateNode const> ConstPtr;
+
     StateNode(unsigned int num_actions = 0) : action_infos(num_actions), state_visits(0) {}
-    std::vector<StateActionNode> actions;
+    std::vector<StateActionNode::Ptr> actions;
     unsigned int state_visits;
 };
 
 class StateActionNode {
   public:
-    StateActionNode(unsigned int visits = 0, float val = 0.0f) : visits(visits), value(value) {}
-    std::map<State::ConstPtr, StateNode> next_states;
+    StateActionNode(unsigned int visits = 0, float val = 0.0f) : visits(visits), mean_value(mean_value) {}
+    std::map<State::ConstPtr, StateNode::Ptr> next_states;
     unsigned int visits;
-    float value;
+    float mean_value;
 };
 
 class MCTS : public AbstractPlanner {
 
   public:
 
-    typedef boost::shared_ptr<MultiThreadedMCTS<State, StateHash, Action> > Ptr;
-    typedef typename ModelUpdater<State,Action>::Ptr ModelUpdaterPtr;
-    typedef typename StateMapping<State>::Ptr StateMappingPtr;
-
     class HistoryStep {
       public:
-        typename StateInfoTable::iterator state_info;
+        typename StateNode::Ptr state;
         unsigned int action_id;
         float reward;
         bool update_this_state;
     };
 
+    static const int NO_MAX_PLAYOUTS = -1;
+
 #define PARAMS(_) \
     _(unsigned int,maxDepth,maxDepth,0) \
-    _(int,numThreads,numThreads,1) \
     _(float,lambda,lambda,0.0) \
     _(float,gamma,gamma,1.0) \
     _(float,rewardBound,rewardBound,10000) \
     _(float,maxNewStatesPerRollout,maxNewStatesPerRollout,0) \
     _(float,unknownActionValue,unknownActionValue,-1e10) \
-    _(float,unknownActionPlanningValue,unknownActionPlanningValue,1e10) \
     _(float,unknownBootstrapValue,unknownBootstrapValue,0.0) \
-    _(bool,theoreticallyCorrectLambda,theoreticallyCorrectLambda,false) \
 
     Params_STRUCT(PARAMS)
 #undef PARAMS
 
-    MCTS(DefaultPolicyPtr defaultPolicy,
-         ModelUpdaterPtr modelUpdater,
-         StateMappingPtr stateMapping,
-         boost::shared_ptr<RNG> masterRng,
-         const Params& p);
-
     virtual ~MCTS() {}
 
-    unsigned int search(const State& startState,
-                        unsigned int& termination_count,
-                        double maxPlanningtime = 1.0,
-                        int maxPlayouts = 0);
-    unsigned int search(const State& startState,
-                        const Action& startAction,
-                        unsigned int& termination_count,
-                        double maxPlanningtime = 1.0,
-                        int maxPlayouts = 0);
-    Action selectWorldAction(const State& state);
-    void printBestTrajectory(const State& state, Action action);
-    void restart();
+    virtual void init(const GenerativeModel::ConstPtr& model,
+                      const YAML::Node& params,
+                      const std::string& output_directory,
+                      const boost::shared_ptr<RNG>& rng) = 0;
 
-  private:
+    virtual void search(const State::ConstPtr& start_state,
+                        float timeout = 1.0,
+                        int max_playouts = NO_MAX_PLAYOUTS);
+    virtual void search(const State::ConstPtr& start_state,
+                        const Action::ConstPtr& start_action,
+                        float timeout = 1.0,
+                        int max_playouts = NO_MAX_PLAYOUTS);
 
-    float calcActionValue(const StateActionInfo& action_info,
-                          const StateInfo& state_info,
-                          bool use_planning_bound) {
-      if (action_info.visits == 0) {
-        return (use_planning_bound) ? p.unknownActionPlanningValue : p.unknownActionValue;
-      }
-      float planning_bound = p.rewardBound * sqrtf(logf(state_info.state_visits) / action_info.visits);
-      return (use_planning_bound) ? action_info.val + planning_bound : action_info.val;
+    virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
+
+    virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state,
+                                               float timeout = NO_TIMEOUT);
+
+    virtual void performPostActionProcessing(const State::ConstPtr& state,
+                                             const Action::ConstPtr& action,
+                                             float timeout = NO_TIMEOUT);
+
+    virtual std::map<std::string, std::string> getParamsAsMap() const;
+
+  protected:
+
+    inline float getStateActionValue(const StateActionNode::ConstPtr &state_action) const {
+      return (state_action->visits == 0) ? p.unknownActionValue : state_action->mean_value;
     }
 
-    float maxValueForState(const State& state, const StateInfo& state_info);
-    Action selectAction(const State& state, bool use_planning_bound,
-        HistoryStep& step, unsigned int& new_states_added_in_rollout, boost::shared_ptr<RNG>& rng);
+    inline float getMaxValueForState(const StateNode::ConstPtr& state) const {
+      float max_value = -std::numeric_limits<float>::max();
+      BOOST_FOREACH(const StateActionNode::ConstPtr& state_action, state.actions) {
+        float val = getStateActionValue(state_action);
+        max_value = std::max(val, max_value);
+      }
+      return max_value;
+    }
+
+    virtual Action::ConstPtr getPlanningAction(const State::ConstPtr& state,
+                                               HistoryStep& step,
+                                               unsigned int& new_states_added_in_rollout);
+
+    /* TODO add a function to do different types of backups here. */
 
     std::string getStateValuesDescription(const State& state);
     std::string getStateTableDescription();
 
-  private:
-    ModelPtr model;
-    DefaultPolicyPtr defaultPolicy;
-    ModelUpdaterPtr modelUpdater;
-    StateMappingPtr stateMapping;
-    bool valid;
+    GenerativeModel::ConstPtr model_;
+    AbstractPlanner::ConstPtr default_planner_;
 
-    State startState;
-    unsigned int maxPlayouts;
-    unsigned int currentPlayouts;
-    unsigned int terminatedPlayouts;
+    State start_state_;
+    Action start_actions_;
+    bool start_action_available_;
 
-    double maxPlanningTime;
-    double endPlanningTime;
+    Params params_;
+    boost::shared_ptr<RNG> rng_;
 
-    Action startAction;
-    bool startActionAvailable;
-
-    Params p;
-    boost::shared_ptr<RNG> masterRng;
-
-    StateInfoTable stateInfoTable;
 };
 
-template<class State, class StateHash, class Action>
-MultiThreadedMCTS<State, StateHash, Action>::MultiThreadedMCTS(
-    DefaultPolicyPtr defaultPolicy,
-    ModelUpdaterPtr modelUpdater, StateMappingPtr stateMapping,
-    boost::shared_ptr<RNG> masterRng, const Params& p) : defaultPolicy(defaultPolicy),
-    modelUpdater(modelUpdater), stateMapping(stateMapping), masterRng(masterRng), startActionAvailable(false), p(p) {}
-
-template<class State, class StateHash, class Action>
-unsigned int MultiThreadedMCTS<State, StateHash, Action>::search(
-    const State& startState,
-    const Action& startAction,
-    unsigned int& termination_count,
-    double maxPlanningTime, int maxPlayouts) {
-  this->startAction = startAction;
-  this->startActionAvailable = true;
-  return search(startState, termination_count, maxPlanningTime, maxPlayouts);
+void MCTS::init(const GenerativeModel::ConstPtr& model,
+                const YAML::Node& params,
+                const std::string& /* output_directory */,
+                const boost::shared_ptr<RNG>& rng) {
+  model_ = model;
+  params_.fromYaml(params);
+  rng_ = rng;
+  start_action_available_ = false;
 }
 
-template<class State, class StateHash, class Action>
-unsigned int MultiThreadedMCTS<State, StateHash, Action>::search(
-    const State& startState,
-    unsigned int& termination_count,
-    double maxPlanningTime, int maxPlayouts) {
-
-  if (maxPlanningTime < 0) {
-    std::cerr << "Invalid maxPlanningTime, must be >= 0" << std::endl;
-    maxPlayouts = 1000;
-  } else if ((maxPlayouts == 0) && (maxPlanningTime <= 0)) {
-    std::cerr << "Must stop planning at some point, either specify "
-              << "maxPlayouts or maxPlanningTime" << std::endl;
-    maxPlayouts = 1000;
-  }
-
-  this->model = modelUpdater->selectModel(startState);
-  this->startState = startState;
-  this->maxPlayouts = maxPlayouts;
-  this->maxPlanningTime = maxPlanningTime;
-  currentPlayouts = 0;
-  terminatedPlayouts = 0;
-  endPlanningTime = getTime() + maxPlanningTime;
-
-  std::vector<boost::shared_ptr<boost::thread> > threads;
-  // Launch n - 1 threads;
-  for (int n = 1; n < p.numThreads; ++n) {
-    boost::shared_ptr<boost::thread> thread(new
-        boost::thread(&MultiThreadedMCTS<State, StateHash, Action>::singleThreadedSearch,
-          this));
-    threads.push_back(thread);
-  }
-
-  // Launch search in the main thread
-  singleThreadedSearch();
-
-  // Join all threads;
-  for (int n = 1; n < p.numThreads; ++n) {
-    threads[n - 1]->join();
-  }
-
-  this->startActionAvailable = false;
-
-  termination_count = terminatedPlayouts;
-  return currentPlayouts;
+void MCTS::search(const State::ConstPtr& start_state,
+                  const Action::ConstPtr& start_action,
+                  float timeout,
+                  int max_playouts) {
+  start_action_ = start_action;
+  start_action_available_ = true;
+  search(start_state, timeout, max_playouts);
 }
 
-template<class State, class StateHash, class Action>
-void MultiThreadedMCTS<State, StateHash, Action>::singleThreadedSearch() {
+void MCTS::search(const State::ConstPtr& start_state,
+                  float timeout,
+                  int max_playouts) {
 
-  boost::shared_ptr<RNG> rng(new RNG(masterRng->randomUInt()));
-
-#ifdef MCTS_DEBUG
-  int count = 0;
-#endif
+  // Do some basic sanity checks.
+  if (timeout < 0 && max_playouts <= 0) {
+    throw IncorrectUsageException("MCTS: either timeout or max_playouts has to be greater than 0 for MCTS search.");
+  }
 
   std::vector<HistoryStep> history;
-  if (p.maxDepth > 0)
-  {
-    history.resize(p.maxDepth);
-  }
 
   while (((maxPlanningTime <= 0.0) || (getTime() < endPlanningTime)) &&
          ((maxPlayouts <= 0) || (currentPlayouts < maxPlayouts))) {
@@ -359,10 +307,15 @@ void MultiThreadedMCTS<State, StateHash, Action>::singleThreadedSearch() {
     if (++count == 10) throw std::runtime_error("argh!");
 #endif
   }
+
+  this->startActionAvailable = false;
+
+  termination_count = terminatedPlayouts;
+  return currentPlayouts;
 }
 
 template<class State, class StateHash, class Action>
-Action MultiThreadedMCTS<State, StateHash, Action>::selectWorldAction(const State& state) {
+Action MultiThreadedMCTS<State, StateHash, Action>::getBestAction(const State& state) {
   State mappedState(state);
   stateMapping->map(mappedState); // discretize state
 #ifdef MCTS_VALUE_DEBUG
