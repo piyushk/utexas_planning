@@ -109,8 +109,7 @@ class MCTS : public AbstractPlanner {
     }
 
     virtual Action::ConstPtr getPlanningAction(const State::ConstPtr& state,
-                                               HistoryStep& step,
-                                               unsigned int& new_states_added_in_rollout);
+                                               const StateNode::ConstPtr& state_info);
 
     /* TODO add a function to do different types of backups here. */
 
@@ -153,103 +152,69 @@ void MCTS::search(const State::ConstPtr& start_state,
                   int max_playouts) {
 
   // Do some basic sanity checks.
-  if (timeout < 0 && max_playouts <= 0) {
+  if (timeout <= 0 && max_playouts <= 0) {
     throw IncorrectUsageException("MCTS: either timeout or max_playouts has to be greater than 0 for MCTS search.");
   }
 
-  std::vector<HistoryStep> history;
+  int current_playouts = 0;
+  boost::posix_time::ptime end_time = boost::posix_time::microsec_clock::local_time() +
+      boost::posix_time::milliseconds(timeout * 1000);
+  boost::posix_time::ptime current_time = start_time;
 
-  while (((maxPlanningTime <= 0.0) || (getTime() < endPlanningTime)) &&
-         ((maxPlayouts <= 0) || (currentPlayouts < maxPlayouts))) {
-
-    // TODO not locked
-    ++currentPlayouts;
+  while (((timeout <= 0.0) || (current_time < end_time)) &&
+         ((max_playouts <= 0) || (current_playouts < max_playouts))) {
 
     MCTS_OUTPUT("------------START ROLLOUT--------------");
-    State state(startState), discretizedState(startState);
-    State newState;
-    Action action;
-    unsigned int action_id, num_actions;
+    std::vector<HistoryStep> history;
+    State::ConstPtr state = start_state;
+    // TODO instantiate this root node when starting search.
+    StateNode::Ptr state_node = root_node;
+    State::Ptr discretized_state = start_state->clone();
+    State::Ptr next_state;
+    Action::ConstPtr action;
+    unsigned int action_id;
     bool terminal = false;
     int depth_count;
 
-    bool atStartState = true;
+    bool at_start_state = true;
 
-    stateMapping->map(discretizedState); // discretize state
+    // TODO state mapping.
+    // stateMapping->map(discretizedState); // discretize state
 
-    unsigned int history_size = 0;
     unsigned int new_states_added_in_rollout = 0;
 
-    // Track how many times the same state is seen this rollout to do first visit monte carlo.
-    std::map<State, unsigned int> stateCount;
+    // Version of the code with no max depth (and hence no pre-cached history memory).
+    for (unsigned int depth = 0;
+         (!terminal && ((timeout <= 0.0) || (current_time < end_time)));
+         depth += depth_count) {
 
-    if (p.maxDepth <= 0) {
-      // Version of the code with no max depth (and hence no pre-cached history memory).
-      history.clear();
-      for (unsigned int depth = 0;
-          (!terminal && (maxPlanningTime <= 0.0 || getTime() < endPlanningTime));
-          depth += depth_count) {
+      // Select action, take it and update the model with the action taken in simulation.
+      MCTS_OUTPUT("MCTS State: " << *state << " " << "DEPTH: " << depth);
 
-        // Select action, take it and update the model with the action taken in simulation.
-        MCTS_OUTPUT("MCTS State: " << state << " " << "DEPTH: " << depth);
-        HistoryStep step;
-        action = selectAction(discretizedState, true, step, new_states_added_in_rollout, rng);
-        if (atStartState && startActionAvailable) {
-          action = startAction;
+      if (at_start_state && start_action_available_) {
+        action = start_action_;
+      } else {
+        if (state_node) {
+          action = getPlanningAction(discretized_state, state_node);
+        } else {
+          action = default_planner_->getBestAction(discretized_state);
         }
-        model->takeAction(state, action, step.reward, newState, terminal, depth_count, rng);
-        MCTS_OUTPUT(" Action Selected: " << action);
-        MCTS_OUTPUT("  Reward: " << step.reward);
-        modelUpdater->updateSimulationAction(action, newState);
-
-        // Record this step in history.
-        history.push_back(step);
-
-        // Update counters and states for next iteration.
-        if (step.update_this_state) {
-          ++(stateCount[discretizedState]); // Should construct with 0 if unavailable
-        }
-        state = newState;
-        discretizedState = newState;
-        stateMapping->map(discretizedState);
-        atStartState = false;
-      }
-      history_size = history.size();
-    } else {
-      // Version of the code with max depth (and precached memory for history).
-      for (unsigned int depth = 0;
-          (!terminal && (depth < p.maxDepth) && (maxPlanningTime <= 0.0 || getTime() < endPlanningTime));
-          depth += depth_count) {
-
-        // Select action, take it and update the model with the action taken in simulation.
-        MCTS_OUTPUT("MCTS State: " << state << " " << "DEPTH: " << depth);
-        HistoryStep& step = history[history_size];
-        action = selectAction(discretizedState, true, step, new_states_added_in_rollout, rng);
-        if (atStartState && startActionAvailable) {
-          action = startAction;
-        }
-        model->takeAction(state, action, step.reward, newState, terminal, depth_count, rng);
-        MCTS_OUTPUT(" Action Selected: " << action);
-        MCTS_OUTPUT("  Reward: " << step.reward);
-        modelUpdater->updateSimulationAction(action, newState);
-
-        // Record this step in history.
-        ++history_size;
-
-        // Update counters and states for next iteration.
-        if (step.update_this_state) {
-          ++(stateCount[discretizedState]); // Should construct with 0 if unavailable
-        }
-        state = newState;
-        discretizedState = newState;
-        stateMapping->map(discretizedState);
-        atStartState = false;
       }
 
-    }
+      model_->takeAction(state, action, step.reward, next_state, depth_count, rng);
+      terminal = model_->isTerminalState(next_state);
 
-    if (terminal) {
-      ++terminatedPlayouts; // TODO not locked
+      MCTS_OUTPUT(" Action Selected: " << action);
+      MCTS_OUTPUT("  Reward: " << step.reward);
+
+      // Record this step in history.
+      history.push_back(step);
+
+      state = next_state;
+      discretizedState = next_state->clone();
+      // TODO handle state discretization
+      stateMapping->map(discretizedState);
+      at_start_state = false;
     }
 
     MCTS_OUTPUT("------------ BACKPROP --------------");
@@ -267,7 +232,7 @@ void MCTS::search(const State::ConstPtr& start_state,
     }
     MCTS_OUTPUT("At final discretized state: " << discretizedState << " the backprop value is " << backpropValue);
 
-    for (int step = history_size - 1; step >= 0; --step) {
+    for (int step = history.size() - 1; step >= 0; --step) {
 
       // Get information about this state
       typename StateInfoTable::iterator& state_info = history[step].state_info;
@@ -306,9 +271,12 @@ void MCTS::search(const State::ConstPtr& start_state,
 #ifdef MCTS_DEBUG
     if (++count == 10) throw std::runtime_error("argh!");
 #endif
+
+    ++current_playouts;
+    current_time = boost::posix_time::microsec_clock::local_time();
   }
 
-  this->startActionAvailable = false;
+  start_action_available_ = false;
 
   termination_count = terminatedPlayouts;
   return currentPlayouts;
@@ -369,6 +337,7 @@ void MultiThreadedMCTS<State, StateHash, Action>::printBestTrajectory(const Stat
   std::cout << ss.str();
   ss << "    Total Reward in best trajectory: " << total_reward << std::endl;
 }
+
 template<class State, class StateHash, class Action>
 Action MultiThreadedMCTS<State, StateHash, Action>::selectAction(const State& state,
     bool use_planning_bound, HistoryStep& history_step, unsigned int& new_states_added_in_rollout,

@@ -28,7 +28,11 @@ namespace utexas_planning {
       virtual void serialize(std::ostream& stream) const = 0;
       virtual std::string getName() const;
 
+      State::Ptr clone() const;
+
     private:
+
+      virtual State::Ptr cloneImpl() const = 0;
 
       friend class boost::serialization::access;
       template<class Archive> void serialize(Archive&  ar, const unsigned int version) {

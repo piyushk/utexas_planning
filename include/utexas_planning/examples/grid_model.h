@@ -72,6 +72,14 @@ namespace utexas_planning {
       }
 
     private:
+
+      virtual State::Ptr cloneImpl() const {
+        boost::shared_ptr<GridState> clone(new GridState);
+        clone->x = x;
+        clone->y = y;
+        return clone;
+      }
+
       friend class boost::serialization::access;
       template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
         ar&  BOOST_SERIALIZATION_BASE_OBJECT_NVP(State);

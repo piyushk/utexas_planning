@@ -23,6 +23,10 @@ namespace utexas_planning {
     return typeid(*this).name();
   };
 
+  State::Ptr State::clone() const {
+    return cloneImpl();
+  }
+
   std::size_t StateHasher::operator() (const State& state) const {
     return state.hash(); // Call polymorphic version.
   }
