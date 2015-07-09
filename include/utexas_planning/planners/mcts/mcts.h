@@ -29,7 +29,7 @@ class StateNode {
     typdef boost::shared_ptr<StateNode const> ConstPtr;
 
     StateNode(unsigned int num_actions = 0) : action_infos(num_actions), state_visits(0) {}
-    std::vector<StateActionNode::Ptr> actions;
+    std::map<Action::ConstPtr, StateActionNode::Ptr> actions;
     unsigned int state_visits;
 };
 
@@ -48,9 +48,8 @@ class MCTS : public AbstractPlanner {
     class HistoryStep {
       public:
         typename StateNode::Ptr state;
-        unsigned int action_id;
+        Action::ConstPtr action;
         float reward;
-        bool update_this_state;
     };
 
     static const int NO_MAX_PLAYOUTS = -1;
@@ -167,14 +166,19 @@ void MCTS::search(const State::ConstPtr& start_state,
     MCTS_OUTPUT("------------START ROLLOUT--------------");
     std::vector<HistoryStep> history;
     State::ConstPtr state = start_state;
-    // TODO instantiate this root node when starting search.
-    StateNode::Ptr state_node = root_node;
+
     State::Ptr discretized_state = start_state->clone();
+    // TODO remove root node when clearing search.
+    if (!root_node_) {
+      root_node_ = getNewStateNode(discretized_state);
+    }
+    StateNode::Ptr state_node = root_node_;
+
     State::Ptr next_state;
     Action::ConstPtr action;
     unsigned int action_id;
-    bool terminal = false;
     int depth_count;
+    float reward
 
     bool at_start_state = true;
 
@@ -185,7 +189,7 @@ void MCTS::search(const State::ConstPtr& start_state,
 
     // Version of the code with no max depth (and hence no pre-cached history memory).
     for (unsigned int depth = 0;
-         (!terminal && ((timeout <= 0.0) || (current_time < end_time)));
+         ((timeout <= 0.0) || (current_time < end_time));
          depth += depth_count) {
 
       // Select action, take it and update the model with the action taken in simulation.
@@ -201,35 +205,54 @@ void MCTS::search(const State::ConstPtr& start_state,
         }
       }
 
-      model_->takeAction(state, action, step.reward, next_state, depth_count, rng);
-      terminal = model_->isTerminalState(next_state);
+      if (state_node->actions.find(action) == state_node->actions.end()) {
+        std::stringstream ss;
+        ss << "MCTS: Action " << *action << " being executed at state " << *state << " is not a valid action. " <<
+          "This can also happen due to incorrect initialization in getNewStateNode()." << std::endl;
+        throw IncorrectUsageException(ss.str());
+      }
+
+      model_->takeAction(state, action, reward, next_state, depth_count, rng);
 
       MCTS_OUTPUT(" Action Selected: " << action);
-      MCTS_OUTPUT("  Reward: " << step.reward);
+      MCTS_OUTPUT("   Reward: " << reward);
 
       // Record this step in history.
+      HistoryStep step;
+      step.state = state_node;
+      step.action = action;
+      step.reward = reward;
       history.push_back(step);
 
+      if (model_->isTerminalState(next_state)) {
+        break;
+      }
+
       state = next_state;
-      discretizedState = next_state->clone();
+      discretized_state = next_state->clone();
       // TODO handle state discretization
-      stateMapping->map(discretizedState);
+      //stateMapping->map(discretized_state);
+
+      // Hunt for next state in the current state_node
+      StateActionNode::Ptr& action_node = state_node->actions[action];
+      if (action_node->next_states.find(discretized_state) == action_node->next_states.end()) {
+        if ((params.maxNewStatesPerRollout == 0) ||
+            (new_states_added_in_rollout < params.maxNewStatesPerRollout)) {
+          state_node = action_node->next_states[discretized_state] = getNewStateNode(discretized_state);
+          ++new_states_added_in_rollout;
+        } else {
+          state_node.reset();
+        }
+      }
+
       at_start_state = false;
     }
 
-    MCTS_OUTPUT("------------ BACKPROP --------------");
+    MCTS_OUTPUT("------------ BACKPROPAGATION --------------");
     float backpropValue = 0;
-    if (!terminal) {
-      // Use the state info iterator in the history step to access the value.
-      // Get bootstrap value of final state
-      // Use of typename: http://stackoverflow.com/questions/11275444/c-template-typename-iterator
-      typename StateInfoTable::const_iterator final_state_info = stateInfoTable.find(discretizedState);
-      if ((final_state_info == stateInfoTable.end()) || (final_state_info->second.state_visits == 0)) {
-        backpropValue = p.unknownBootstrapValue;
-      } else {
-        backpropValue = maxValueForState(state, final_state_info->second);
-      }
-    }
+    // TODO: does this mean that the unknown bootstrap value paramhas no significance?
+    backpropValue = p.unknownBootstrapValue;
+
     MCTS_OUTPUT("At final discretized state: " << discretizedState << " the backprop value is " << backpropValue);
 
     for (int step = history.size() - 1; step >= 0; --step) {
