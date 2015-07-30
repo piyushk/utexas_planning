@@ -98,19 +98,10 @@ class MCTS : public AbstractPlanner {
       return (state_action->visits == 0) ? p.unknownActionValue : state_action->mean_value;
     }
 
-    inline float getMaxValueForState(const StateNode::ConstPtr& state) const {
-      float max_value = -std::numeric_limits<float>::max();
-      BOOST_FOREACH(const StateActionNode::ConstPtr& state_action, state.actions) {
-        float val = getStateActionValue(state_action);
-        max_value = std::max(val, max_value);
-      }
-      return max_value;
-    }
 
     virtual Action::ConstPtr getPlanningAction(const State::ConstPtr& state,
-                                               const StateNode::ConstPtr& state_info);
-
-    /* TODO add a function to do different types of backups here. */
+                                               const StateNode::ConstPtr& state_info) const = 0;
+    virtual void updateState(const HistoryStep& step, float cummulative_value) = 0;
 
     std::string getStateValuesDescription(const State& state);
     std::string getStateTableDescription();
@@ -243,57 +234,44 @@ void MCTS::search(const State::ConstPtr& start_state,
         } else {
           state_node.reset();
         }
+      } else {
+        state_node = action_node->next_states[discretized_state];
       }
-
       at_start_state = false;
     }
 
     MCTS_OUTPUT("------------ BACKPROPAGATION --------------");
     float backpropValue = 0;
-    // TODO: does this mean that the unknown bootstrap value paramhas no significance?
-    backpropValue = p.unknownBootstrapValue;
+    // TODO: does this mean that the unknown bootstrap value param has no significance?
+    /* backpropValue = p.unknownBootstrapValue; */
 
     MCTS_OUTPUT("At final discretized state: " << discretizedState << " the backprop value is " << backpropValue);
 
     for (int step = history.size() - 1; step >= 0; --step) {
 
-      // Get information about this state
-      typename StateInfoTable::iterator& state_info = history[step].state_info;
-      unsigned int& action_id = history[step].action_id;
-      float& reward = history[step].reward;
+      backpropValue = history[step].reward + p.gamma * backpropValue;
 
-      MCTS_OUTPUT("Reviewing state: " << state_info->first << " with reward: " << reward);
+      if (history[step].state) {
+        updateState(history[step], backpropValue);
 
-      backpropValue = reward + p.gamma * backpropValue;
+        // stateCount[state_info->first]--;
+        // // Modify the action appropriately
+        // if (stateCount[state_info->first] == 0) { // First Visit Monte Carlo
+        //   ++(state_info->second.state_visits);
+        //   StateActionInfo& action_info = state_info->second.action_infos[action_id];
+        //   (action_info.visits)++;
+        //   action_info.val += (1.0 / action_info.visits) * (backpropValue - action_info.val);
+        //   MCTS_OUTPUT("  Set value of action " << action_id << " to " << action_info.val);
+        // }
 
-      MCTS_OUTPUT("Total backprop value: " << backpropValue);
-
-      if (history[step].update_this_state) {
-
-        stateCount[state_info->first]--;
-        // Modify the action appropriately
-        if (stateCount[state_info->first] == 0) { // First Visit Monte Carlo
-          ++(state_info->second.state_visits);
-          StateActionInfo& action_info = state_info->second.action_infos[action_id];
-          (action_info.visits)++;
-          action_info.val += (1.0 / action_info.visits) * (backpropValue - action_info.val);
-          MCTS_OUTPUT("  Set value of action " << action_id << " to " << action_info.val);
-        }
-
-        if (state_info->second.state_visits > 1) {
-          float maxValue = maxValueForState(state_info->first, state_info->second);
-          MCTS_OUTPUT("  Interpolating backpropagation value between current " << backpropValue << " and max " << maxValue);
-          backpropValue = p.lambda * backpropValue + (1.0 - p.lambda) * maxValue;
-        } // else don't change the value being backed up
+        // if (state_info->second.state_visits > 1) {
+        //   float maxValue = maxValueForState(state_info->first, state_info->second);
+        //   MCTS_OUTPUT("  Interpolating backpropagation value between current " << backpropValue << " and max " << maxValue);
+        //   backpropValue = p.lambda * backpropValue + (1.0 - p.lambda) * maxValue;
+        // } // else don't change the value being backed up
       }
 
-      MCTS_OUTPUT("  At state: " << state_info->first << " the backprop value is " << backpropValue);
     }
-
-    MCTS_OUTPUT("State Table: " << std::endl << getStateTableDescription());
-#ifdef MCTS_DEBUG
-    if (++count == 10) throw std::runtime_error("argh!");
-#endif
 
     ++current_playouts;
     current_time = boost::posix_time::microsec_clock::local_time();
@@ -305,8 +283,18 @@ void MCTS::search(const State::ConstPtr& start_state,
   return currentPlayouts;
 }
 
-template<class State, class StateHash, class Action>
-Action MultiThreadedMCTS<State, StateHash, Action>::getBestAction(const State& state) {
+virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const {
+    inline Action::ConstPtr getMaxValueAndActionForState(const StateNode::ConstPtr& state,
+                                              Action::ConstPtr& action) const {
+
+      float max_value = -std::numeric_limits<float>::max();
+      typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
+      BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state.actions) {
+        float val = getStateActionValue(state_action);
+        max_value = std::max(val, max_value);
+      }
+      return max_value;
+    }
   State mappedState(state);
   stateMapping->map(mappedState); // discretize state
 #ifdef MCTS_VALUE_DEBUG
