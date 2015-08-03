@@ -1,3 +1,6 @@
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/planners/mcts/mcts.h>
 
 #ifdef MCTS_DEBUG
@@ -37,8 +40,8 @@ namespace utexas_planning {
     }
 
     int current_playouts = 0;
-    boost::posix_time::ptime end_time = boost::posix_time::microsec_clock::local_time() +
-        boost::posix_time::milliseconds(timeout * 1000);
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::ptime end_time = start_time + boost::posix_time::milliseconds(timeout * 1000);
     boost::posix_time::ptime current_time = start_time;
 
     while (((timeout <= 0.0) || (current_time < end_time)) &&
@@ -54,11 +57,11 @@ namespace utexas_planning {
       }
       StateNode::Ptr state_node = root_node_;
 
-      State::Ptr next_state;
+      State::ConstPtr next_state;
       Action::ConstPtr action;
       unsigned int action_id;
       int depth_count;
-      float reward
+      float reward;
 
       bool at_start_state = true;
 
@@ -69,7 +72,7 @@ namespace utexas_planning {
 
       // Version of the code with no max depth (and hence no pre-cached history memory).
       for (unsigned int depth = 0;
-           ((params.max_depth != 0) || (depth < params.max_depth) &&
+           ((params_.max_depth != 0) || (depth < params_.max_depth) &&
             (timeout <= 0.0) || (current_time < end_time));
            depth += depth_count) {
 
@@ -93,7 +96,7 @@ namespace utexas_planning {
           throw IncorrectUsageException(ss.str());
         }
 
-        model_->takeAction(state, action, reward, next_state, depth_count, rng);
+        model_->takeAction(state, action, reward, next_state, depth_count, rng_);
 
         MCTS_OUTPUT(" Action Selected: " << action);
         MCTS_OUTPUT("   Reward: " << reward);
@@ -117,8 +120,8 @@ namespace utexas_planning {
         // Hunt for next state in the current state_node
         StateActionNode::Ptr& action_node = state_node->actions[action];
         if (action_node->next_states.find(discretized_state) == action_node->next_states.end()) {
-          if ((params.max_new_states_per_rollout == 0) ||
-              (new_states_added_in_rollout < params.max_new_states_per_rollout)) {
+          if ((params_.max_new_states_per_rollout == 0) ||
+              (new_states_added_in_rollout < params_.max_new_states_per_rollout)) {
             state_node = action_node->next_states[discretized_state] = getNewStateNode(discretized_state);
             ++new_states_added_in_rollout;
           } else {
@@ -137,7 +140,7 @@ namespace utexas_planning {
                   " the backprop value is " << backup_value);
 
       for (int step = history.size() - 1; step >= 0; --step) {
-        backup_value = history[step].reward + p.gamma * backup_value;
+        backup_value = history[step].reward + params_.gamma * backup_value;
         if (history[step].state) {
           updateState(history[step], backup_value);
         }
@@ -148,12 +151,9 @@ namespace utexas_planning {
     }
 
     start_action_available_ = false;
-
-    termination_count = terminatedPlayouts;
-    return currentPlayouts;
   }
 
-  virtual Action::ConstPtr MCTS::getBestAction(const State::ConstPtr& state) const {
+  Action::ConstPtr MCTS::getBestAction(const State::ConstPtr& state) const {
 
     typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
 
@@ -162,12 +162,23 @@ namespace utexas_planning {
     // TODO handle state discretization
     //stateMapping->map(discretized_state);
 
-    StateActionNode::ConstPtr action = root_node_.actions[last_action_selected_];
-    StateNode::ConstPtr state_node = action[last_action_selected_];
+    StateNode::ConstPtr state_node;
+    bool use_default_action = true;
+    if (root_node_) {
+      StateActionNode::ConstPtr action = root_node_->actions.find(last_action_selected_)->second;
+      if (action->next_states.find(discretized_state) != action->next_states.end()) {
+        state_node = action->next_states.find(discretized_state)->second;
+        use_default_action = false;
+      }
+    }
+
+    if (use_default_action) {
+      return default_planner_->getBestAction(state);
+    }
 
     float max_value = -std::numeric_limits<float>::max();
     std::vector<Action::ConstPtr> best_actions;
-    BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state.actions) {
+    BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
       float val = getStateActionValue(action_info_pair.second);
       if (fabs(val - max_value) < 1e-10) {
         best_actions.push_back(action_info_pair.first);
@@ -178,18 +189,18 @@ namespace utexas_planning {
       }
     }
 
-    return best_actions[rng->randomInt(best_actions.size() - 1)];
+    return best_actions[rng_->randomInt(best_actions.size() - 1)];
   }
 
   void MCTS::performEpisodeStartProcessing(const State::ConstPtr& start_state,
-                                           float timeout = NO_TIMEOUT) {
+                                           float timeout) {
     restart();
     search(start_state, timeout);
   }
 
   void MCTS::performPostActionProcessing(const State::ConstPtr& state,
                                          const Action::ConstPtr& action,
-                                         float timeout = NO_TIMEOUT) {
+                                         float timeout) {
     restart();
     last_action_selected_ = action;
     search(state, action, timeout);
@@ -199,28 +210,69 @@ namespace utexas_planning {
     root_node_.reset();
   }
 
-  Action::ConstPtr getPlanningAction(const State::ConstPtr& state,
-                                     const StateNode::ConstPtr& state_info) const {
+  Action::ConstPtr MCTS::getPlanningAction(const State::ConstPtr& state,
+                                           const StateNode::ConstPtr& state_node) const {
 
-    return action;
+    std::vector<Action::ConstPtr> best_actions;
+
+    if (params_.action_selection_strategy == UCT) {
+      typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
+
+      // TODO change to assert.
+      if (state_node->state_visits == 0) {
+        throw std::runtime_error("getPlanningAction() called with a state where no visits in state info!");
+      }
+
+      float max_value = -std::numeric_limits<float>::max();
+      std::vector<Action::ConstPtr> best_actions;
+      BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
+        float planning_bound = 1e10f;
+        if (action_info_pair.second->visits != 0) {
+          planning_bound = action_info_pair.second->mean_value +
+            params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
+        }
+        if (fabs(planning_bound - max_value) < 1e-10f) {
+          best_actions.push_back(action_info_pair.first);
+        } else if (planning_bound > max_value) {
+          max_value = planning_bound;
+          best_actions.clear();
+          best_actions.push_back(action_info_pair.first);
+        }
+      }
+    } else {
+      throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
+    }
+
+    return best_actions[rng_->randomInt(best_actions.size() - 1)];
   }
 
-  void updateState(const HistoryStep& step, float& backup_value) {
+  void MCTS::updateState(HistoryStep& step, float& backup_value) {
 
     /* Update mean value for this action. */
     StateNode::Ptr& state_info = step.state;
     ++(state_info->state_visits);
-    StateActionNode::Ptr& action_info = state_info.actions[step.action];
+    StateActionNode::Ptr& action_info = state_info->actions[step.action];
     ++(action_info->visits);
-    action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info.val);
+    action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
 
-    switch (params.backup_strategy) {
-      case ELIGIBILITY_TRACE:
-      default:
-        float max_value = max_value_for_state(state_info);
-        backup_value = params.lambda * backup_value + (1.0 - params.lambda) * max_value;
+    if (params_.backup_strategy == ELIGIBILITY_TRACE) {
+      float max_value = maxValueForState(state_info);
+      backup_value = params_.eligibility_lambda * backup_value + (1.0 - params_.eligibility_lambda) * max_value;
+    } else {
+      throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
     }
 
+  }
+
+  StateNode::Ptr MCTS::getNewStateNode(const State::ConstPtr& state) {
+    std::vector<Action::ConstPtr> actions;
+    model_->getActionsAtState(state, actions);
+    StateNode::Ptr state_node(new StateNode);
+    BOOST_FOREACH(const Action::ConstPtr& action, actions) {
+      StateActionNode::Ptr state_action_node(new StateActionNode);
+      state_node->actions[action] = state_action_node;
+    }
+    return state_node;
   }
 
 } /* utexas_planning */
