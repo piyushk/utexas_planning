@@ -16,6 +16,7 @@ namespace utexas_planning {
       void runSingleTrial(int seed) {
 
         RewardMetrics::Ptr reward_metrics = model_->getRewardMetricsAtEpisodeStart();
+        float cumulative_reward = 0.0f;
 
         State::ConstPtr state = model_->getStartState(seed);
         std::map<std::string, std::string> record = state->asMap();
@@ -36,6 +37,7 @@ namespace utexas_planning {
                              depth_count,
                              post_action_timeout,
                              rng);
+          cumulative_reward += reward;
           planner->performPostActionProcessing(state, action, post_action_timeout);
           state = next_state;
         }
@@ -46,8 +48,9 @@ namespace utexas_planning {
         record.insert(solver_params.begin(), solver_params.end());
         std::map<std::string, std::string> reward_metrics_map = reward_metrics->asMap();
         record.insert(reward_metrics_map.begin(), reward_metrics_map.end());
+        record["reward"] = cumulative_reward;
 
-        bwi_tools::writeRecordsAsCSV(results_directory_ + "/result_s/part." + boost::lexical_cast<std::string>(seed),
+        bwi_tools::writeRecordsAsCSV(results_directory_ + "/part." + boost::lexical_cast<std::string>(seed)),
       }
 
     private:

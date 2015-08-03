@@ -194,6 +194,11 @@ namespace utexas_planning {
 
       };
 
+      State::ConstPtr getStartState(long seed) const {
+        RNG rng(seed);
+        return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
+      }
+
     private:
       std::vector<State::ConstPtr> complete_state_vector_;
       std::vector<Action::ConstPtr> default_action_list_;

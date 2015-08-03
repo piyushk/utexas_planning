@@ -15,8 +15,10 @@ namespace utexas_planning {
   void DeclarativeModel::takeAction(const State::ConstPtr& state,
                                     const Action::ConstPtr& action,
                                     float& reward,
+                                    const RewardMetrics::Ptr& reward_metrics,
                                     State::ConstPtr& next_state,
                                     int& depth_count,
+                                    float& post_action_timeout,
                                     boost::shared_ptr<RNG> rng) const {
 
     // NOTE: This default implementation is definitely not optimized for every domain. However this implementation is
@@ -31,8 +33,9 @@ namespace utexas_planning {
 
     next_state = next_states[idx];
     reward = rewards[idx];
-    depth_count = 1;
 
+    depth_count = 1;
+    post_action_timeout = 1.0f;
   }
 
 } /* utexas_planning */

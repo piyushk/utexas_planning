@@ -7,6 +7,7 @@
 
 #include <utexas_planning/common/rng.h>
 #include <utexas_planning/core/action.h>
+#include <utexas_planning/core/reward_metrics.h>
 #include <utexas_planning/core/state.h>
 
 namespace utexas_planning {
@@ -27,13 +28,31 @@ namespace utexas_planning {
                               const Action::ConstPtr& action,
                               float& reward,
                               State::ConstPtr& next_state,
+                              boost::shared_ptr<RNG> rng) const;
+
+      virtual void takeAction(const State::ConstPtr& state,
+                              const Action::ConstPtr& action,
+                              float& reward,
+                              State::ConstPtr& next_state,
                               int& depth_count,
+                              boost::shared_ptr<RNG> rng) const;
+
+      virtual void takeAction(const State::ConstPtr& state,
+                              const Action::ConstPtr& action,
+                              float& reward,
+                              const RewardMetrics::Ptr& reward_metrics,
+                              State::ConstPtr& next_state,
+                              int& depth_count,
+                              float& post_action_timeout,
                               boost::shared_ptr<RNG> rng) const = 0;
 
       virtual void getActionsAtState(const State::ConstPtr& state,
                                      std::vector<Action::ConstPtr>& actions) const = 0;
 
+      virtual State::ConstPtr getStartState(long seed) const = 0;
+
       virtual std::map<std::string, std::string> getParamsAsMap() const;
+      virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart();
 
   };
 

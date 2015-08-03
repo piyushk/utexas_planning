@@ -27,9 +27,14 @@ namespace utexas_planning {
     return cloneImpl();
   }
 
+  std::map<std::string, std::string> asMap() {
+    return std::map<std::string, std::string>();
+  }
+
   std::size_t StateHasher::operator() (const State& state) const {
     return state.hash(); // Call polymorphic version.
   }
+
 
 } /* utexas_planning */
 

@@ -9,6 +9,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <iostream>
+#include <map>
 
 namespace utexas_planning {
 
@@ -29,6 +30,8 @@ namespace utexas_planning {
       virtual std::string getName() const;
 
       State::Ptr clone() const;
+
+      std::map<std::string, std::string> asMap() const;
 
     private:
 

@@ -30,8 +30,10 @@ namespace utexas_planning {
       virtual void takeAction(const State::ConstPtr& state,
                               const Action::ConstPtr& action,
                               float& reward,
+                              const RewardMetrics::Ptr& reward_metrics,
                               State::ConstPtr& next_state,
                               int& depth_count,
+                              float& post_action_timeout,
                               boost::shared_ptr<RNG> rng) const;
 
   };
