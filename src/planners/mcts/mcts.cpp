@@ -69,7 +69,8 @@ namespace utexas_planning {
 
       // Version of the code with no max depth (and hence no pre-cached history memory).
       for (unsigned int depth = 0;
-           ((timeout <= 0.0) || (current_time < end_time));
+           ((params.max_depth != 0) || (depth < params.max_depth) &&
+            (timeout <= 0.0) || (current_time < end_time));
            depth += depth_count) {
 
         // Select action, take it and update the model with the action taken in simulation.
@@ -116,8 +117,8 @@ namespace utexas_planning {
         // Hunt for next state in the current state_node
         StateActionNode::Ptr& action_node = state_node->actions[action];
         if (action_node->next_states.find(discretized_state) == action_node->next_states.end()) {
-          if ((params.maxNewStatesPerRollout == 0) ||
-              (new_states_added_in_rollout < params.maxNewStatesPerRollout)) {
+          if ((params.max_new_states_per_rollout == 0) ||
+              (new_states_added_in_rollout < params.max_new_states_per_rollout)) {
             state_node = action_node->next_states[discretized_state] = getNewStateNode(discretized_state);
             ++new_states_added_in_rollout;
           } else {
@@ -130,36 +131,16 @@ namespace utexas_planning {
       }
 
       MCTS_OUTPUT("------------ BACKPROPAGATION --------------");
-      float backpropValue = 0;
-      // TODO: does this mean that the unknown bootstrap value param has no significance?
-      /* backpropValue = p.unknownBootstrapValue; */
+      float backup_value = 0;
 
-      MCTS_OUTPUT("At final discretized state: " << discretizedState << " the backprop value is " << backpropValue);
+      MCTS_OUTPUT("At final discretized state: " << discretizedState <<
+                  " the backprop value is " << backup_value);
 
       for (int step = history.size() - 1; step >= 0; --step) {
-
-        backpropValue = history[step].reward + p.gamma * backpropValue;
-
+        backup_value = history[step].reward + p.gamma * backup_value;
         if (history[step].state) {
-          updateState(history[step], backpropValue);
-
-          // stateCount[state_info->first]--;
-          // // Modify the action appropriately
-          // if (stateCount[state_info->first] == 0) { // First Visit Monte Carlo
-          //   ++(state_info->second.state_visits);
-          //   StateActionInfo& action_info = state_info->second.action_infos[action_id];
-          //   (action_info.visits)++;
-          //   action_info.val += (1.0 / action_info.visits) * (backpropValue - action_info.val);
-          //   MCTS_OUTPUT("  Set value of action " << action_id << " to " << action_info.val);
-          // }
-
-          // if (state_info->second.state_visits > 1) {
-          //   float maxValue = maxValueForState(state_info->first, state_info->second);
-          //   MCTS_OUTPUT("  Interpolating backpropagation value between current " << backpropValue << " and max " << maxValue);
-          //   backpropValue = p.lambda * backpropValue + (1.0 - p.lambda) * maxValue;
-          // } // else don't change the value being backed up
+          updateState(history[step], backup_value);
         }
-
       }
 
       ++current_playouts;
@@ -174,8 +155,17 @@ namespace utexas_planning {
 
   virtual Action::ConstPtr MCTS::getBestAction(const State::ConstPtr& state) const {
 
-    float max_value = -std::numeric_limits<float>::max();
     typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
+
+    // Look for this state from the root node.
+    State::Ptr discretized_state = state->clone();
+    // TODO handle state discretization
+    //stateMapping->map(discretized_state);
+
+    StateActionNode::ConstPtr action = root_node_.actions[last_action_selected_];
+    StateNode::ConstPtr state_node = action[last_action_selected_];
+
+    float max_value = -std::numeric_limits<float>::max();
     std::vector<Action::ConstPtr> best_actions;
     BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state.actions) {
       float val = getStateActionValue(action_info_pair.second);
@@ -201,6 +191,7 @@ namespace utexas_planning {
                                          const Action::ConstPtr& action,
                                          float timeout = NO_TIMEOUT) {
     restart();
+    last_action_selected_ = action;
     search(state, action, timeout);
   }
 
@@ -208,7 +199,29 @@ namespace utexas_planning {
     root_node_.reset();
   }
 
+  Action::ConstPtr getPlanningAction(const State::ConstPtr& state,
+                                     const StateNode::ConstPtr& state_info) const {
 
+    return action;
+  }
+
+  void updateState(const HistoryStep& step, float& backup_value) {
+
+    /* Update mean value for this action. */
+    StateNode::Ptr& state_info = step.state;
+    ++(state_info->state_visits);
+    StateActionNode::Ptr& action_info = state_info.actions[step.action];
+    ++(action_info->visits);
+    action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info.val);
+
+    switch (params.backup_strategy) {
+      case ELIGIBILITY_TRACE:
+      default:
+        float max_value = max_value_for_state(state_info);
+        backup_value = params.lambda * backup_value + (1.0 - params.lambda) * max_value;
+    }
+
+  }
 
 } /* utexas_planning */
 

@@ -39,14 +39,18 @@ namespace utexas_planning {
 
       static const int NO_MAX_PLAYOUTS = -1;
 
+      static const int UCT = "uct";
+
+      static const int ELIGIBILITY_TRACE = "eligibility";
+
 #define PARAMS(_) \
-      _(unsigned int,maxDepth,maxDepth,0) \
-      _(float,lambda,lambda,0.0) \
+      _(unsigned int,max_depth,max_depth,0) \
       _(float,gamma,gamma,1.0) \
-      _(float,rewardBound,rewardBound,10000) \
-      _(float,maxNewStatesPerRollout,maxNewStatesPerRollout,0) \
-      _(float,unknownActionValue,unknownActionValue,-1e10) \
-      _(float,unknownBootstrapValue,unknownBootstrapValue,0.0) \
+      _(float,max_new_states_per_rollout,max_new_states_per_rollout,0) \
+      _(std::string,action_selection_strategy,action_selection_strategy,UCT) \
+      _(float,uct_reward_bound,uct_reward_bound,10000) \
+      _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
+      _(float,eligibility_lambda,eligibility_lambda,0.0) \
 
       Params_STRUCT(PARAMS)
 #undef PARAMS
@@ -84,8 +88,8 @@ namespace utexas_planning {
       }
 
       virtual Action::ConstPtr getPlanningAction(const State::ConstPtr& state,
-                                                 const StateNode::ConstPtr& state_info) const = 0;
-      virtual void updateState(const HistoryStep& step, float cummulative_value) = 0;
+                                                 const StateNode::ConstPtr& state_info) const;
+      virtual void updateState(const HistoryStep& step, float& backup_value);
 
       std::string getStateValuesDescription(const State& state);
       std::string getStateTableDescription();
