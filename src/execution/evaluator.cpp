@@ -16,43 +16,41 @@ std::string experiment_file_;
 std::string base_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
-int precompute_only_ = -1;
 
 int processOptions(int argc, char** argv) {
 
   std::string mcts_params_file, methods_file;
 
-  /** Define and parse the program options 
-  */ 
-  namespace po = boost::program_options; 
-  po::options_description desc("Options"); 
-  desc.add_options() 
+  /** Define and parse the program options
+  */
+  namespace po = boost::program_options;
+  po::options_description desc("Options");
+  desc.add_options()
     ("experiment-file", po::value<std::string>(&experiment_file_)->required(),
-     "JSON file containing all the necessary information about this experiment.") 
-    ("data-directory", po::value<std::string>(&base_directory_), "Data directory (defaults to runtime directory).") 
-    ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")  
-    ("num-instances", po::value<int>(&num_instances_), "Number of Instances") 
-    ("precompute-only", po::value<int>(&precompute_only_), "Run offline precomputation for each planner.");
+     "JSON file containing all the necessary information about this experiment.")
+    ("data-directory", po::value<std::string>(&base_directory_), "Data directory (defaults to runtime directory).")
+    ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
+    ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
 
-  po::variables_map vm; 
+  po::variables_map vm;
 
-  try { 
-    po::store(po::command_line_parser(argc, argv).options(desc) 
+  try {
+    po::store(po::command_line_parser(argc, argv).options(desc)
               /* .positional(positionalOptions).allow_unregistered().run(),  */
-              .allow_unregistered().run(), 
-              vm); // throws on error 
+              .allow_unregistered().run(),
+              vm); // throws on error
 
-    po::notify(vm); // throws on error, so do after help in case 
-    // there are any problems 
-  } catch(boost::program_options::required_option& e) { 
-    std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
+    po::notify(vm); // throws on error, so do after help in case
+    // there are any problems
+  } catch(boost::program_options::required_option& e) {
+    std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
     std::cout << desc << std::endl;
-    return -1; 
-  } catch(boost::program_options::error& e) { 
-    std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
+    return -1;
+  } catch(boost::program_options::error& e) {
+    std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
     std::cout << desc << std::endl;
-    return -1; 
-  } 
+    return -1;
+  }
 
   /* Read in methods */
   std::cout << "Experiment File: " << experiment_file_ << std::endl;
