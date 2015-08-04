@@ -31,7 +31,7 @@ namespace utexas_planning {
 
       State::Ptr clone() const;
 
-      std::map<std::string, std::string> asMap() const;
+      virtual std::map<std::string, std::string> asMap() const;
 
     private:
 

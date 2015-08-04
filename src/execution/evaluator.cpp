@@ -1,10 +1,12 @@
 #include<fstream>
 #include<cstdlib>
 
-#include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
+#include <boost/program_options.hpp>
 
+#include <utexas_planning/common/record_writer.h>
 #include <utexas_planning/execution/class_loader.h>
 #include <utexas_planning/execution/evaluation.h>
 
@@ -29,7 +31,7 @@ int processOptions(int argc, char** argv) {
      "JSON file containing all the necessary information about this experiment.")
     ("data-directory", po::value<std::string>(&data_directory_), "Data directory (defaults to runtime directory).")
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
-    ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
+    ("num-instances", po::value<int>(&num_instances_), "Number of Instances");
 
   po::variables_map vm;
 
@@ -74,17 +76,18 @@ int main(int argc, char** argv) {
   }
 
   std::vector<GenerativeModel::ConstPtr> models;
-  std::vector<std::vector<AbstractPlanner::ConstPtr> > planners;
+  std::vector<std::vector<AbstractPlanner::Ptr> > planners;
 
   // Load all libraries_as_char from environment variable.
-  ClassLoader loader;
+  ClassLoader& loader = ClassLoader::getInstance();
+
   char* libraries_as_char;
   libraries_as_char = getenv("UTEXAS_PLANNING_LIBRARIES");
   if (libraries_as_char == NULL) {
     std::cerr << "UTEXAS_PLANNING_LIBRARIES environment variable not set!" << std::endl;
     return -1;
   }
-  std::string libraries_as_string(libraries_as_char);
+  std::string libraries_as_str(libraries_as_char);
   std::vector<std::string> libraries;
   boost::split(libraries, libraries_as_str, boost::is_any_of(",;:"));
   loader.addLibraries(libraries);
@@ -106,7 +109,7 @@ int main(int argc, char** argv) {
       planners[model_idx][planner_idx] = loader.loadPlanner(planner_name,
                                                             models[model_idx],
                                                             planner_rng,
-                                                            planner_yaml[planner_idx],
+                                                            planners_yaml[planner_idx],
                                                             data_directory_);
     }
   }
@@ -116,12 +119,12 @@ int main(int argc, char** argv) {
   for (unsigned model_idx = 0; model_idx < models.size(); ++model_idx) {
     for (unsigned planner_idx = 0; planner_idx < planners.size(); ++planner_idx) {
       records.push_back(runSingleTrial(models[model_idx],
-                                       planners[planner_idx],
+                                       planners[model_idx][planner_idx],
                                        data_directory_,
                                        seed_));
     }
   }
-  writeRecordsAsCSV(results_directory + "/result." + boost::lexical_cast<std::string>(seed_), records);
+  writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);
 
   return 0;
 }

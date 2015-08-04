@@ -16,7 +16,7 @@ namespace utexas_planning {
       typedef boost::shared_ptr<AbstractPlanner> Ptr;
       typedef boost::shared_ptr<const AbstractPlanner> ConstPtr;
 
-      ~AbstractPlanner() {}
+      virtual ~AbstractPlanner();
 
       virtual void init(const GenerativeModel::ConstPtr& model,
                         const YAML::Node& params,

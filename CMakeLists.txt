@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(utexas_planning)
 
-find_package(Boost REQUIRED COMPONENTS filesystem serialization system)
+find_package(Boost REQUIRED COMPONENTS filesystem program_options serialization system)
 find_package(class_loader REQUIRED)
 
 find_package(PkgConfig REQUIRED)
@@ -61,6 +61,7 @@ target_link_libraries(vi_example utexas_planning_models)
 add_executable(evaluator
   src/execution/evaluator.cpp
 )
-target_link_libraries(evaluator utexas_planning_planners)
+target_link_libraries(evaluator utexas_planning_execution)
 target_link_libraries(evaluator utexas_planning_models)
+target_link_libraries(evaluator utexas_planning_planners)
 target_link_libraries(evaluator ${class_loader_LIBRARIES})

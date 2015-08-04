@@ -20,7 +20,7 @@ namespace utexas_planning {
       typedef boost::shared_ptr<GenerativeModel> Ptr;
       typedef boost::shared_ptr<const GenerativeModel> ConstPtr;
 
-      virtual ~GenerativeModel ();
+      virtual ~GenerativeModel();
 
       virtual void init(const YAML::Node& params,
                         const std::string& output_directory);
