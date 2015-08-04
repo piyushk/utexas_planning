@@ -41,7 +41,7 @@ namespace utexas_planning {
     return typeid(*this).name();
   }
 
-  RewardMetrics::Ptr GenerativeModel::getRewardMetricsAtEpisodeStart() {
+  RewardMetrics::Ptr GenerativeModel::getRewardMetricsAtEpisodeStart() const {
     return RewardMetrics::Ptr(new RewardMetrics);
   }
 

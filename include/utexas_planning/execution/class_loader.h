@@ -3,6 +3,10 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <class_loader/multi_library_class_loader.h>
+#include <string>
+#include <utexas_planning/core/abstract_planner.h>
+#include <utexas_planning/core/generative_model.h>
+#include <yaml-cpp/yaml.h>
 
 namespace utexas_planning {
 
@@ -15,52 +19,24 @@ namespace utexas_planning {
         return instance;
       }
 
-      inline void addLibraries(const std::vector<std::string>& libraries) {
-        BOOST_FOREACH(const std::string& library, libraries) {
-          class_loader_.loadLibrary(library);
-        }
-      }
+      void addLibraries(const std::vector<std::string>& libraries);
 
-      inline GenerativeModel::ConstPtr loadModel(const std::string& model_class,
-                                                 const YAML::Node& params = YAML::Node(),
-                                                 const std::string& output_directory = "/tmp"} {
-        std::vector<std::string> classes = class_loader_.getAvailableClasses<GenerativeModel>();
-        BOOST_FOREACH(const std::string& class_name, classes) {
-          if (class_name == model_class) {
-            GenerativeModel::Ptr model = loader.createInstance<GenerativeModel const>(class_name);
-            model->init(params, output_directory);
-            return model;
-          }
-        }
-        std::string all_available_classes = "[" + boost::algorithm::join(classes, ", ") + "]";
-        throw ResourceNotFoundException("ClassLoader: Unable to load requested class " + model_class +
-                                        ". Available classes are " + all_available_classes);
-      }
+      GenerativeModel::ConstPtr loadModel(const std::string& model_class,
+                                          const YAML::Node& params = YAML::Node(),
+                                          const std::string& output_directory = "/tmp");
 
-      inline AbstractPlanner::Ptr loadPlanner(const std::string& planner_class,
-                                              const GenerativeModel::ConstPtr& model,
-                                              const boost::shared_ptr<RNG>& rng,
-                                              const YAML::Node& params = YAML::Node(),
-                                              const std::string& output_directory = "/tmp"} {
-        std::vector<std::string> classes = class_loader_.getAvailableClasses<AbstractPlanner>();
-        BOOST_FOREACH(const std::string& class_name, classes) {
-          if (class_name == model_class) {
-            AbstractPlanner::Ptr model = loader.createInstance<AbstractPlanner const>(class_name);
-            model->init(model, params, output_directory, rng);
-            return model;
-          }
-        }
-        std::string all_available_classes = "[" + boost::algorithm::join(classes, ", ") + "]";
-        throw ResourceNotFoundException("ClassLoader: Unable to load requested class " + model_class +
-                                        ". Available classes are " + all_available_classes);
-      }
+      AbstractPlanner::Ptr loadPlanner(const std::string& planner_class,
+                                       const GenerativeModel::ConstPtr& model,
+                                       const boost::shared_ptr<RNG>& rng,
+                                       const YAML::Node& params = YAML::Node(),
+                                       const std::string& output_directory = "/tmp");
 
     private:
 
       // Ensure that only a single instance is created here.
-      ClassLoader() {}
-      ClassLoader(ClassLoader const&) = delete;
-      void operator=(ClassLoader const&) = delete;
+      ClassLoader();
+      ClassLoader(ClassLoader const&);
+      void operator=(ClassLoader const&);
 
       class_loader::MultiLibraryClassLoader class_loader_;
 

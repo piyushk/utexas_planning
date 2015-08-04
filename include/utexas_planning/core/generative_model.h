@@ -58,7 +58,7 @@ namespace utexas_planning {
 
       virtual float getInitialTimeout() const;
       virtual std::map<std::string, std::string> getParamsAsMap() const;
-      virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart();
+      virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart() const;
 
   };
 
