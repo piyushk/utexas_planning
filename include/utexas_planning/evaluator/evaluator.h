@@ -5,8 +5,6 @@ namespace utexas_planning {
 
   class Evaluator {
 
-    // TODO Add params for timeout etc.
-
     public:
 
       /* Assumes that the model and planners have already been initialized. */
@@ -25,7 +23,7 @@ namespace utexas_planning {
         float reward;
         float post_action_timeout;
 
-        planner->performEpisodeStartProcessing(state, params_.start_timeout);
+        planner->performEpisodeStartProcessing(state, model_->getInitialTimeout());
 
         while (!model_->isTerminalState(state)) {
           action = planner_->getBestAction(state);
@@ -50,10 +48,15 @@ namespace utexas_planning {
         record.insert(reward_metrics_map.begin(), reward_metrics_map.end());
         record["reward"] = cumulative_reward;
 
-        bwi_tools::writeRecordsAsCSV(results_directory_ + "/part." + boost::lexical_cast<std::string>(seed)),
+        bwi_tools::writeRecordsAsCSV(results_directory_ + "/part." + boost::lexical_cast<std::string>(seed), record);
+
       }
 
     private:
+
+      GenerativeModel::ConstPtr model_;
+      AbstractPlanner::ConstPtr planner_;
+
 
   }; /* Evaluator */
 
