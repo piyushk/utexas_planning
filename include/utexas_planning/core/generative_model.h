@@ -20,6 +20,9 @@ namespace utexas_planning {
 
       virtual ~GenerativeModel ();
 
+      virtual void init(const YAML::Node& params,
+                        const std::string& output_directory);
+
       virtual std::string getName() const;
 
       virtual bool isTerminalState(const State::ConstPtr& state) const = 0;
@@ -51,6 +54,7 @@ namespace utexas_planning {
 
       virtual State::ConstPtr getStartState(long seed) const = 0;
 
+      virtual float getInitialTimeout() const;
       virtual std::map<std::string, std::string> getParamsAsMap() const;
       virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart();
 

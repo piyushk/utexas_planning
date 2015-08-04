@@ -20,7 +20,12 @@ namespace utexas_planning {
 
   class IncorrectUsageException : public std::runtime_error {
     public:
-      IncorrectUsageException(const std::string& incorrect_usage) : std::runtime_error(incorrect_usage) {}
+      IncorrectUsageException(const std::string& message) : std::runtime_error(message) {}
+  };
+
+  class ResourceNotFoundException : public std::runtime_error {
+    public:
+      ResourceNotFoundException(const std::string& message) : std::runtime_error(message) {}
   };
 
 } /* utexas_planning */

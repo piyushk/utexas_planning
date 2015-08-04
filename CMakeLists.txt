@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 project(utexas_planning)
 
-find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS filesystem serialization system)
+find_package(class_loader REQUIRED)
+
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp>=0.5)
 find_library(YAML_CPP_LIBRARY NAMES yaml-cpp
   HINTS ${YAML_CPP_LIBDIR} ${YAML_CPP_LIBRARY_DIRS}
