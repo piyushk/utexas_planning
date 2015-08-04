@@ -1,10 +1,11 @@
-#include <utexas_planning/model/grid_models.h>
+#include <utexas_planning/common/exceptions.h>
+#include <utexas_planning/models/grid_model.h>
 
 #define GRID_SIZE 10
 
 namespace utexas_planning {
 
-  void serialize(std::ostream& stream) const {
+  void GridAction::serialize(std::ostream& stream) const {
     if (type == UP) {
       stream << "Up";
     } else if (type == DOWN) {

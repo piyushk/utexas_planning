@@ -10,6 +10,8 @@
 #include <utexas_planning/core/reward_metrics.h>
 #include <utexas_planning/core/state.h>
 
+#include <yaml-cpp/yaml.h>
+
 namespace utexas_planning {
 
   class GenerativeModel {

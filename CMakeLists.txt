@@ -14,7 +14,7 @@ include_directories(include/)
 include_directories(${YAML_CPP_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_library(utexas_planning_core
+add_library(utexas_planning_core SHARED
   src/lib/common/farmhash.cc
   src/lib/core/abstract_planner.cpp
   src/lib/core/action.cpp
@@ -27,7 +27,7 @@ target_link_libraries(utexas_planning_core
   ${YAML_CPP_LIBRARY}
 )
 
-add_library(utexas_planning_planners
+add_library(utexas_planning_planners SHARED
   src/planners/random/random_planner.cpp
   src/planners/mcts/mcts.cpp
   src/planners/vi/vi.cpp
@@ -36,9 +36,15 @@ add_library(utexas_planning_planners
 )
 target_link_libraries(utexas_planning_planners utexas_planning_core)
 
+add_library(utexas_planning_models SHARED
+  src/models/grid_model.cpp
+)
+target_link_libraries(utexas_planning_models utexas_planning_core)
+
 add_executable(vi_example
   src/examples/vi/vi_example.cpp
 )
-target_link_libraries(vi_example utexas_planning_core)
+
 target_link_libraries(vi_example utexas_planning_planners)
+target_link_libraries(vi_example utexas_planning_models)
 target_link_libraries(vi_example ${YAML_CPP_LIBRARIES})

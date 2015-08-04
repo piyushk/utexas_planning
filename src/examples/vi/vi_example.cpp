@@ -39,7 +39,7 @@
 #include <boost/serialization/export.hpp>
 
 #include <utexas_planning/common/exceptions.h>
-#include <utexas_planning/examples/grid_model.h>
+#include <utexas_planning/models/grid_model.h>
 
 #include <utexas_planning/planners/vi/vi.h>
 

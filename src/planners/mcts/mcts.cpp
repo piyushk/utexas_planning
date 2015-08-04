@@ -275,5 +275,9 @@ namespace utexas_planning {
     return state_node;
   }
 
+  std::map<std::string, std::string> MCTS::getParamsAsMap() const {
+    return params_.asMap();
+  }
+
 } /* utexas_planning */
 
