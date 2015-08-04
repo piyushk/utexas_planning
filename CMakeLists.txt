@@ -13,6 +13,7 @@ find_library(YAML_CPP_LIBRARY NAMES yaml-cpp
 include_directories(include/)
 include_directories(${YAML_CPP_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${class_loader_INCLUDE_DIRS})
 
 add_library(utexas_planning_common SHARED
   src/common/farmhash.cc
@@ -54,7 +55,12 @@ target_link_libraries(utexas_planning_models utexas_planning_core)
 add_executable(vi_example
   src/examples/vi/vi_example.cpp
 )
-
 target_link_libraries(vi_example utexas_planning_planners)
 target_link_libraries(vi_example utexas_planning_models)
-target_link_libraries(vi_example ${YAML_CPP_LIBRARIES})
+
+add_executable(evaluator
+  src/execution/evaluator.cpp
+)
+target_link_libraries(evaluator utexas_planning_planners)
+target_link_libraries(evaluator utexas_planning_models)
+target_link_libraries(evaluator ${class_loader_LIBRARIES})

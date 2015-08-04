@@ -23,13 +23,13 @@ namespace utexas_planning {
 
       GenerativeModel::ConstPtr loadModel(const std::string& model_class,
                                           const YAML::Node& params = YAML::Node(),
-                                          const std::string& output_directory = "/tmp");
+                                          const std::string& output_directory = "./");
 
       AbstractPlanner::Ptr loadPlanner(const std::string& planner_class,
                                        const GenerativeModel::ConstPtr& model,
                                        const boost::shared_ptr<RNG>& rng,
                                        const YAML::Node& params = YAML::Node(),
-                                       const std::string& output_directory = "/tmp");
+                                       const std::string& output_directory = "./");
 
     private:
 

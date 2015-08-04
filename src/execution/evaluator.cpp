@@ -4,16 +4,15 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
-#include <pluginlib/class_loader.h>
 
-#include <bwi_rl/planning/domain.h>
-#include <bwi_tools/common/Util.h>
+#include <utexas_planning/execution/class_loader.h>
+#include <utexas_planning/execution/evaluation.h>
 
-using namespace bwi_rl;
+using namespace utexas_planning;
 
-Json::Value experiment_;
+YAML::Node experiment_;
 std::string experiment_file_;
-std::string base_directory_ = ".";      // runtime directory.
+std::string data_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
 
@@ -28,7 +27,7 @@ int processOptions(int argc, char** argv) {
   desc.add_options()
     ("experiment-file", po::value<std::string>(&experiment_file_)->required(),
      "JSON file containing all the necessary information about this experiment.")
-    ("data-directory", po::value<std::string>(&base_directory_), "Data directory (defaults to runtime directory).")
+    ("data-directory", po::value<std::string>(&data_directory_), "Data directory (defaults to runtime directory).")
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
     ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
 
@@ -54,15 +53,13 @@ int processOptions(int argc, char** argv) {
 
   /* Read in methods */
   std::cout << "Experiment File: " << experiment_file_ << std::endl;
-  if (!readJson(experiment_file_, experiment_)) {
-    return -1;
-  }
+  // TODO catch an exception here.
+  experiment_ = YAML::LoadFile(experiment_file_);
 
   /* Create the output directory */
-  base_directory_ = base_directory_ + "/out";
-  if (!boost::filesystem::is_directory(base_directory_) && !boost::filesystem::create_directory(base_directory_))
-  {
-    std::cerr << "Unable to create directory for storing intermediate results and output: " << base_directory_;
+  data_directory_ = data_directory_;
+  if (!boost::filesystem::is_directory(data_directory_) && !boost::filesystem::create_directory(data_directory_)) {
+    std::cerr << "Unable to create directory for storing intermediate output and results: " << data_directory_;
     return -1;
   }
 
@@ -76,43 +73,55 @@ int main(int argc, char** argv) {
     return ret;
   }
 
-  // Load the domain using pluginlib.
-  pluginlib::ClassLoader<Domain> class_loader("bwi_rl", "bwi_rl::Domain");
-  std::vector<boost::shared_ptr<Domain> > domains;
+  std::vector<GenerativeModel::ConstPtr> models;
+  std::vector<std::vector<AbstractPlanner::ConstPtr> > planners;
 
-  Json::Value domains_json = experiment_["domains"];
-  try {
-    for (unsigned domain_idx = 0; domain_idx < domains_json.size(); ++domain_idx) {
-      std::string domain_name = domains_json[domain_idx]["domain"].asString();
-      boost::shared_ptr<Domain> domain = class_loader.createInstance(domain_name);
-      if (!(domain->initialize(domains_json[domain_idx], base_directory_))) {
-        ROS_FATAL("Could not initialize domain.");
-        return -1;
-      }
-      domains.push_back(domain);
-    }
-  } catch(pluginlib::PluginlibException& ex) {
-    // Print an error should any planner fail to load.
-    ROS_FATAL("Unable to load specified domain. Error: %s", ex.what());
+  // Load all libraries_as_char from environment variable.
+  ClassLoader loader;
+  char* libraries_as_char;
+  libraries_as_char = getenv("UTEXAS_PLANNING_LIBRARIES");
+  if (libraries_as_char == NULL) {
+    std::cerr << "UTEXAS_PLANNING_LIBRARIES environment variable not set!" << std::endl;
     return -1;
   }
+  std::string libraries_as_string(libraries_as_char);
+  std::vector<std::string> libraries;
+  boost::split(libraries, libraries_as_str, boost::is_any_of(",;:"));
+  loader.addLibraries(libraries);
 
-  // See if this is a precomputation request only.
-  if (precompute_only_ != -1) {
-    BOOST_FOREACH(boost::shared_ptr<Domain>& domain, domains) {
-      for (int i = 0; i < num_instances_; ++i) {
-        domain->precomputeAndSavePolicy(precompute_only_ + i);
-      }
+  boost::shared_ptr<RNG> rng(new RNG(seed_));
+
+  std::cout << "Initializing all models and planners..." << std::endl;
+  YAML::Node models_yaml = experiment_["models"];
+  YAML::Node planners_yaml = experiment_["planners"];
+  models.resize(models_yaml.size());
+  planners.resize(planners_yaml.size());
+  for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
+    std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
+    models[model_idx] = loader.loadModel(model_name, models_yaml[model_idx], data_directory_);
+    planners[model_idx].resize(planners_yaml.size());
+    for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
+      boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
+      std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
+      planners[model_idx][planner_idx] = loader.loadPlanner(planner_name,
+                                                            models[model_idx],
+                                                            planner_rng,
+                                                            planner_yaml[planner_idx],
+                                                            data_directory_);
     }
-    return 0;
   }
 
-  // Otherwise let's start testing instances!
-  BOOST_FOREACH(boost::shared_ptr<Domain>& domain, domains) {
-    for (int i = 0; i < num_instances_; ++i) {
-      domain->testInstance(seed_ + i);
+  // Running trials
+  std::vector<std::map<std::string, std::string> > records;
+  for (unsigned model_idx = 0; model_idx < models.size(); ++model_idx) {
+    for (unsigned planner_idx = 0; planner_idx < planners.size(); ++planner_idx) {
+      records.push_back(runSingleTrial(models[model_idx],
+                                       planners[planner_idx],
+                                       data_directory_,
+                                       seed_));
     }
   }
+  writeRecordsAsCSV(results_directory + "/result." + boost::lexical_cast<std::string>(seed_), records);
 
   return 0;
 }
