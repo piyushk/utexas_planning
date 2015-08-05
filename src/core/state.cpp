@@ -27,7 +27,7 @@ namespace utexas_planning {
     return cloneImpl();
   }
 
-  std::map<std::string, std::string> asMap() {
+  std::map<std::string, std::string> State::asMap() const {
     return std::map<std::string, std::string>();
   }
 

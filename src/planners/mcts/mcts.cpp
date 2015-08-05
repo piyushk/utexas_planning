@@ -1,4 +1,5 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <class_loader/class_loader.h>
 
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/planners/mcts/mcts.h>
@@ -281,3 +282,4 @@ namespace utexas_planning {
 
 } /* utexas_planning */
 
+CLASS_LOADER_REGISTER_CLASS(utexas_planning::MCTS, utexas_planning::AbstractPlanner);

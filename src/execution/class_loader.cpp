@@ -26,6 +26,7 @@ namespace utexas_planning {
     std::string all_available_classes = "[" + boost::algorithm::join(classes, ", ") + "]";
     throw ResourceNotFoundException("ClassLoader: Unable to load requested class " + model_class +
                                     ". Available classes are " + all_available_classes);
+    return GenerativeModel::Ptr();
   }
 
   AbstractPlanner::Ptr ClassLoader::loadPlanner(const std::string& planner_class,
@@ -47,6 +48,6 @@ namespace utexas_planning {
   }
 
   // TODO not a hundred percent sure about the flag provided to class_loader_
-  ClassLoader::ClassLoader() : class_loader_(true) {}
+  ClassLoader::ClassLoader() : class_loader_(false) {}
 
 } /* utexas_planning */

@@ -1,5 +1,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <class_loader/class_loader.h>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
@@ -179,3 +180,5 @@ namespace utexas_planning {
   } /* vi */
 
 } /* utexas_planning */
+
+CLASS_LOADER_REGISTER_CLASS(utexas_planning::planners::VI, utexas_planning::AbstractPlanner);

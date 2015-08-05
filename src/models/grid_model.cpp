@@ -1,3 +1,4 @@
+#include <class_loader/class_loader.h>
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/models/grid_model.h>
 
@@ -158,3 +159,5 @@ namespace utexas_planning {
   }
 
 } /* utexas_planning */
+
+CLASS_LOADER_REGISTER_CLASS(utexas_planning::GridModel, utexas_planning::GenerativeModel);

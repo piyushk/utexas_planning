@@ -1,6 +1,4 @@
-#ifndef UTEXAS_PLANNING_RANDOM_PLANNER_H_
-#define UTEXAS_PLANNING_RANDOM_PLANNER_H_
-
+#include <class_loader/class_loader.h>
 #include <utexas_planning/planners/random/random_planner.h>
 
 namespace utexas_planning {
@@ -34,4 +32,4 @@ namespace utexas_planning {
 
 } /* utexas_planning */
 
-#endif /* end of include guard: UTEXAS_PLANNING_RANDOM_PLANNER_H_ */
+CLASS_LOADER_REGISTER_CLASS(utexas_planning::random::RandomPlanner, utexas_planning::AbstractPlanner);
