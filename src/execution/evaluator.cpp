@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
   std::vector<std::vector<AbstractPlanner::Ptr> > planners;
 
   // Load all libraries_as_char from environment variable.
-  ClassLoader& loader = ClassLoader::getInstance();
+  ClassLoader::Ptr loader(new ClassLoader);
 
   char* libraries_as_char;
   libraries_as_char = getenv("UTEXAS_PLANNING_LIBRARIES");
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
   std::string libraries_as_str(libraries_as_char);
   std::vector<std::string> libraries;
   boost::split(libraries, libraries_as_str, boost::is_any_of(",;:"));
-  loader.addLibraries(libraries);
+  loader->addLibraries(libraries);
 
   boost::shared_ptr<RNG> rng(new RNG(seed_));
 
@@ -103,12 +103,12 @@ int main(int argc, char** argv) {
   planners.resize(planners_yaml.size());
   for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
-    models[model_idx] = loader.loadModel(model_name, models_yaml[model_idx], data_directory_);
+    models[model_idx] = loader->loadModel(model_name, models_yaml[model_idx], data_directory_);
     planners[model_idx].resize(planners_yaml.size());
     for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
       boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
       std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
-      planners[model_idx][planner_idx] = loader.loadPlanner(planner_name,
+      planners[model_idx][planner_idx] = loader->loadPlanner(planner_name,
                                                             models[model_idx],
                                                             planner_rng,
                                                             planners_yaml[planner_idx],
@@ -128,6 +128,10 @@ int main(int argc, char** argv) {
     }
   }
   writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);
+
+  // Make sure you clear up all the models and planners beofre the ClassLoader resets at the end of this function call.
+  models.clear();
+  planners.clear();
 
   return 0;
 }

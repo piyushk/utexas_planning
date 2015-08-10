@@ -2,3 +2,5 @@ models:
   - name: utexas_planning::GridModel
 planners:
   - name: utexas_planning::planners::VI
+  - name: utexas_planning::MCTS
+    max_playouts: 1000

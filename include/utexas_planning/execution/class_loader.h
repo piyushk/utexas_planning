@@ -14,10 +14,9 @@ namespace utexas_planning {
 
     public:
 
-      static ClassLoader& getInstance() {
-        static ClassLoader instance;
-        return instance;
-      }
+      typedef boost::shared_ptr<ClassLoader> Ptr;
+
+      ClassLoader();
 
       void addLibraries(const std::vector<std::string>& libraries);
 
@@ -32,11 +31,6 @@ namespace utexas_planning {
                                        const std::string& output_directory = "./");
 
     private:
-
-      // Ensure that only a single instance is created here.
-      ClassLoader();
-      ClassLoader(ClassLoader const&);
-      void operator=(ClassLoader const&);
 
       class_loader::MultiLibraryClassLoader class_loader_;
 
