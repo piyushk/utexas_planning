@@ -3,6 +3,7 @@
 
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/planners/mcts/mcts.h>
+#include <utexas_planning/planners/random/random_planner.h>
 
 #ifdef MCTS_DEBUG
 #define MCTS_OUTPUT(x) std::cout << x << std::endl
@@ -14,10 +15,15 @@ namespace utexas_planning {
 
   void MCTS::init(const GenerativeModel::ConstPtr& model,
                   const YAML::Node& params,
-                  const std::string& /* output_directory */,
+                  const std::string& output_directory,
                   const boost::shared_ptr<RNG>& rng) {
     model_ = model;
     params_.fromYaml(params);
+
+    // TODO parametrize the default planner using ClassLoader
+    default_planner_.reset(new random::RandomPlanner);
+    default_planner_->init(model, params, output_directory, rng);
+
     rng_ = rng;
     start_action_available_ = false;
   }
@@ -73,7 +79,7 @@ namespace utexas_planning {
 
       // Version of the code with no max depth (and hence no pre-cached history memory).
       for (unsigned int depth = 0;
-           ((params_.max_depth != 0) || (depth < params_.max_depth) &&
+           ((params_.max_depth == 0) || (depth < params_.max_depth) &&
             (timeout <= 0.0) || (current_time < end_time));
            depth += depth_count) {
 
@@ -99,7 +105,7 @@ namespace utexas_planning {
 
         model_->takeAction(state, action, reward, next_state, depth_count, rng_);
 
-        MCTS_OUTPUT(" Action Selected: " << action);
+        MCTS_OUTPUT(" Action Selected: " << *action);
         MCTS_OUTPUT("   Reward: " << reward);
 
         // Record this step in history.
@@ -137,8 +143,7 @@ namespace utexas_planning {
       MCTS_OUTPUT("------------ BACKPROPAGATION --------------");
       float backup_value = 0;
 
-      MCTS_OUTPUT("At final discretized state: " << discretizedState <<
-                  " the backprop value is " << backup_value);
+      MCTS_OUTPUT("At final discretized state: " << *discretized_state << " the backprop value is " << backup_value);
 
       for (int step = history.size() - 1; step >= 0; --step) {
         backup_value = history[step].reward + params_.gamma * backup_value;
@@ -163,12 +168,21 @@ namespace utexas_planning {
     // TODO handle state discretization
     //stateMapping->map(discretized_state);
 
-    StateNode::ConstPtr state_node;
+    // TODO clean this logic up, check if the state is the state corresponding to the root node or not.
+    StateNode::ConstPtr state_node = root_node_;
     bool use_default_action = true;
     if (root_node_) {
-      StateActionNode::ConstPtr action = root_node_->actions.find(last_action_selected_)->second;
-      if (action->next_states.find(discretized_state) != action->next_states.end()) {
-        state_node = action->next_states.find(discretized_state)->second;
+      if (last_action_selected_) {
+        // We were at root_node_ and selected last_action_selected_. However getBestAction probably wants the next state
+        // afterwards.
+        StateActionNode::ConstPtr action = root_node_->actions.find(last_action_selected_)->second;
+        if (action->next_states.find(discretized_state) != action->next_states.end()) {
+          state_node = action->next_states.find(discretized_state)->second;
+          use_default_action = false;
+        }
+      } else {
+        // We are at the start of the episode, and we've performed search at state.
+        state_node = root_node_;
         use_default_action = false;
       }
     }
@@ -196,7 +210,8 @@ namespace utexas_planning {
   void MCTS::performEpisodeStartProcessing(const State::ConstPtr& start_state,
                                            float timeout) {
     restart();
-    search(start_state, timeout);
+    last_action_selected_.reset();
+    search(start_state, timeout, params_.max_playouts);
   }
 
   void MCTS::performPostActionProcessing(const State::ConstPtr& state,
@@ -204,7 +219,7 @@ namespace utexas_planning {
                                          float timeout) {
     restart();
     last_action_selected_ = action;
-    search(state, action, timeout);
+    search(state, action, timeout, params_.max_playouts);
   }
 
   void MCTS::restart() {
@@ -219,31 +234,32 @@ namespace utexas_planning {
     if (params_.action_selection_strategy == UCT) {
       typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
 
-      // TODO change to assert.
       if (state_node->state_visits == 0) {
-        throw std::runtime_error("getPlanningAction() called with a state where no visits in state info!");
-      }
-
-      float max_value = -std::numeric_limits<float>::max();
-      std::vector<Action::ConstPtr> best_actions;
-      BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
-        float planning_bound = 1e10f;
-        if (action_info_pair.second->visits != 0) {
-          planning_bound = action_info_pair.second->mean_value +
-            params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
-        }
-        if (fabs(planning_bound - max_value) < 1e-10f) {
-          best_actions.push_back(action_info_pair.first);
-        } else if (planning_bound > max_value) {
-          max_value = planning_bound;
-          best_actions.clear();
-          best_actions.push_back(action_info_pair.first);
+        // This is the first time this state node is being visited. Simply return the action from the default policy.
+        best_actions.push_back(default_planner_->getBestAction(state));
+      } else {
+        float max_value = -std::numeric_limits<float>::max();
+        BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
+          float planning_bound = 1e10f;
+          if (action_info_pair.second->visits != 0) {
+            planning_bound = action_info_pair.second->mean_value +
+              params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
+          }
+          /* std::cout << planning_bound << " " << max_value << " " << best_actions.size() << std::endl; */
+          if (fabs(planning_bound - max_value) < 1e-10f) {
+            best_actions.push_back(action_info_pair.first);
+          } else if (planning_bound > max_value) {
+            max_value = planning_bound;
+            best_actions.clear();
+            best_actions.push_back(action_info_pair.first);
+          }
         }
       }
     } else {
       throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
     }
 
+    /* std::cout << best_actions.size() << std::endl; */
     return best_actions[rng_->randomInt(best_actions.size() - 1)];
   }
 

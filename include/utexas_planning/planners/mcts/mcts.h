@@ -58,6 +58,7 @@ namespace utexas_planning {
       _(unsigned int,max_depth,max_depth,0) \
       _(float,gamma,gamma,1.0) \
       _(float,max_new_states_per_rollout,max_new_states_per_rollout,0) \
+      _(float,max_playouts,max_playouts,NO_MAX_PLAYOUTS) \
       _(float,unknown_action_value,unknown_action_value,-1e10f) \
       _(std::string,action_selection_strategy,action_selection_strategy,UCT) \
       _(float,uct_reward_bound,uct_reward_bound,10000) \
@@ -119,7 +120,7 @@ namespace utexas_planning {
       std::string getStateTableDescription();
 
       GenerativeModel::ConstPtr model_;
-      AbstractPlanner::ConstPtr default_planner_;
+      AbstractPlanner::Ptr default_planner_;
 
       StateNode::Ptr root_node_;
       Action::ConstPtr start_action_;
