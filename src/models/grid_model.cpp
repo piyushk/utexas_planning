@@ -1,3 +1,4 @@
+#include <boost/lexical_cast.hpp>
 #include <class_loader/class_loader.h>
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/models/grid_model.h>
@@ -48,6 +49,13 @@ namespace utexas_planning {
     clone->x = x;
     clone->y = y;
     return clone;
+  }
+
+  std::map<std::string, std::string> GridState::asMap() const {
+    std::map<std::string, std::string> state_map;
+    state_map["x"] = boost::lexical_cast<std::string>(x);
+    state_map["y"] = boost::lexical_cast<std::string>(y);
+    return state_map;
   }
 
 } /* utexas_planning */

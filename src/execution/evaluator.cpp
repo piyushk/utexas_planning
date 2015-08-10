@@ -17,6 +17,7 @@ std::string experiment_file_;
 std::string data_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
+bool verbose_ = false;
 
 int processOptions(int argc, char** argv) {
 
@@ -31,7 +32,8 @@ int processOptions(int argc, char** argv) {
      "JSON file containing all the necessary information about this experiment.")
     ("data-directory", po::value<std::string>(&data_directory_), "Data directory (defaults to runtime directory).")
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
-    ("num-instances", po::value<int>(&num_instances_), "Number of Instances");
+    ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
+    ("verbose", po::value<bool>(&verbose_), "Increased verbosity of trial.");
 
   po::variables_map vm;
 
@@ -121,7 +123,8 @@ int main(int argc, char** argv) {
       records.push_back(runSingleTrial(models[model_idx],
                                        planners[model_idx][planner_idx],
                                        data_directory_,
-                                       seed_));
+                                       seed_,
+                                       verbose_));
     }
   }
   writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);

@@ -10,7 +10,8 @@ namespace utexas_planning {
   std::map<std::string, std::string> runSingleTrial(const GenerativeModel::ConstPtr& model,
                                                     const AbstractPlanner::Ptr& planner,
                                                     std::string results_directory,
-                                                    int seed);
+                                                    int seed,
+                                                    bool verbose);
 
 } /* utexas_planning */
 

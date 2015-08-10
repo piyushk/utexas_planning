@@ -41,6 +41,7 @@ namespace utexas_planning {
 
       bool operator<(const State& other_base) const;
       void serialize(std::ostream& stream) const;
+      std::map<std::string, std::string> asMap() const;
 
     private:
 

@@ -1,0 +1,4 @@
+models:
+  - name: utexas_planning::GridModel
+planners:
+  - name: utexas_planning::planners::VI
