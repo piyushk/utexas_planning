@@ -21,7 +21,7 @@ namespace utexas_planning {
     params_.fromYaml(params);
 
     // TODO parametrize the default planner using ClassLoader
-    default_planner_.reset(new random::RandomPlanner);
+    default_planner_.reset(new RandomPlanner);
     default_planner_->init(model, params, output_directory, rng);
 
     rng_ = rng;

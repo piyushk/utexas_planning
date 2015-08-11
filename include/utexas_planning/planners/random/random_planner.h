@@ -8,35 +8,31 @@
 
 namespace utexas_planning {
 
-  namespace random {
+  class RandomPlanner : public AbstractPlanner {
 
-    class RandomPlanner : public AbstractPlanner {
+    public:
 
-      public:
+      typedef boost::shared_ptr<RandomPlanner> Ptr;
+      typedef boost::shared_ptr<const RandomPlanner> ConstPtr;
 
-        typedef boost::shared_ptr<RandomPlanner> Ptr;
-        typedef boost::shared_ptr<const RandomPlanner> ConstPtr;
+      virtual ~RandomPlanner ();
 
-        virtual ~RandomPlanner ();
-
-        virtual void init(const GenerativeModel::ConstPtr& model,
-                          const YAML::Node& params,
-                          const std::string& output_directory,
-                          const boost::shared_ptr<RNG>& rng);
-        virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
-                                                   float timeout = NO_TIMEOUT);
-        virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
-        virtual void performPostActionProcessing(const State::ConstPtr& state,
-                                                 const Action::ConstPtr& action,
+      virtual void init(const GenerativeModel::ConstPtr& model,
+                        const YAML::Node& params,
+                        const std::string& output_directory,
+                        const boost::shared_ptr<RNG>& rng);
+      virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
                                                  float timeout = NO_TIMEOUT);
+      virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
+      virtual void performPostActionProcessing(const State::ConstPtr& state,
+                                               const Action::ConstPtr& action,
+                                               float timeout = NO_TIMEOUT);
 
-      private:
+    private:
 
-        boost::shared_ptr<RNG> rng_;
-        GenerativeModel::ConstPtr model_;
-    };
-
-  } /* random */
+      boost::shared_ptr<RNG> rng_;
+      GenerativeModel::ConstPtr model_;
+  };
 
 } /* utexas_planning */
 

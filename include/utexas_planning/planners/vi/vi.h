@@ -11,62 +11,58 @@
 
 namespace utexas_planning {
 
-  namespace planners {
+  class VI : public AbstractPlanner {
 
-    class VI : public AbstractPlanner {
+    public:
 
-      public:
-
-        typedef boost::shared_ptr<VI> Ptr;
-        typedef boost::shared_ptr<const VI> ConstPtr;
+      typedef boost::shared_ptr<VI> Ptr;
+      typedef boost::shared_ptr<const VI> ConstPtr;
 
 #define PARAMS(_) \
-      _(float,gamma,gamma,1.0) \
-      _(float,epsilon,epsilon,1e-2) \
-      _(unsigned int,max_iter,max_iter,1000) \
-      _(float,max_value,max_value,std::numeric_limits<float>::max()) \
-      _(float,min_value,min_value,-std::numeric_limits<float>::max()) \
-      _(bool,reuse_policy_from_file,reuse_policy_from_file,false) \
-      _(float,policy_computation_timeout,policy_computation_timeout,NO_TIMEOUT) \
+    _(float,gamma,gamma,1.0) \
+    _(float,epsilon,epsilon,1e-2) \
+    _(unsigned int,max_iter,max_iter,1000) \
+    _(float,max_value,max_value,std::numeric_limits<float>::max()) \
+    _(float,min_value,min_value,-std::numeric_limits<float>::max()) \
+    _(bool,reuse_policy_from_file,reuse_policy_from_file,false) \
+    _(float,policy_computation_timeout,policy_computation_timeout,NO_TIMEOUT) \
 
-      Params_STRUCT(PARAMS)
+    Params_STRUCT(PARAMS)
 #undef PARAMS
 
-        VI();
-        virtual ~VI ();
+      VI();
+      virtual ~VI ();
 
-        virtual void init(const GenerativeModel::ConstPtr& model,
-                          const YAML::Node& params,
-                          const std::string& output_directory,
-                          const boost::shared_ptr<RNG>& rng = boost::shared_ptr<RNG>());
-        virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
-                                                   float timeout = NO_TIMEOUT);
-        virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
-        virtual void performPostActionProcessing(const State::ConstPtr& state,
-                                                 const Action::ConstPtr& action,
+      virtual void init(const GenerativeModel::ConstPtr& model,
+                        const YAML::Node& params,
+                        const std::string& output_directory,
+                        const boost::shared_ptr<RNG>& rng = boost::shared_ptr<RNG>());
+      virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
                                                  float timeout = NO_TIMEOUT);
-        virtual std::map<std::string, std::string> getParamsAsMap() const;
+      virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
+      virtual void performPostActionProcessing(const State::ConstPtr& state,
+                                               const Action::ConstPtr& action,
+                                               float timeout = NO_TIMEOUT);
+      virtual std::map<std::string, std::string> getParamsAsMap() const;
 
-      private:
+    private:
 
-        void computePolicy(float timeout);
-        void loadPolicy(const std::string& file);
-        void savePolicy(const std::string& file) const;
-        std::string generatePolicyFileName() const;
-        std::string policy_file_location_;
+      void computePolicy(float timeout);
+      void loadPolicy(const std::string& file);
+      void savePolicy(const std::string& file) const;
+      std::string generatePolicyFileName() const;
+      std::string policy_file_location_;
 
-        DeclarativeModel::ConstPtr model_;
-        std::vector<State::ConstPtr> states_;
-        unsigned int num_states_;
-        vi::Estimator::Ptr value_estimator_;
+      DeclarativeModel::ConstPtr model_;
+      std::vector<State::ConstPtr> states_;
+      unsigned int num_states_;
+      vi::Estimator::Ptr value_estimator_;
 
-        Params params_;
-        bool initialized_;
-        bool policy_available_;
+      Params params_;
+      bool initialized_;
+      bool policy_available_;
 
-    };
-
-  } /* planners */
+  };
 
 } /* utexas_planning */
 
