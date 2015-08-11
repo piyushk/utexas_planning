@@ -20,11 +20,7 @@ namespace utexas_planning {
         typedef boost::shared_ptr<TabularEstimator> Ptr;
         typedef boost::shared_ptr<const TabularEstimator> ConstPtr;
 
-        struct LessState : public std::binary_function<const State::ConstPtr, const State::ConstPtr, bool> {
-          bool operator() (const State::ConstPtr& lhs, const State::ConstPtr& rhs) const;
-        };
-
-        typedef std::map<State::ConstPtr, std::pair<float, Action::ConstPtr>, LessState> EstimatorTable;
+        typedef std::map<State::ConstPtr, std::pair<float, Action::ConstPtr>, State::PtrComparator> EstimatorTable;
 
         virtual ~TabularEstimator ();
 

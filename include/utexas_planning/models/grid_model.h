@@ -18,7 +18,9 @@ namespace utexas_planning {
   class GridAction : public Action {
     public:
       GridActionType type;
+      bool operator<(const Action& other_base) const;
       void serialize(std::ostream& stream) const;
+
 
     private:
       friend class boost::serialization::access;

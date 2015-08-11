@@ -27,6 +27,10 @@ namespace utexas_planning {
     return action.hash(); // Call polymorphic version.
   }
 
+  bool Action::PtrComparator::operator() (const Action::ConstPtr& lhs, const Action::ConstPtr& rhs) const {
+    return (*lhs < *rhs);
+  }
+
 } /* utexas_planning */
 
 std::ostream& operator<<(std::ostream& stream, const utexas_planning::Action& a) {

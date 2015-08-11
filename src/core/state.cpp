@@ -35,6 +35,10 @@ namespace utexas_planning {
     return state.hash(); // Call polymorphic version.
   }
 
+  bool State::PtrComparator::operator() (const State::ConstPtr& lhs, const State::ConstPtr& rhs) const {
+    return (*lhs < *rhs);
+  }
+
 
 } /* utexas_planning */
 

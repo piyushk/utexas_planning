@@ -6,10 +6,6 @@ namespace utexas_planning {
 
   namespace vi {
 
-    bool TabularEstimator::LessState::operator() (const State::ConstPtr& lhs, const State::ConstPtr& rhs) const {
-      return (*lhs < *rhs);
-    }
-
     TabularEstimator::~TabularEstimator () {}
 
     float TabularEstimator::getValue(const State::ConstPtr& state) const {

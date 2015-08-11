@@ -7,6 +7,15 @@
 
 namespace utexas_planning {
 
+  bool GridAction::operator<(const Action& other_base) const {
+    try {
+      const GridAction& other = dynamic_cast<const GridAction&>(other_base);
+      return type < other.type;
+    } catch(const std::bad_cast& exp) {
+      throw DowncastException("State", "GridState");
+    }
+  }
+
   void GridAction::serialize(std::ostream& stream) const {
     if (type == UP) {
       stream << "Up";
@@ -147,10 +156,10 @@ namespace utexas_planning {
       rewards.push_back(-1);
       rewards.push_back(-1);
 
-      float p_up = (action->type == UP) ? 0.7f : 0.1f;
-      float p_down = (action->type == DOWN) ? 0.7f : 0.1f;
-      float p_left = (action->type == LEFT) ? 0.7f : 0.1f;
-      float p_right = (action->type == RIGHT) ? 0.7f : 0.1f;
+      float p_up = (action->type == UP) ? 1.0f : 0.0f;
+      float p_down = (action->type == DOWN) ? 1.0f : 0.0f;
+      float p_left = (action->type == LEFT) ? 1.0f : 0.0f;
+      float p_right = (action->type == RIGHT) ? 1.0f : 0.0f;
 
       probabilities.push_back(p_up);
       probabilities.push_back(p_down);

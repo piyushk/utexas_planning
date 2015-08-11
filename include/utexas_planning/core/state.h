@@ -20,6 +20,10 @@ namespace utexas_planning {
       typedef boost::shared_ptr<State> Ptr;
       typedef boost::shared_ptr<const State> ConstPtr;
 
+      struct PtrComparator : public std::binary_function<const State::ConstPtr, const State::ConstPtr, bool> {
+        bool operator() (const State::ConstPtr& lhs, const State::ConstPtr& rhs) const;
+      };
+
       virtual ~State();
 
       virtual bool operator<(const State& other) const;

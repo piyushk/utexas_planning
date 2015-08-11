@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 
+#include <utexas_planning/common/constants.h>
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/core/declarative_model.h>
 
@@ -35,7 +36,7 @@ namespace utexas_planning {
     reward = rewards[idx];
 
     depth_count = 1;
-    post_action_timeout = 1.0f;
+    post_action_timeout = NO_TIMEOUT;
   }
 
 } /* utexas_planning */
