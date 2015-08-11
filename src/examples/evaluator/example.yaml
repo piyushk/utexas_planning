@@ -3,6 +3,6 @@ models:
 planners:
   # - name: utexas_planning::planners::VI
   - name: utexas_planning::MCTS
-    max_playouts: 10000
+    max_playouts: 1000
     max_depth: 25
     uct_reward_bound: 100
