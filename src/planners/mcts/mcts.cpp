@@ -11,6 +11,8 @@
 #define MCTS_OUTPUT(x) ((void) 0)
 #endif
 
+#define MCTS_OUTPUT_INFO(x) std::cout << x << std::endl
+
 namespace utexas_planning {
 
   void MCTS::init(const GenerativeModel::ConstPtr& model,
@@ -178,6 +180,9 @@ namespace utexas_planning {
         // We were at root_node_ and selected last_action_selected_. However getBestAction probably wants the next state
         // afterwards.
         StateActionNode::ConstPtr action = root_node_->actions.find(last_action_selected_)->second;
+        // BOOST_FOREACH(const State2StateInfoPair& state_info_pair, action->next_states) {
+        //   std::cout << *(state_info_pair.first) << std::endl;
+        // }
         if (action->next_states.find(discretized_state) != action->next_states.end()) {
           state_node = action->next_states.find(discretized_state)->second;
           use_default_action = false;
@@ -190,15 +195,16 @@ namespace utexas_planning {
     }
 
     if (use_default_action) {
+      MCTS_OUTPUT_INFO("Taking default action!");
       return default_planner_->getBestAction(state);
     }
 
     float max_value = -std::numeric_limits<float>::max();
     std::vector<Action::ConstPtr> best_actions;
-    std::cout << "Value of actions:- ";
+    MCTS_OUTPUT_INFO("Value of actions:- ");
     BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
       float val = getStateActionValue(action_info_pair.second);
-      std::cout << *(action_info_pair.first) << ": " << val << "(" << action_info_pair.second->visits << ") ";
+      MCTS_OUTPUT_INFO("  " << *(action_info_pair.first) << ": " << val << "(" << action_info_pair.second->visits << ")");
       if (fabs(val - max_value) < 1e-10) {
         best_actions.push_back(action_info_pair.first);
       } else if (val > max_value) {
@@ -207,7 +213,6 @@ namespace utexas_planning {
         best_actions.push_back(action_info_pair.first);
       }
     }
-    std::cout << std::endl;
 
     return best_actions[rng_->randomInt(best_actions.size() - 1)];
   }

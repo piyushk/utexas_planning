@@ -24,6 +24,18 @@ namespace utexas_planning {
     }
   }
 
+  bool GridAction3D::operator==(const Action& other_base) const {
+    try {
+      const GridAction3D& other = dynamic_cast<const GridAction3D&>(other_base);
+      return
+        (xdiff == other.xdiff) &&
+        (ydiff == other.ydiff) &&
+        (zdiff == other.zdiff);
+    } catch(const std::bad_cast& exp) {
+      throw DowncastException("Action", "GridAction3D");
+    }
+  }
+
   void GridAction3D::serialize(std::ostream& stream) const {
     stream << "(" << xdiff << "," << ydiff << "," << zdiff << ")";
   }
@@ -60,6 +72,7 @@ namespace utexas_planning {
     boost::shared_ptr<GridState3D> clone(new GridState3D);
     clone->x = x;
     clone->y = y;
+    clone->z = z;
     return clone;
   }
 
@@ -125,9 +138,9 @@ namespace utexas_planning {
       {-1, 1, -1}
     };
 
-    if (params_.num_actions < 6) {
+    if (params_.num_actions <= 6) {
       params_.num_actions = 6;
-    } else if (params_.num_actions < 18) {
+    } else if (params_.num_actions <= 18) {
       params_.num_actions = 18;
     } else {
       params_.num_actions = 26;
@@ -194,13 +207,13 @@ namespace utexas_planning {
         boost::shared_ptr<const GridAction3D> default_action =
           boost::dynamic_pointer_cast<const GridAction3D>(default_action_base);
 
-        int new_x = state->x + action->xdiff;
+        int new_x = state->x + default_action->xdiff;
         new_x = (new_x == -1) ? params_.grid_size - 1 : new_x;
         new_x = (new_x == params_.grid_size) ? 0 : new_x;
-        int new_y = state->y + action->ydiff;
+        int new_y = state->y + default_action->ydiff;
         new_y = (new_y == -1) ? params_.grid_size - 1 : new_y;
         new_y = (new_y == params_.grid_size) ? 0 : new_y;
-        int new_z = state->z + action->zdiff;
+        int new_z = state->z + default_action->zdiff;
         new_z = (new_z == -1) ? params_.grid_size - 1 : new_z;
         new_z = (new_z == params_.grid_size) ? 0 : new_z;
 

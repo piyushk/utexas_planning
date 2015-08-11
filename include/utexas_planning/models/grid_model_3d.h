@@ -15,6 +15,7 @@ namespace utexas_planning {
       int ydiff;
       int zdiff;
       bool operator<(const Action& other_base) const;
+      bool operator==(const Action& other_base) const;
       void serialize(std::ostream& stream) const;
 
 
