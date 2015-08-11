@@ -3,8 +3,6 @@
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/models/grid_model.h>
 
-#define GRID_SIZE 10
-
 namespace utexas_planning {
 
   bool GridAction::operator<(const Action& other_base) const {
@@ -12,7 +10,7 @@ namespace utexas_planning {
       const GridAction& other = dynamic_cast<const GridAction&>(other_base);
       return type < other.type;
     } catch(const std::bad_cast& exp) {
-      throw DowncastException("State", "GridState");
+      throw DowncastException("Action", "GridAction");
     }
   }
 
@@ -73,11 +71,15 @@ BOOST_CLASS_EXPORT_IMPLEMENT(utexas_planning::GridState);
 
 namespace utexas_planning {
 
-  GridModel::GridModel() {
+  void GridModel::init(const YAML::Node& params,
+                       const std::string& /* output_directory */,
+                       const boost::shared_ptr<RNG>& rng) {
+
+    params_.fromYaml(params);
 
     // Precache the complete state vector of 100 states.
-    for (int x = 0; x < GRID_SIZE; ++x) {
-      for (int y = 0; y < GRID_SIZE; ++y) {
+    for (int x = 0; x < params_.grid_size; ++x) {
+      for (int y = 0; y < params_.grid_size; ++y) {
         boost::shared_ptr<GridState> s(new GridState);
         s->x = x;
         s->y = y;
@@ -98,7 +100,7 @@ namespace utexas_planning {
     if (!state) {
       throw DowncastException("State", "GridState");
     }
-    return ((state->x == GRID_SIZE / 2) && (state->y == GRID_SIZE / 2));
+    return ((state->x == params_.grid_size / 2) && (state->y == params_.grid_size / 2));
   }
 
   void GridModel::getActionsAtState(const State::ConstPtr& state,
@@ -136,18 +138,18 @@ namespace utexas_planning {
     if (!isTerminalState(state)) {
       boost::shared_ptr<GridState> ns(new GridState);
       ns->x = state->x;
-      ns->y = (state->y == 0) ? GRID_SIZE - 1 : state->y - 1;
+      ns->y = (state->y == 0) ? params_.grid_size - 1 : state->y - 1;
       next_states.push_back(ns);
       ns.reset(new GridState);
       ns->x = state->x;
-      ns->y = (state->y + 1) % GRID_SIZE;
+      ns->y = (state->y + 1) % params_.grid_size;
       next_states.push_back(ns);
       ns.reset(new GridState);
-      ns->x = (state->x == 0) ? GRID_SIZE - 1 : state->x - 1;
+      ns->x = (state->x == 0) ? params_.grid_size - 1 : state->x - 1;
       ns->y = state->y;
       next_states.push_back(ns);
       ns.reset(new GridState);
-      ns->x = (state->x + 1) % GRID_SIZE;
+      ns->x = (state->x + 1) % params_.grid_size;
       ns->y = state->y;
       next_states.push_back(ns);
 
@@ -171,8 +173,13 @@ namespace utexas_planning {
   }
 
   State::ConstPtr GridModel::getStartState(long seed) const {
-    RNG rng(seed);
-    return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
+    if ((params_.start_x < 0 || params_.start_x >= params_.grid_size) ||
+        (params_.start_y < 0 || params_.start_y >= params_.grid_size)) {
+      RNG rng(seed);
+      return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
+    }
+    // Vector is ordered in column major.
+    return complete_state_vector_[params_.start_x * params_.grid_size + params_.start_y];
   }
 
 } /* utexas_planning */

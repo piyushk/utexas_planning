@@ -21,6 +21,7 @@ namespace utexas_planning {
       void addLibraries(const std::vector<std::string>& libraries);
 
       GenerativeModel::ConstPtr loadModel(const std::string& model_class,
+                                          const boost::shared_ptr<RNG>& rng,
                                           const YAML::Node& params = YAML::Node(),
                                           const std::string& output_directory = "./");
 

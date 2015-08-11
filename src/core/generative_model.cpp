@@ -5,10 +5,6 @@ namespace utexas_planning {
 
   GenerativeModel::~GenerativeModel() {}
 
-  void GenerativeModel::init(const YAML::Node& /* params */,
-                             const std::string& /* output_directory */) {
-  }
-
   void GenerativeModel::takeAction(const State::ConstPtr& state,
                                    const Action::ConstPtr& action,
                                    float& reward,

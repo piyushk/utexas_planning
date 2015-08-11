@@ -23,7 +23,8 @@ namespace utexas_planning {
       virtual ~GenerativeModel();
 
       virtual void init(const YAML::Node& params,
-                        const std::string& output_directory);
+                        const std::string& output_directory,
+                        const boost::shared_ptr<RNG>& rng) = 0;
 
       virtual std::string getName() const;
 

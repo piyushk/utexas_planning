@@ -44,6 +44,7 @@ target_link_libraries(utexas_planning_planners ${class_loader_LIBRARIES})
 
 add_library(utexas_planning_models SHARED
   src/models/grid_model.cpp
+  src/models/grid_model_3d.cpp
 )
 target_link_libraries(utexas_planning_models utexas_planning_core)
 target_link_libraries(utexas_planning_models ${class_loader_LIBRARIES})

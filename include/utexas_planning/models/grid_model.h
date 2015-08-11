@@ -3,6 +3,8 @@
 
 #include <boost/serialization/export.hpp>
 
+#include <utexas_planning/common/params.h>
+#include <utexas_planning/common/rng.h>
 #include <utexas_planning/core/declarative_model.h>
 
 namespace utexas_planning {
@@ -51,9 +53,9 @@ namespace utexas_planning {
 
       friend class boost::serialization::access;
       template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
-        ar&  BOOST_SERIALIZATION_BASE_OBJECT_NVP(State);
-        ar&  BOOST_SERIALIZATION_NVP(x);
-        ar&  BOOST_SERIALIZATION_NVP(y);
+        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(State);
+        ar & BOOST_SERIALIZATION_NVP(x);
+        ar & BOOST_SERIALIZATION_NVP(y);
       }
   };
 
@@ -67,7 +69,17 @@ namespace utexas_planning {
 
     public:
 
-      GridModel();
+#define PARAMS(_) \
+      _(int,start_x,start_x,-1) \
+      _(int,start_y,start_y,-1) \
+      _(int,grid_size,grid_size,10) \
+
+      Params_STRUCT(PARAMS)
+#undef PARAMS
+
+      virtual void init(const YAML::Node& params,
+                        const std::string& output_directory,
+                        const boost::shared_ptr<RNG>& rng);
 
       bool isTerminalState(const State::ConstPtr& state_base) const;
 
@@ -88,6 +100,7 @@ namespace utexas_planning {
 
       std::vector<State::ConstPtr> complete_state_vector_;
       std::vector<Action::ConstPtr> default_action_list_;
+      Params params_;
   };
 
 } /* utexas_planning */

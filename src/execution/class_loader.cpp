@@ -13,13 +13,14 @@ namespace utexas_planning {
   }
 
   GenerativeModel::ConstPtr ClassLoader::loadModel(const std::string& model_class,
+                                                   const boost::shared_ptr<RNG>& rng,
                                                    const YAML::Node& params,
                                                    const std::string& output_directory) {
     std::vector<std::string> classes = class_loader_.getAvailableClasses<GenerativeModel>();
     BOOST_FOREACH(const std::string& class_name, classes) {
       if (class_name == model_class) {
         GenerativeModel::Ptr model = class_loader_.createInstance<GenerativeModel>(class_name);
-        model->init(params, output_directory);
+        model->init(params, output_directory, rng);
         return model;
       }
     }

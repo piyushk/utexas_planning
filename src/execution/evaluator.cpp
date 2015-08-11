@@ -102,8 +102,9 @@ int main(int argc, char** argv) {
   models.resize(models_yaml.size());
   planners.resize(planners_yaml.size());
   for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
+    boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
-    models[model_idx] = loader->loadModel(model_name, models_yaml[model_idx], data_directory_);
+    models[model_idx] = loader->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
     planners[model_idx].resize(planners_yaml.size());
     for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
       boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
