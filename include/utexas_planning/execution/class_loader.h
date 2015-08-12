@@ -29,7 +29,8 @@ namespace utexas_planning {
                                        const GenerativeModel::ConstPtr& model,
                                        const boost::shared_ptr<RNG>& rng,
                                        const YAML::Node& params = YAML::Node(),
-                                       const std::string& output_directory = "./");
+                                       const std::string& output_directory = "./",
+                                       bool verbose = false);
 
     private:
 

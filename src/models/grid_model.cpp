@@ -172,6 +172,25 @@ namespace utexas_planning {
 
   }
 
+  void GridModel::takeAction(const State::ConstPtr& state,
+                             const Action::ConstPtr& action,
+                             float& reward,
+                             const RewardMetrics::Ptr& reward_metrics,
+                             State::ConstPtr& next_state,
+                             int& depth_count,
+                             float& post_action_timeout,
+                             boost::shared_ptr<RNG> rng) const {
+    DeclarativeModel::takeAction(state,
+                                 action,
+                                 reward,
+                                 reward_metrics,
+                                 next_state,
+                                 depth_count,
+                                 post_action_timeout,
+                                 rng);
+    post_action_timeout = params_.per_step_planning_time;
+  }
+
   State::ConstPtr GridModel::getStartState(long seed) const {
     if ((params_.start_x < 0 || params_.start_x >= params_.grid_size) ||
         (params_.start_y < 0 || params_.start_y >= params_.grid_size)) {
@@ -180,6 +199,14 @@ namespace utexas_planning {
     }
     // Vector is ordered in column major.
     return complete_state_vector_[params_.start_x * params_.grid_size + params_.start_y];
+  }
+
+  float GridModel::getInitialTimeout() const {
+    return params_.initial_planning_time;
+  }
+
+  std::string GridModel::getName() const {
+    return std::string("Grid");
   }
 
 } /* utexas_planning */

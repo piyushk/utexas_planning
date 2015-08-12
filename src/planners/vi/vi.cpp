@@ -21,9 +21,10 @@ namespace utexas_planning {
   VI::~VI() {}
 
   void VI::init(const GenerativeModel::ConstPtr& model,
-                            const YAML::Node& params,
-                            const std::string& output_directory,
-                            const boost::shared_ptr<RNG>& /* rng */) {
+                const YAML::Node& params,
+                const std::string& output_directory,
+                const boost::shared_ptr<RNG>& /* rng */,
+                bool /* verbose */) {
 
     // Validate that the model can be used with value iteration.
     model_ = boost::dynamic_pointer_cast<const DeclarativeModel>(model);
@@ -164,6 +165,10 @@ namespace utexas_planning {
 
   std::map<std::string, std::string> VI::getParamsAsMap() const {
     return params_.asMap();
+  }
+
+  std::string VI::getName() const {
+    return std::string("VI");
   }
 
   std::string VI::generatePolicyFileName() const {

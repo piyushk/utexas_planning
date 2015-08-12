@@ -8,7 +8,8 @@ namespace utexas_planning {
   void RandomPlanner::init(const GenerativeModel::ConstPtr& model,
                            const YAML::Node& /* params */,
                            const std::string& /* output_directory */,
-                           const boost::shared_ptr<RNG>& rng) {
+                           const boost::shared_ptr<RNG>& rng,
+                           bool /* verbose */) {
     model_ = model;
     rng_ = rng;
   }
@@ -25,6 +26,10 @@ namespace utexas_planning {
   void RandomPlanner::performPostActionProcessing(const State::ConstPtr& /* state */,
                                                   const Action::ConstPtr& /* action */,
                                                   float /* timeout */) {}
+
+  std::string RandomPlanner::getName() const {
+    return std::string("Random");
+  }
 
 } /* utexas_planning */
 

@@ -11,6 +11,8 @@ namespace utexas_planning {
                                                     const AbstractPlanner::Ptr& planner,
                                                     std::string results_directory,
                                                     int seed,
+                                                    int max_trial_depth,
+                                                    float max_trial_time,
                                                     bool verbose);
 
 } /* utexas_planning */

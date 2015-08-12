@@ -33,12 +33,13 @@ namespace utexas_planning {
                                                 const GenerativeModel::ConstPtr& model,
                                                 const boost::shared_ptr<RNG>& rng,
                                                 const YAML::Node& params,
-                                                const std::string& output_directory) {
+                                                const std::string& output_directory,
+                                                bool verbose) {
     std::vector<std::string> classes = class_loader_.getAvailableClasses<AbstractPlanner>();
     BOOST_FOREACH(const std::string& class_name, classes) {
       if (class_name == planner_class) {
         AbstractPlanner::Ptr planner = class_loader_.createInstance<AbstractPlanner>(class_name);
-        planner->init(model, params, output_directory, rng);
+        planner->init(model, params, output_directory, rng, verbose);
         return planner;
       }
     }

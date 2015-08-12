@@ -4,6 +4,7 @@
 namespace utexas_planning {
 
   static const float NO_TIMEOUT = -1.0f;
+  static const int NO_MAX_DEPTH = -1;
 
 };
 

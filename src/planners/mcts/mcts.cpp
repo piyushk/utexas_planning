@@ -6,19 +6,20 @@
 #include <utexas_planning/planners/random/random_planner.h>
 
 #ifdef MCTS_DEBUG
-#define MCTS_OUTPUT(x) std::cout << x << std::endl
+#define MCTS_DEBUG_OUTPUT(x) std::cout << x << std::endl
 #else
-#define MCTS_OUTPUT(x) ((void) 0)
+#define MCTS_DEBUG_OUTPUT(x) ((void) 0)
 #endif
 
-#define MCTS_OUTPUT_INFO(x) std::cout << x << std::endl
+#define MCTS_VERBOSE_OUTPUT(x) if (verbose_) std::cout << x << std::endl
 
 namespace utexas_planning {
 
   void MCTS::init(const GenerativeModel::ConstPtr& model,
                   const YAML::Node& params,
                   const std::string& output_directory,
-                  const boost::shared_ptr<RNG>& rng) {
+                  const boost::shared_ptr<RNG>& rng,
+                  bool verbose) {
     model_ = model;
     params_.fromYaml(params);
 
@@ -27,6 +28,7 @@ namespace utexas_planning {
     default_planner_->init(model, params, output_directory, rng);
 
     rng_ = rng;
+    verbose_ = verbose;
     start_action_available_ = false;
   }
 
@@ -56,7 +58,7 @@ namespace utexas_planning {
     while (((timeout <= 0.0) || (current_time < end_time)) &&
            ((max_playouts <= 0) || (current_playouts < max_playouts))) {
 
-      MCTS_OUTPUT("------------START ROLLOUT--------------");
+      MCTS_DEBUG_OUTPUT("------------START ROLLOUT--------------");
       std::vector<HistoryStep> history;
       State::ConstPtr state = start_state;
 
@@ -86,7 +88,7 @@ namespace utexas_planning {
            depth += depth_count) {
 
         // Select action, take it and update the model with the action taken in simulation.
-        MCTS_OUTPUT("MCTS State: " << *state << " " << "DEPTH: " << depth);
+        MCTS_DEBUG_OUTPUT("MCTS State: " << *state << " " << "DEPTH: " << depth);
 
         if (at_start_state && start_action_available_) {
           action = start_action_;
@@ -107,8 +109,8 @@ namespace utexas_planning {
 
         model_->takeAction(state, action, reward, next_state, depth_count, rng_);
 
-        MCTS_OUTPUT(" Action Selected: " << *action);
-        MCTS_OUTPUT("   Reward: " << reward);
+        MCTS_DEBUG_OUTPUT(" Action Selected: " << *action);
+        MCTS_DEBUG_OUTPUT("   Reward: " << reward);
 
         // Record this step in history.
         HistoryStep step;
@@ -142,15 +144,15 @@ namespace utexas_planning {
         at_start_state = false;
       }
 
-      MCTS_OUTPUT("------------ BACKPROPAGATION --------------");
+      MCTS_DEBUG_OUTPUT("------------ BACKPROPAGATION --------------");
       float backup_value = 0;
 
-      MCTS_OUTPUT("At final discretized state: " << *discretized_state << " the backprop value is " << backup_value);
+      MCTS_DEBUG_OUTPUT("At final discretized state: " << *discretized_state << " the backprop value is " << backup_value);
 
       for (int step = history.size() - 1; step >= 0; --step) {
         backup_value = history[step].reward + params_.gamma * backup_value;
         if (history[step].state) {
-          MCTS_OUTPUT("  Updating state " << *(history[step].state) << " with value " << backup_value);
+          MCTS_DEBUG_OUTPUT("  Updating state " << *(history[step].state) << " with value " << backup_value);
           updateState(history[step], backup_value);
         }
       }
@@ -180,31 +182,36 @@ namespace utexas_planning {
         // We were at root_node_ and selected last_action_selected_. However getBestAction probably wants the next state
         // afterwards.
         StateActionNode::ConstPtr action = root_node_->actions.find(last_action_selected_)->second;
-        // BOOST_FOREACH(const State2StateInfoPair& state_info_pair, action->next_states) {
-        //   std::cout << *(state_info_pair.first) << std::endl;
-        // }
         if (action->next_states.find(discretized_state) != action->next_states.end()) {
           state_node = action->next_states.find(discretized_state)->second;
           use_default_action = false;
+        } else {
+          MCTS_VERBOSE_OUTPUT("  This state was not found in the search tree! Taking action using default policy!");
+          MCTS_VERBOSE_OUTPUT("    The following states were found!");
+          BOOST_FOREACH(const State2StateInfoPair& state_info_pair, action->next_states) {
+            MCTS_VERBOSE_OUTPUT("    " << *(state_info_pair.first));
+          }
         }
       } else {
         // We are at the start of the episode, and we've performed search at state.
         state_node = root_node_;
         use_default_action = false;
       }
+    } else {
+      MCTS_VERBOSE_OUTPUT("  The root search node for MCTS does not exist! Did you call search?");
     }
 
     if (use_default_action) {
-      MCTS_OUTPUT_INFO("Taking default action!");
+      MCTS_VERBOSE_OUTPUT("  Returning action as per default policy!");
       return default_planner_->getBestAction(state);
     }
 
     float max_value = -std::numeric_limits<float>::max();
     std::vector<Action::ConstPtr> best_actions;
-    MCTS_OUTPUT_INFO("Value of actions:- ");
+    MCTS_VERBOSE_OUTPUT("  Value of actions:- ");
     BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
       float val = getStateActionValue(action_info_pair.second);
-      MCTS_OUTPUT_INFO("  " << *(action_info_pair.first) << ": " << val << "(" << action_info_pair.second->visits << ")");
+      MCTS_VERBOSE_OUTPUT("    " << *(action_info_pair.first) << ": " << val << "(" << action_info_pair.second->visits << ")");
       if (fabs(val - max_value) < 1e-10) {
         best_actions.push_back(action_info_pair.first);
       } else if (val > max_value) {
@@ -284,7 +291,7 @@ namespace utexas_planning {
       StateActionNode::Ptr& action_info = state_info->actions[step.action];
       ++(action_info->visits);
       action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
-      MCTS_OUTPUT("  Value of this state-action pair updated to: " << action_info->mean_value);
+      MCTS_DEBUG_OUTPUT("  Value of this state-action pair updated to: " << action_info->mean_value);
 
       // Prepare backup using eligiblity trace methodology.
       float max_value = maxValueForState(state_info);
@@ -308,6 +315,10 @@ namespace utexas_planning {
 
   std::map<std::string, std::string> MCTS::getParamsAsMap() const {
     return params_.asMap();
+  }
+
+  std::string MCTS::getName() const {
+    return std::string("MCTS");
   }
 
 } /* utexas_planning */

@@ -6,6 +6,7 @@
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 
+#include <utexas_planning/common/constants.h>
 #include <utexas_planning/common/record_writer.h>
 #include <utexas_planning/execution/class_loader.h>
 #include <utexas_planning/execution/evaluation.h>
@@ -18,6 +19,8 @@ std::string data_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
 bool verbose_ = false;
+int max_trial_depth_ = NO_MAX_DEPTH;
+float max_trial_time_ = NO_TIMEOUT;
 
 int processOptions(int argc, char** argv) {
 
@@ -33,7 +36,9 @@ int processOptions(int argc, char** argv) {
     ("data-directory", po::value<std::string>(&data_directory_), "Data directory (defaults to runtime directory).")
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
     ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
-    ("verbose", po::value<bool>(&verbose_), "Increased verbosity of trial.");
+    ("verbose", "Increased verbosity in planner and trial output.")
+    ("max-trial-depth", po::value<int>(&max_trial_depth_), "Maximum number of actions that should be taken inside MDP in case a terminal state is not reached.")
+    ("max-trial-time", po::value<float>(&max_trial_time_), "Maximum time each trial should run for in case a terminal state is not reached.");
 
   po::variables_map vm;
 
@@ -53,6 +58,10 @@ int processOptions(int argc, char** argv) {
     std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
     std::cout << desc << std::endl;
     return -1;
+  }
+
+  if (vm.count("verbose")) {
+    verbose_ = true;
   }
 
   /* Read in methods */
@@ -125,6 +134,8 @@ int main(int argc, char** argv) {
                                        planners[model_idx][planner_idx],
                                        data_directory_,
                                        seed_,
+                                       max_trial_depth_,
+                                       max_trial_time_,
                                        verbose_));
     }
   }

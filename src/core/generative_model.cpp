@@ -33,10 +33,6 @@ namespace utexas_planning {
     return std::map<std::string, std::string>();
   }
 
-  std::string GenerativeModel::getName() const {
-    return typeid(*this).name();
-  }
-
   RewardMetrics::Ptr GenerativeModel::getRewardMetricsAtEpisodeStart() const {
     return RewardMetrics::Ptr(new RewardMetrics);
   }

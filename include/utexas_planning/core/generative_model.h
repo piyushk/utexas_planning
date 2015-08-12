@@ -26,7 +26,7 @@ namespace utexas_planning {
                         const std::string& output_directory,
                         const boost::shared_ptr<RNG>& rng) = 0;
 
-      virtual std::string getName() const;
+      virtual std::string getName() const = 0;
 
       virtual bool isTerminalState(const State::ConstPtr& state) const = 0;
 

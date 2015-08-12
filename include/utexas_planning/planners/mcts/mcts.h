@@ -73,7 +73,8 @@ namespace utexas_planning {
       virtual void init(const GenerativeModel::ConstPtr& model,
                         const YAML::Node& params,
                         const std::string& output_directory,
-                        const boost::shared_ptr<RNG>& rng);
+                        const boost::shared_ptr<RNG>& rng,
+                        bool verbose = false);
 
       virtual void search(const State::ConstPtr& start_state,
                           float timeout = 1.0,
@@ -93,6 +94,7 @@ namespace utexas_planning {
                                                float timeout = NO_TIMEOUT);
 
       virtual std::map<std::string, std::string> getParamsAsMap() const;
+      virtual std::string getName() const;
 
     protected:
 
@@ -129,6 +131,8 @@ namespace utexas_planning {
 
       Params params_;
       boost::shared_ptr<RNG> rng_;
+
+      bool verbose_;
 
   };
 

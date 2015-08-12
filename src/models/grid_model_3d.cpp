@@ -238,9 +238,47 @@ namespace utexas_planning {
 
   }
 
+  void GridModel3D::takeAction(const State::ConstPtr& state,
+                             const Action::ConstPtr& action,
+                             float& reward,
+                             const RewardMetrics::Ptr& reward_metrics,
+                             State::ConstPtr& next_state,
+                             int& depth_count,
+                             float& post_action_timeout,
+                             boost::shared_ptr<RNG> rng) const {
+    DeclarativeModel::takeAction(state,
+                                 action,
+                                 reward,
+                                 reward_metrics,
+                                 next_state,
+                                 depth_count,
+                                 post_action_timeout,
+                                 rng);
+    post_action_timeout = params_.per_step_planning_time;
+  }
+
   State::ConstPtr GridModel3D::getStartState(long seed) const {
     RNG rng(seed);
     return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
+    if ((params_.start_x < 0 || params_.start_x >= params_.grid_size) ||
+        (params_.start_y < 0 || params_.start_y >= params_.grid_size) ||
+        (params_.start_z < 0 || params_.start_z >= params_.grid_size)) {
+      RNG rng(seed);
+      return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
+    }
+    int idx =
+      params_.start_x * params_.grid_size * params_.grid_size +
+      params_.start_y * params_.grid_size +
+      params_.start_z;
+    return complete_state_vector_[idx];
+  }
+
+  float GridModel3D::getInitialTimeout() const {
+    return params_.initial_planning_time;
+  }
+
+  std::string GridModel3D::getName() const {
+    return std::string("Grid3D");
   }
 
 } /* utexas_planning */
