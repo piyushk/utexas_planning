@@ -24,6 +24,7 @@ namespace utexas_planning {
 
       StateNode() : state_visits(0) {}
       std::map<Action::ConstPtr, boost::shared_ptr<StateActionNode>, Action::PtrComparator> actions;
+      State::ConstPtr state;
       unsigned int state_visits;
   };
 
@@ -32,7 +33,7 @@ namespace utexas_planning {
       typedef boost::shared_ptr<StateActionNode> Ptr;
       typedef boost::shared_ptr<StateActionNode const> ConstPtr;
 
-      StateActionNode(unsigned int visits = 0, float val = 0.0f) : visits(visits), mean_value(mean_value) {}
+      StateActionNode(unsigned int visits = 0, float mean_value = 0.0f) : visits(visits), mean_value(mean_value) {}
       std::map<State::ConstPtr, StateNode::Ptr, State::PtrComparator> next_states;
       unsigned int visits;
       float mean_value;

@@ -27,6 +27,7 @@ namespace utexas_planning {
     default_planner_.reset(new RandomPlanner);
     default_planner_->init(model, params, output_directory, rng);
 
+    std::cout << "verbosity: " << verbose << std::endl;
     rng_ = rng;
     verbose_ = verbose;
     start_action_available_ = false;
@@ -152,7 +153,8 @@ namespace utexas_planning {
       for (int step = history.size() - 1; step >= 0; --step) {
         backup_value = history[step].reward + params_.gamma * backup_value;
         if (history[step].state) {
-          MCTS_DEBUG_OUTPUT("  Updating state " << *(history[step].state) << " with value " << backup_value);
+          MCTS_DEBUG_OUTPUT("  Updating state-action " << *(history[step].state->state) << " " <<
+                            *(history[step].action) << " with backup value " << backup_value);
           updateState(history[step], backup_value);
         }
       }
@@ -289,9 +291,11 @@ namespace utexas_planning {
       StateNode::Ptr& state_info = step.state;
       ++(state_info->state_visits);
       StateActionNode::Ptr& action_info = state_info->actions[step.action];
+      MCTS_DEBUG_OUTPUT("  Original value and visits for this state-action: " << action_info->mean_value <<
+                        " (" << action_info->visits << ")");
       ++(action_info->visits);
       action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
-      MCTS_DEBUG_OUTPUT("  Value of this state-action pair updated to: " << action_info->mean_value);
+      MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << " (" << action_info->visits << ")");
 
       // Prepare backup using eligiblity trace methodology.
       float max_value = maxValueForState(state_info);
@@ -306,6 +310,7 @@ namespace utexas_planning {
     std::vector<Action::ConstPtr> actions;
     model_->getActionsAtState(state, actions);
     StateNode::Ptr state_node(new StateNode);
+    state_node->state = state;
     BOOST_FOREACH(const Action::ConstPtr& action, actions) {
       StateActionNode::Ptr state_action_node(new StateActionNode);
       state_node->actions[action] = state_action_node;

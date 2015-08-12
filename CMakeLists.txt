@@ -15,6 +15,8 @@ include_directories(${YAML_CPP_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${class_loader_INCLUDE_DIRS})
 
+add_definitions(-DMCTS_DEBUG)
+
 add_library(utexas_planning_common SHARED
   src/common/farmhash.cc
 )

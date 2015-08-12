@@ -122,7 +122,8 @@ int main(int argc, char** argv) {
                                                             models[model_idx],
                                                             planner_rng,
                                                             planners_yaml[planner_idx],
-                                                            data_directory_);
+                                                            data_directory_,
+                                                            verbose_);
     }
   }
 
