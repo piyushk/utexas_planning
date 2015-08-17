@@ -24,7 +24,7 @@ namespace utexas_planning {
 
       virtual void init(const YAML::Node& params,
                         const std::string& output_directory,
-                        const boost::shared_ptr<RNG>& rng) = 0;
+                        const boost::shared_ptr<RNG>& rng = boost::shared_ptr<RNG>()) = 0;
 
       virtual std::string getName() const = 0;
 

@@ -47,12 +47,14 @@ using namespace utexas_planning;
 
 int main(int argc, char **argv) {
 
-  GenerativeModel::Ptr model(new GridModel);
-  VI::Ptr planner(new VI);
   YAML::Node empty_params;
   std::string out_dir = "/tmp/test";
+
+  GenerativeModel::Ptr model(new GridModel);
+  model->init(empty_params, out_dir);
+
+  VI::Ptr planner(new VI);
   planner->init(model, empty_params, out_dir);
-  std::cout << "Computing policy..." << std::endl;
 
   planner->performEpisodeStartProcessing(State::ConstPtr());
 

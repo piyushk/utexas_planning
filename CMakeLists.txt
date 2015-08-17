@@ -2,12 +2,18 @@ cmake_minimum_required(VERSION 2.6)
 project(utexas_planning)
 
 find_package(Boost REQUIRED COMPONENTS filesystem program_options serialization system)
-find_package(class_loader REQUIRED)
+## find_package(class_loader REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp>=0.5)
+pkg_check_modules(CLASS_LOADER REQUIRED class_loader)
+
 find_library(YAML_CPP_LIBRARY NAMES yaml-cpp
   HINTS ${YAML_CPP_LIBDIR} ${YAML_CPP_LIBRARY_DIRS}
+)
+
+find_library(CLASS_LOADER_LIBRARY NAMES class_loader
+  HINTS ${CLASS_LOADER_LIBDIR} ${CLASS_LOADER_LIBRARY_DIRS}
 )
 
 include_directories(include/)
@@ -42,21 +48,21 @@ add_library(utexas_planning_planners SHARED
   src/planners/vi/tabular_estimator.cpp
 )
 target_link_libraries(utexas_planning_planners utexas_planning_core)
-target_link_libraries(utexas_planning_planners ${class_loader_LIBRARIES})
+target_link_libraries(utexas_planning_planners ${CLASS_LOADER_LIBRARY})
 
 add_library(utexas_planning_models SHARED
   src/models/grid_model.cpp
   src/models/grid_model_3d.cpp
 )
 target_link_libraries(utexas_planning_models utexas_planning_core)
-target_link_libraries(utexas_planning_models ${class_loader_LIBRARIES})
+target_link_libraries(utexas_planning_models ${CLASS_LOADER_LIBRARY})
 
 add_library(utexas_planning_execution SHARED
   src/execution/class_loader.cpp
   src/execution/evaluation.cpp
 )
 target_link_libraries(utexas_planning_execution utexas_planning_core)
-target_link_libraries(utexas_planning_execution ${class_loader_LIBRARIES})
+target_link_libraries(utexas_planning_execution ${CLASS_LOADER_LIBRARY})
 
 add_executable(vi_example
   src/examples/vi/vi_example.cpp
@@ -69,3 +75,17 @@ add_executable(evaluator
 )
 target_link_libraries(evaluator utexas_planning_execution)
 target_link_libraries(evaluator utexas_planning_core)
+
+install(
+  TARGETS
+    utexas_planning_common
+    utexas_planning_core
+    utexas_planning_planners
+    utexas_planning_models
+    utexas_planning_execution
+    vi_example
+    evaluator
+  ## ARCHIVE DESTINATION bin
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)

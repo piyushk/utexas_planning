@@ -1,9 +1,9 @@
 models:
   - name: utexas_planning::GridModel
 planners:
-  # - name: utexas_planning::VI
+  - name: utexas_planning::VI
   - name: utexas_planning::MCTS
-    max_playouts: 10
+    max_playouts: 1000
     max_depth: 25
     uct_reward_bound: 100
     eligibility_lambda: 1.0
