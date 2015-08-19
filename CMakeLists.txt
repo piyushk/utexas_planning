@@ -19,7 +19,7 @@ find_library(CLASS_LOADER_LIBRARY NAMES class_loader
 include_directories(include/)
 include_directories(${YAML_CPP_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${class_loader_INCLUDE_DIRS})
+include_directories(${CLASS_LOADER_INCLUDE_DIRS})
 
 #add_definitions(-DMCTS_DEBUG)
 
