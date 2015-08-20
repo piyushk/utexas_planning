@@ -70,17 +70,19 @@ namespace utexas_planning {
       Params_STRUCT(PARAMS)
 #undef PARAMS
 
+      RddlModel();
+
       virtual void init(const YAML::Node& params,
                         const std::string& output_directory,
                         const boost::shared_ptr<RNG>& rng);
 
       virtual bool isTerminalState(const State::ConstPtr& state_base) const;
 
-      virtual void getActionsAtState(const State::ConstPtr& state,
-                             std::vector<Action::ConstPtr>& actions) const; // Return all ActionStates. Not sure on how to use SAC. Use one of the SAC domains to test this out.
+      virtual void getActionsAtState(const State::ConstPtr& state_base,
+                                     std::vector<Action::ConstPtr>& actions) const;
 
-      virtual void takeAction(const State::ConstPtr& state, // See TaskAnalyzer
-                              const Action::ConstPtr& action,
+      virtual void takeAction(const State::ConstPtr& state_base,
+                              const Action::ConstPtr& action_base,
                               float& reward,
                               const RewardMetrics::Ptr& reward_metrics,
                               State::ConstPtr& next_state,
@@ -88,7 +90,7 @@ namespace utexas_planning {
                               float& post_action_timeout,
                               boost::shared_ptr<RNG> rng) const;
 
-      virtual State::ConstPtr getStartState(long seed) const; // See State::Constructor
+      virtual State::ConstPtr getStartState(long seed) const;
 
       virtual float getInitialTimeout() const;
       virtual std::string getName() const;

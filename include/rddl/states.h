@@ -164,7 +164,10 @@ public:
         state(size, 0), index(-1) {}
 
     ActionState(ActionState const& other) :
-        state(other.state), index(other.index) {}
+        state(other.state),
+        index(other.index),
+        scheduledActionFluents(other.scheduledActionFluents),
+        relevantSACs(other.relevantSACs) {}
 
     // This is used to sort action states by the number of true fluents and the
     // position of the true fluents to ensure deterministic behaviour
