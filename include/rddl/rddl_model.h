@@ -1,5 +1,5 @@
-#ifndef UTEXAS_PLANNING_GRID_MODEL_3D_H_
-#define UTEXAS_PLANNING_GRID_MODEL_3D_H_
+#ifndef UTEXAS_PLANNING_RDDL_MODEL_H_
+#define UTEXAS_PLANNING_RDDL_MODEL_H_
 
 #include <boost/serialization/export.hpp>
 
@@ -10,7 +10,7 @@
 
 namespace utexas_planning {
 
-  class GridAction3D : public Action {
+  class RddlAction : public Action {
     public:
       int xdiff;
       int ydiff;
@@ -31,11 +31,11 @@ namespace utexas_planning {
 
 } /* utexas_planning */
 
-BOOST_CLASS_EXPORT_KEY(utexas_planning::GridAction3D);
+BOOST_CLASS_EXPORT_KEY(utexas_planning::RddlAction);
 
 namespace utexas_planning {
 
-  class GridState3D : public State {
+  class RddlState : public State {
     public:
       int x;
       int y;
@@ -60,11 +60,11 @@ namespace utexas_planning {
 
 } /* utexas_planning */
 
-BOOST_CLASS_EXPORT_KEY(utexas_planning::GridState3D);
+BOOST_CLASS_EXPORT_KEY(utexas_planning::RddlState);
 
 namespace utexas_planning {
 
-  class GridModel3D : public DeclarativeModel {
+  class RddlModel : public GenerativeModel {
 
     public:
 
@@ -88,7 +88,7 @@ namespace utexas_planning {
       virtual bool isTerminalState(const State::ConstPtr& state_base) const;
 
       virtual void getActionsAtState(const State::ConstPtr& state,
-                             std::vector<Action::ConstPtr>& actions) const;
+                             std::vector<Action::ConstPtr>& actions) const; // Return all ActionStates. Not sure on how to use SAC.
 
       virtual std::vector<State::ConstPtr> getStateVector() const;
 
@@ -98,7 +98,7 @@ namespace utexas_planning {
                                  std::vector<float>& rewards,
                                  std::vector<float>& probabilities) const;
 
-      virtual void takeAction(const State::ConstPtr& state,
+      virtual void takeAction(const State::ConstPtr& state, // See TaskAnalyzer
                               const Action::ConstPtr& action,
                               float& reward,
                               const RewardMetrics::Ptr& reward_metrics,
@@ -107,7 +107,7 @@ namespace utexas_planning {
                               float& post_action_timeout,
                               boost::shared_ptr<RNG> rng) const;
 
-      virtual State::ConstPtr getStartState(long seed) const;
+      virtual State::ConstPtr getStartState(long seed) const; // See State::Constructor
 
       virtual float getInitialTimeout() const;
       virtual std::string getName() const;
@@ -123,4 +123,4 @@ namespace utexas_planning {
 
 } /* utexas_planning */
 
-#endif /* end of include guard: UTEXAS_PLANNING_GRID_MODEL_3D_H_ */
+#endif /* end of include guard: UTEXAS_PLANNING_RDDL_MODEL_H_ */
