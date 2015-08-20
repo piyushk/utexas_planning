@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
     std::cout << task->nonFluents.size() << std::endl;
     std::cout << task->stateFluents.size() << std::endl;
     std::cout << task->actionFluents.size() << std::endl;
+    std::cout << task->SACs.size() << std::endl;
     std::cout << task->actionPreconds.size() << std::endl;
 
     t.reset();
@@ -65,9 +66,10 @@ int main(int argc, char** argv) {
     std::cout << task->nonFluents.size() << std::endl;
     std::cout << task->stateFluents.size() << std::endl;
     std::cout << task->actionFluents.size() << std::endl;
+    std::cout << task->SACs.size() << std::endl;
     std::cout << task->actionPreconds.size() << std::endl;
 
-    task->print(cout);
+    /* task->print(cout); */
 
     t.reset();
     cout << "preprocessing..." << endl;
@@ -78,9 +80,10 @@ int main(int argc, char** argv) {
     std::cout << task->nonFluents.size() << std::endl;
     std::cout << task->stateFluents.size() << std::endl;
     std::cout << task->actionFluents.size() << std::endl;
+    std::cout << task->SACs.size() << std::endl;
     std::cout << task->actionPreconds.size() << std::endl;
 
-    task->print(cout);
+    /* task->print(cout); */
 
     return 0;
 }
