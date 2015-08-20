@@ -16,7 +16,6 @@ void State::print(ostream& out) const {
     for (unsigned int index = 0; index < state.size(); ++index) {
         out << state[index] << " ";
     }
-    out << endl;
 }
 
 string ActionState::getName() const {
@@ -34,5 +33,4 @@ void ActionState::print(ostream& out) const {
     for (unsigned int index = 0; index < state.size(); ++index) {
         out << state[index] << " ";
     }
-    out << endl;
 }

@@ -4,17 +4,18 @@
 #include <boost/serialization/export.hpp>
 
 #include <utexas_planning/common/constants.h>
+#include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/common/params.h>
 #include <utexas_planning/common/rng.h>
 #include <utexas_planning/core/declarative_model.h>
 
+#include "states.h"
 namespace utexas_planning {
 
   class RddlAction : public Action {
     public:
-      int xdiff;
-      int ydiff;
-      int zdiff;
+      boost::shared_ptr<rddl::ActionState> state;
+
       bool operator<(const Action& other_base) const;
       bool operator==(const Action& other_base) const;
       void serialize(std::ostream& stream) const;
@@ -22,10 +23,7 @@ namespace utexas_planning {
     private:
       friend class boost::serialization::access;
       template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Action);
-        ar & BOOST_SERIALIZATION_NVP(xdiff);
-        ar & BOOST_SERIALIZATION_NVP(ydiff);
-        ar & BOOST_SERIALIZATION_NVP(zdiff);
+        throw UnimplementedFunctionException("RddlAction","serialize(Archive& ar)");
       }
   };
 
@@ -37,9 +35,7 @@ namespace utexas_planning {
 
   class RddlState : public State {
     public:
-      int x;
-      int y;
-      int z;
+      boost::shared_ptr<rddl::State> state;
 
       bool operator<(const State& other_base) const;
       void serialize(std::ostream& stream) const;
@@ -51,10 +47,7 @@ namespace utexas_planning {
 
       friend class boost::serialization::access;
       template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(State);
-        ar & BOOST_SERIALIZATION_NVP(x);
-        ar & BOOST_SERIALIZATION_NVP(y);
-        ar & BOOST_SERIALIZATION_NVP(z);
+        throw UnimplementedFunctionException("RddlAction","serialize(Archive& ar)");
       }
   };
 
@@ -69,12 +62,8 @@ namespace utexas_planning {
     public:
 
 #define PARAMS(_) \
-      _(int,start_x,start_x,-1) \
-      _(int,start_y,start_y,-1) \
-      _(int,start_z,start_z,-1) \
-      _(int,grid_size,grid_size,10) \
-      _(int,num_actions,num_actions,6) \
-      _(float,non_determinism,non_determinism,0.1f) \
+      _(std::string,rddl_domain,rddl_domain,"") \
+      _(std::string,rddl_problem,rddl_problem,"") \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 
@@ -88,15 +77,7 @@ namespace utexas_planning {
       virtual bool isTerminalState(const State::ConstPtr& state_base) const;
 
       virtual void getActionsAtState(const State::ConstPtr& state,
-                             std::vector<Action::ConstPtr>& actions) const; // Return all ActionStates. Not sure on how to use SAC.
-
-      virtual std::vector<State::ConstPtr> getStateVector() const;
-
-      virtual void getTransitionDynamics(const State::ConstPtr& state_base,
-                                 const Action::ConstPtr& action_base,
-                                 std::vector<State::ConstPtr>& next_states,
-                                 std::vector<float>& rewards,
-                                 std::vector<float>& probabilities) const;
+                             std::vector<Action::ConstPtr>& actions) const; // Return all ActionStates. Not sure on how to use SAC. Use one of the SAC domains to test this out.
 
       virtual void takeAction(const State::ConstPtr& state, // See TaskAnalyzer
                               const Action::ConstPtr& action,
