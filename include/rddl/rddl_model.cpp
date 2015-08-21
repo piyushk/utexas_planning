@@ -127,8 +127,8 @@ namespace utexas_planning {
     preprocessor.preprocess();
 
     start_state_.reset(new RddlState);
-    start_state_.state.reset(new rddl::State(task_->CPFs));
-    start_state_.remaining_steps = task_->horizon;
+    start_state_->state.reset(new rddl::State(task_->CPFs));
+    start_state_->remaining_steps = task_->horizon;
 
     default_action_list_.resize(task_->actionStates.size());
     for (int idx = 0; idx < task_->actionStates.size(); ++idx) {
@@ -193,16 +193,18 @@ namespace utexas_planning {
       throw IncorrectUsageException("RddlModel: takeAction called on a terminal state, which is not allowed");
     }
 
-    boost::shared_ptr
-    rddl::State next(task->CPFs.size());
-    for(unsigned int i = 0; i < task->CPFs.size(); ++i) {
-      task->CPFs[i]->formula->evaluate(next[i], current, randomAction);
+    RddlState::Ptr next_state_mutable(new RddlState);
+    next_state_mutable->state.reset(new rddl::State(task_->CPFs.size()));
+    for(unsigned int i = 0; i < task_->CPFs.size(); ++i) {
+      task_->CPFs[i]->formula->evaluate((*(next_state_mutable->state))[i], current, action->state);
     }
+    next_state_mutable->remaining_steps = state->remaining_steps - 1;
+    next_state = next_state_mutable; // copy over to const container.
+
     double reward_as_double;
     task_->rewardCPF->formula->evaluate(reward_as_double, current, action->state);
     reward = reward_as_double; // implicit conversion to float.
 
-    next_state.remaining_steps = state.remaining_steps - 1;
     post_action_timeout = params_.per_step_planning_time;
     depth_count = 1;
   }

@@ -3,44 +3,48 @@
 
 #include <string>
 
-class SystemUtils {
-public:
-    static void abort(std::string msg);
-    static void warn(std::string msg);
+namespace rddl {
 
-    static void takeTime();
-    static double stopTime();
+  class SystemUtils {
+  public:
+      static void abort(std::string msg);
+      static void warn(std::string msg);
 
-    static bool readFile(std::string& file, std::string& res,
-            std::string ignoreSign = "");
+      static void takeTime();
+      static double stopTime();
 
-    static long getTotalVirtualMemory();
-    static long getUsedVirtualMemory();
-    static int getVirtualMemoryUsedByThis();
+      static bool readFile(std::string& file, std::string& res,
+              std::string ignoreSign = "");
 
-    static long getTotalRAM();
-    static long getUsedRAM();
-    static int getRAMUsedByThis();
+      static long getTotalVirtualMemory();
+      static long getUsedVirtualMemory();
+      static int getVirtualMemoryUsedByThis();
 
-    static void initCPUMeasurementOfThis();
-    static double getCPUUsageOfThis();
+      static long getTotalRAM();
+      static long getUsedRAM();
+      static int getRAMUsedByThis();
 
-protected:
-    static clock_t start;
-    static bool clockRunning;
-    static bool CPUMeasurementRunning;
-    static bool CPUMeasurementOfProcessRunning;
+      static void initCPUMeasurementOfThis();
+      static double getCPUUsageOfThis();
 
-    static clock_t lastCPU;
-    static clock_t lastSysCPU;
-    static clock_t lastUserCPU;
-    static int numProcessors;
+  protected:
+      static clock_t start;
+      static bool clockRunning;
+      static bool CPUMeasurementRunning;
+      static bool CPUMeasurementOfProcessRunning;
+
+      static clock_t lastCPU;
+      static clock_t lastSysCPU;
+      static clock_t lastUserCPU;
+      static int numProcessors;
 
 
-    static int parseLine(char* line);
+      static int parseLine(char* line);
 
-private:
-    SystemUtils() {}
-};
+  private:
+      SystemUtils() {}
+  };
+
+} /* rddl */
 
 #endif

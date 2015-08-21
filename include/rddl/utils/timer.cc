@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace rddl;
 
 Timer::Timer() {
     currentTime = getCurrentTime();

@@ -10,6 +10,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace rddl;
 
 void TaskAnalyzer::analyzeTask(int const& numberOfStates,
                                double const& maxTimeout) {

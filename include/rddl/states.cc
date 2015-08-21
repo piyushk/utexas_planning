@@ -5,6 +5,7 @@
 #include <sstream>
 
 using namespace std;
+using namespace rddl;
 
 State::State(vector<ConditionalProbabilityFunction*> const& cpfs) {
     for (unsigned int i = 0; i < cpfs.size(); ++i) {

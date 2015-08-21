@@ -9,221 +9,225 @@
 #include "probability_distribution.h"
 #include "utils/math_utils.h"
 
-class ActionFluent;
-class ActionPrecondition;
-class ConditionalProbabilityFunction;
+namespace rddl {
 
-/*****************************************************************
-                               State
-*****************************************************************/
+  class ActionFluent;
+  class ActionPrecondition;
+  class ConditionalProbabilityFunction;
 
-struct State {
-    State(std::vector<ConditionalProbabilityFunction*> const& cpfs);
-    State(State const& other) :
-        state(other.state) {}
-    State(int stateSize) :
-        state(stateSize, 0.0) {}
+  /*****************************************************************
+                                 State
+  *****************************************************************/
 
-    double& operator[](int const& index) {
-        assert(index < state.size());
-        return state[index];
-    }
+  struct State {
+      State(std::vector<ConditionalProbabilityFunction*> const& cpfs);
+      State(State const& other) :
+          state(other.state) {}
+      State(int stateSize) :
+          state(stateSize, 0.0) {}
 
-    double const& operator[](int const& index) const {
-        assert(index < state.size());
-        return state[index];
-    }
+      double& operator[](int const& index) {
+          assert(index < state.size());
+          return state[index];
+      }
 
-    void print(std::ostream& out) const;
+      double const& operator[](int const& index) const {
+          assert(index < state.size());
+          return state[index];
+      }
 
-    struct StateSort {
-        bool operator()(State const& lhs, State const& rhs) const {
-            assert(lhs.state.size() == rhs.state.size());
+      void print(std::ostream& out) const;
 
-            for (int i = lhs.state.size() - 1; i >= 0; --i) {
-                if (MathUtils::doubleIsSmaller(lhs.state[i], rhs.state[i])) {
-                    return true;
-                } else if (MathUtils::doubleIsSmaller(rhs.state[i],
-                                   lhs.state[i])) {
-                    return false;
-                }
-            }
-            return false;
-        }
-    };
+      struct StateSort {
+          bool operator()(State const& lhs, State const& rhs) const {
+              assert(lhs.state.size() == rhs.state.size());
 
-    std::vector<double> state;
-};
+              for (int i = lhs.state.size() - 1; i >= 0; --i) {
+                  if (MathUtils::doubleIsSmaller(lhs.state[i], rhs.state[i])) {
+                      return true;
+                  } else if (MathUtils::doubleIsSmaller(rhs.state[i],
+                                     lhs.state[i])) {
+                      return false;
+                  }
+              }
+              return false;
+          }
+      };
 
-/*****************************************************************
-                            PDState
-*****************************************************************/
+      std::vector<double> state;
+  };
 
-struct PDState {
-    PDState(int stateSize) :
-        state(stateSize, DiscretePD()) {}
+  /*****************************************************************
+                              PDState
+  *****************************************************************/
 
-    DiscretePD& operator[](int const& index) {
-        assert(index < state.size());
-        return state[index];
-    }
+  struct PDState {
+      PDState(int stateSize) :
+          state(stateSize, DiscretePD()) {}
 
-    DiscretePD const& operator[](int const& index) const {
-        assert(index < state.size());
-        return state[index];
-    }
+      DiscretePD& operator[](int const& index) {
+          assert(index < state.size());
+          return state[index];
+      }
 
-    struct PDStateSort {
-        bool operator()(PDState const& lhs, PDState const& rhs) const {
-            for (unsigned int i = 0; i < lhs.state.size(); ++i) {
-                if (rhs.state[i] < lhs.state[i]) {
-                    return false;
-                } else if (lhs.state[i] < rhs.state[i]) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    };
+      DiscretePD const& operator[](int const& index) const {
+          assert(index < state.size());
+          return state[index];
+      }
 
-    std::vector<DiscretePD> state;
-};
+      struct PDStateSort {
+          bool operator()(PDState const& lhs, PDState const& rhs) const {
+              for (unsigned int i = 0; i < lhs.state.size(); ++i) {
+                  if (rhs.state[i] < lhs.state[i]) {
+                      return false;
+                  } else if (lhs.state[i] < rhs.state[i]) {
+                      return true;
+                  }
+              }
+              return false;
+          }
+      };
 
-/*****************************************************************
-                          KleeneState
-*****************************************************************/
+      std::vector<DiscretePD> state;
+  };
 
-class KleeneState {
-public:
+  /*****************************************************************
+                            KleeneState
+  *****************************************************************/
 
-    KleeneState(int stateSize) :
-        state(stateSize) {}
+  class KleeneState {
+  public:
 
-    KleeneState(State const& origin) :
-        state(origin.state.size()) {
-        for (unsigned int index = 0; index < state.size(); ++index) {
-            state[index].insert(origin[index]);
-        }
-    }
+      KleeneState(int stateSize) :
+          state(stateSize) {}
 
-    std::set<double>& operator[](int const& index) {
-        assert(index < state.size());
-        return state[index];
-    }
+      KleeneState(State const& origin) :
+          state(origin.state.size()) {
+          for (unsigned int index = 0; index < state.size(); ++index) {
+              state[index].insert(origin[index]);
+          }
+      }
 
-    std::set<double> const& operator[](int const& index) const {
-        assert(index < state.size());
-        return state[index];
-    }
+      std::set<double>& operator[](int const& index) {
+          assert(index < state.size());
+          return state[index];
+      }
 
-    bool operator==(KleeneState const& other) const {
-        assert(state.size() == other.state.size());
+      std::set<double> const& operator[](int const& index) const {
+          assert(index < state.size());
+          return state[index];
+      }
 
-        for (unsigned int index = 0; index < state.size(); ++index) {
-            if (!std::equal(state[index].begin(), state[index].end(),
-                        other.state[index].begin())) {
-                return false;
-            }
-        }
-        return true;
-    }
+      bool operator==(KleeneState const& other) const {
+          assert(state.size() == other.state.size());
 
-    // This is used to merge two KleeneStates
-    KleeneState operator|=(KleeneState const& other) {
-        assert(state.size() == other.state.size());
+          for (unsigned int index = 0; index < state.size(); ++index) {
+              if (!std::equal(state[index].begin(), state[index].end(),
+                          other.state[index].begin())) {
+                  return false;
+              }
+          }
+          return true;
+      }
 
-        for (unsigned int i = 0; i < state.size(); ++i) {
-            state[i].insert(other.state[i].begin(), other.state[i].end());
-        }
-        return *this;
-    }
+      // This is used to merge two KleeneStates
+      KleeneState operator|=(KleeneState const& other) {
+          assert(state.size() == other.state.size());
 
-    KleeneState const operator||(KleeneState const& other) {
-        assert(state.size() == other.state.size());
-        return KleeneState(*this) |= other;
-    }
+          for (unsigned int i = 0; i < state.size(); ++i) {
+              state[i].insert(other.state[i].begin(), other.state[i].end());
+          }
+          return *this;
+      }
 
-    void print(std::ostream& out) const;
+      KleeneState const operator||(KleeneState const& other) {
+          assert(state.size() == other.state.size());
+          return KleeneState(*this) |= other;
+      }
 
-protected:
-    std::vector<std::set<double> > state;
+      void print(std::ostream& out) const;
 
-private:
-    KleeneState(KleeneState const& other) :
-        state(other.state) {}
-};
+  protected:
+      std::vector<std::set<double> > state;
+
+  private:
+      KleeneState(KleeneState const& other) :
+          state(other.state) {}
+  };
 
 
-/*****************************************************************
-                            ActionState
-*****************************************************************/
+  /*****************************************************************
+                              ActionState
+  *****************************************************************/
 
-class ActionState {
-public:
-    ActionState(int size) :
-        state(size, 0), index(-1) {}
+  class ActionState {
+  public:
+      ActionState(int size) :
+          state(size, 0), index(-1) {}
 
-    ActionState(ActionState const& other) :
-        state(other.state),
-        index(other.index),
-        scheduledActionFluents(other.scheduledActionFluents),
-        relevantSACs(other.relevantSACs) {}
+      ActionState(ActionState const& other) :
+          state(other.state),
+          scheduledActionFluents(other.scheduledActionFluents),
+          relevantSACs(other.relevantSACs),
+          index(other.index) {}
 
-    // This is used to sort action states by the number of true fluents and the
-    // position of the true fluents to ensure deterministic behaviour
-    struct ActionStateSort {
-        bool operator()(ActionState const& lhs, ActionState const& rhs) const {
-            int lhsNum = 0;
-            int rhsNum = 0;
-            for (unsigned int i = 0; i < lhs.state.size(); ++i) {
-                lhsNum += lhs.state[i];
-                rhsNum += rhs.state[i];
-            }
+      // This is used to sort action states by the number of true fluents and the
+      // position of the true fluents to ensure deterministic behaviour
+      struct ActionStateSort {
+          bool operator()(ActionState const& lhs, ActionState const& rhs) const {
+              int lhsNum = 0;
+              int rhsNum = 0;
+              for (unsigned int i = 0; i < lhs.state.size(); ++i) {
+                  lhsNum += lhs.state[i];
+                  rhsNum += rhs.state[i];
+              }
 
-            if (lhsNum < rhsNum) {
-                return true;
-            } else if (rhsNum < lhsNum) {
-                return false;
-            }
+              if (lhsNum < rhsNum) {
+                  return true;
+              } else if (rhsNum < lhsNum) {
+                  return false;
+              }
 
-            return lhs.state < rhs.state;
-        }
-    };
+              return lhs.state < rhs.state;
+          }
+      };
 
-    int& operator[](int const& index) {
-        return state[index];
-    }
+      int& operator[](int const& index) {
+          return state[index];
+      }
 
-    const int& operator[](int const& index) const {
-        return state[index];
-    }
+      const int& operator[](int const& index) const {
+          return state[index];
+      }
 
-    bool operator<(ActionState const& other) const {
-        if (state.size() < other.state.size()) {
-            return true;
-        } else if(state.size() > other.state.size()) {
-            return false;
-        }
+      bool operator<(ActionState const& other) const {
+          if (state.size() < other.state.size()) {
+              return true;
+          } else if(state.size() > other.state.size()) {
+              return false;
+          }
 
-        for(unsigned int i = 0; i < state.size(); ++i) {
-            if(state[i] < other.state[i]) {
-                return true;
-            } else if(state[i] > other.state[i]) {
-                return false;
-            }
-        }
+          for(unsigned int i = 0; i < state.size(); ++i) {
+              if(state[i] < other.state[i]) {
+                  return true;
+              } else if(state[i] > other.state[i]) {
+                  return false;
+              }
+          }
 
-        return false;
-    }
+          return false;
+      }
 
-    void print(std::ostream& out) const;
+      void print(std::ostream& out) const;
 
-    std::string getName() const;
+      std::string getName() const;
 
-    std::vector<int> state;
-    std::vector<ActionFluent*> scheduledActionFluents;
-    std::vector<ActionPrecondition*> relevantSACs;
-    int index;
-};
+      std::vector<int> state;
+      std::vector<ActionFluent*> scheduledActionFluents;
+      std::vector<ActionPrecondition*> relevantSACs;
+      int index;
+  };
+
+} /* rddl */
 
 #endif

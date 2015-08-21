@@ -6,175 +6,178 @@
 #include "logical_expressions.h"
 #include "probability_distribution.h"
 
-class ConditionalProbabilityFunction;
+namespace rddl {
 
-struct Evaluatable {
-    Evaluatable(std::string _name, LogicalExpression* _formula) :
-        name(_name),
-        formula(_formula),
-        determinization(NULL),
-        isProb(false),
-        hasArithmeticFunction(false) {}
+  class ConditionalProbabilityFunction;
 
-    // Initialization
-    virtual void initialize();
+  struct Evaluatable {
+      Evaluatable(std::string _name, LogicalExpression* _formula) :
+          name(_name),
+          formula(_formula),
+          determinization(NULL),
+          isProb(false),
+          hasArithmeticFunction(false) {}
 
-    // Simplification
-    virtual void simplify(std::map<ParametrizedVariable*, double>& replace);
+      // Initialization
+      virtual void initialize();
 
-    bool isActionIndependent() const {
-        return dependentActionFluents.empty();
-    }
+      // Simplification
+      virtual void simplify(std::map<ParametrizedVariable*, double>& replace);
 
-    bool const& isProbabilistic() const {
-        return isProb;
-    }
+      bool isActionIndependent() const {
+          return dependentActionFluents.empty();
+      }
 
-    // A unique string that describes this (only used for print)
-    std::string name;
+      bool const& isProbabilistic() const {
+          return isProb;
+      }
 
-    // The formula that is evaluatable
-    LogicalExpression* formula;
+      // A unique string that describes this (only used for print)
+      std::string name;
 
-    // The determinized version of formula (this is NULL for all evaluatables
-    // except probabilistic CPFs)
-    LogicalExpression* determinization;
+      // The formula that is evaluatable
+      LogicalExpression* formula;
 
-    // All evaluatables have a hash index that is used to quckly update the
-    // state fluent hash key of this evaluatable
-    int hashIndex;
+      // The determinized version of formula (this is NULL for all evaluatables
+      // except probabilistic CPFs)
+      LogicalExpression* determinization;
 
-    // The caching type that will be used (initially) for this evaluatable
-    std::string cachingType;
+      // All evaluatables have a hash index that is used to quckly update the
+      // state fluent hash key of this evaluatable
+      int hashIndex;
 
-    // If the caching type is VECTOR, this contains all possible results of
-    // evaluating this (the first of the determinization, and if this is
-    // probabilistic the second of formula)
-    std::vector<double> precomputedResults;
-    std::vector<DiscretePD> precomputedPDResults;
+      // The caching type that will be used (initially) for this evaluatable
+      std::string cachingType;
 
-    // The kleene caching type that will be used (initially) for this
-    // evaluatable and the size of the vector if kleeneCachingType is VECTOR
-    std::string kleeneCachingType;
-    int kleeneCachingVectorSize;
+      // If the caching type is VECTOR, this contains all possible results of
+      // evaluating this (the first of the determinization, and if this is
+      // probabilistic the second of formula)
+      std::vector<double> precomputedResults;
+      std::vector<DiscretePD> precomputedPDResults;
 
-    // Properties of this Evaluatable
-    std::set<StateFluent*> dependentStateFluents;
-    std::set<ActionFluent*> dependentActionFluents;
-    bool isProb;
-    bool hasArithmeticFunction;
+      // The kleene caching type that will be used (initially) for this
+      // evaluatable and the size of the vector if kleeneCachingType is VECTOR
+      std::string kleeneCachingType;
+      int kleeneCachingVectorSize;
 
-    // The actionHashKeyMap contains the hash keys of the actions that influence
-    // this Evaluatable (these are added to the state fluent hash keys of a
-    // state)
-    std::vector<long> actionHashKeyMap;
+      // Properties of this Evaluatable
+      std::set<StateFluent*> dependentStateFluents;
+      std::set<ActionFluent*> dependentActionFluents;
+      bool isProb;
+      bool hasArithmeticFunction;
 
-    // The stateFluentHashKeyMap contains the state fluent hash key (base) of
-    // each of the dependent state fluents
-    std::vector<std::pair<int, long> > stateFluentHashKeyBases;
+      // The actionHashKeyMap contains the hash keys of the actions that influence
+      // this Evaluatable (these are added to the state fluent hash keys of a
+      // state)
+      std::vector<long> actionHashKeyMap;
 
-    // These function are used to calculate the two parts of state fluent hash
-    // keys: the action part (that is stored in the actionHashKeyMap of
-    // Evaluatable), and the state fluent part (that is stored in PlanningTask
-    // and computed within states).
-    void initializeHashKeys(PlanningTask* task);
-    long initializeActionHashKeys(std::vector<ActionState> const& actionStates);
-    bool calculateActionHashKey(std::vector<ActionState> const& actionStates,
-                                ActionState const& action,
-                                long& nextKey);
-    long getActionHashKey(std::vector<ActionState> const& actionStates,
-                          std::vector<ActionFluent*>& scheduledActions);
+      // The stateFluentHashKeyMap contains the state fluent hash key (base) of
+      // each of the dependent state fluents
+      std::vector<std::pair<int, long> > stateFluentHashKeyBases;
 
-    void initializeStateFluentHashKeys(PlanningTask* task, long const& baseKey);
-    void initializeKleeneStateFluentHashKeys(PlanningTask* task,
-                                             long const& baseKey);
-};
+      // These function are used to calculate the two parts of state fluent hash
+      // keys: the action part (that is stored in the actionHashKeyMap of
+      // Evaluatable), and the state fluent part (that is stored in PlanningTask
+      // and computed within states).
+      void initializeHashKeys(PlanningTask* task);
+      long initializeActionHashKeys(std::vector<ActionState> const& actionStates);
+      bool calculateActionHashKey(std::vector<ActionState> const& actionStates,
+                                  ActionState const& action,
+                                  long& nextKey);
+      long getActionHashKey(std::vector<ActionState> const& actionStates,
+                            std::vector<ActionFluent*>& scheduledActions);
 
-struct ActionPrecondition : public Evaluatable {
-    ActionPrecondition(std::string _name, LogicalExpression* _formula) :
-        Evaluatable(_name, _formula) {}
+      void initializeStateFluentHashKeys(PlanningTask* task, long const& baseKey);
+      void initializeKleeneStateFluentHashKeys(PlanningTask* task,
+                                               long const& baseKey);
+  };
 
-    void initialize();
+  struct ActionPrecondition : public Evaluatable {
+      ActionPrecondition(std::string _name, LogicalExpression* _formula) :
+          Evaluatable(_name, _formula) {}
 
-    bool containsArithmeticFunction() const {
-        return hasArithmeticFunction;
-    }
+      void initialize();
 
-    bool containsStateFluent() const {
-        return !dependentStateFluents.empty();
-    }
+      bool containsArithmeticFunction() const {
+          return hasArithmeticFunction;
+      }
 
-    int index;
+      bool containsStateFluent() const {
+          return !dependentStateFluents.empty();
+      }
 
-    std::set<ActionFluent*> positiveActionDependencies;
-    std::set<ActionFluent*> negativeActionDependencies;
-};
+      int index;
 
-struct RewardFunction : public Evaluatable {
-    RewardFunction(LogicalExpression* _formula) :
-        Evaluatable("Reward", _formula) {}
+      std::set<ActionFluent*> positiveActionDependencies;
+      std::set<ActionFluent*> negativeActionDependencies;
+  };
 
-    void initialize();
+  struct RewardFunction : public Evaluatable {
+      RewardFunction(LogicalExpression* _formula) :
+          Evaluatable("Reward", _formula) {}
 
-    double const& getMinVal() const {
-        assert(!domain.empty());
-        return *domain.begin();
-    }
+      void initialize();
 
-    double const& getMaxVal() const {
-        assert(!domain.empty());
-        return *domain.rbegin();
-    }
+      double const& getMinVal() const {
+          assert(!domain.empty());
+          return *domain.begin();
+      }
 
-    std::set<ActionFluent*> positiveActionDependencies;
-    std::set<ActionFluent*> negativeActionDependencies;
+      double const& getMaxVal() const {
+          assert(!domain.empty());
+          return *domain.rbegin();
+      }
 
-    std::set<double> domain;
-};
+      std::set<ActionFluent*> positiveActionDependencies;
+      std::set<ActionFluent*> negativeActionDependencies;
 
-struct ConditionalProbabilityFunction : public Evaluatable {
-    // This is used to sort transition functions by their name to ensure
-    // deterministic behaviour
-    struct TransitionFunctionSort {
-        bool operator()(ConditionalProbabilityFunction* const& lhs,
-                        ConditionalProbabilityFunction* const& rhs) const {
-            if (lhs->isProb == rhs->isProb) {
-                return lhs->name < rhs->name;                
-            }
-            return rhs->isProb;
-        }
-    };
+      std::set<double> domain;
+  };
 
-    ConditionalProbabilityFunction(StateFluent* _head,
-                                   LogicalExpression* _formula) :
-        Evaluatable(_head->fullName, _formula),
-        head(_head),
-        kleeneDomainSize(0) {}
+  struct ConditionalProbabilityFunction : public Evaluatable {
+      // This is used to sort transition functions by their name to ensure
+      // deterministic behaviour
+      struct TransitionFunctionSort {
+          bool operator()(ConditionalProbabilityFunction* const& lhs,
+                          ConditionalProbabilityFunction* const& rhs) const {
+              if (lhs->isProb == rhs->isProb) {
+                  return lhs->name < rhs->name;
+              }
+              return rhs->isProb;
+          }
+      };
 
-    int getDomainSize() const {
-        return domain.size();
-    }
+      ConditionalProbabilityFunction(StateFluent* _head,
+                                     LogicalExpression* _formula) :
+          Evaluatable(_head->fullName, _formula),
+          head(_head),
+          kleeneDomainSize(0) {}
 
-    bool hasFiniteDomain() const {
-        return !domain.empty();
-    }
+      int getDomainSize() const {
+          return domain.size();
+      }
 
-    void setIndex(int _index) {
-        head->index = _index;
-    }
+      bool hasFiniteDomain() const {
+          return !domain.empty();
+      }
 
-    double getInitialValue() const {
-        return head->initialValue;
-    }
+      void setIndex(int _index) {
+          head->index = _index;
+      }
 
-    StateFluent* head;
+      double getInitialValue() const {
+          return head->initialValue;
+      }
 
-    // The values this CPF can take
-    std::set<double> domain;
+      StateFluent* head;
 
-    // Hashing of KleeneStates
-    long kleeneDomainSize;
-};
+      // The values this CPF can take
+      std::set<double> domain;
 
+      // Hashing of KleeneStates
+      long kleeneDomainSize;
+  };
+
+} /* rddl */
 
 #endif

@@ -4,54 +4,58 @@
 #include <vector>
 #include <string>
 
-class PlanningTask;
-class LogicalExpression;
-class ParameterList;
-class Parameter;
+namespace rddl {
 
-class RDDLParser {
-public:
-    RDDLParser();
-    ~RDDLParser() {}
+  class PlanningTask;
+  class LogicalExpression;
+  class ParameterList;
+  class Parameter;
 
-    PlanningTask* parse(std::string& domainFile, std::string& problemFile);
+  class RDDLParser {
+  public:
+      RDDLParser();
+      ~RDDLParser() {}
 
-private:
-    PlanningTask* task;
+      PlanningTask* parse(std::string& domainFile, std::string& problemFile);
 
-    void readFiles(std::string& domainFile, std::string& problemFile);
+  private:
+      PlanningTask* task;
 
-    void parseDomain();
-    void parseNonFluents();
-    void parseInstance();
+      void readFiles(std::string& domainFile, std::string& problemFile);
 
-    void parseType(std::string& desc);
-    void parseObject(std::string& desc);
-    void parseVariableDefinition(std::string& desc);
-    void parseCPFDefinition(std::string& desc);
-    void parseAtomicLogicalExpression(std::string& desc);
-    LogicalExpression* parseRDDLFormula(std::string desc);
-    ParameterList* parseParameterList(std::string& desc);
-    Parameter* parseParameter(std::string& desc);
+      void parseDomain();
+      void parseNonFluents();
+      void parseInstance();
 
-    void getTokenName(std::string& token, std::string& name, int startPos);
-    void splitToken(std::string& desc, std::vector<std::string>& result);
+      void parseType(std::string& desc);
+      void parseObject(std::string& desc);
+      void parseVariableDefinition(std::string& desc);
+      void parseCPFDefinition(std::string& desc);
+      void parseAtomicLogicalExpression(std::string& desc);
+      LogicalExpression* parseRDDLFormula(std::string desc);
+      ParameterList* parseParameterList(std::string& desc);
+      Parameter* parseParameter(std::string& desc);
 
-    std::vector<std::string> tokenizeFormula(std::string& text);
-    bool isNumericConstant(std::string& token);
+      void getTokenName(std::string& token, std::string& name, int startPos);
+      void splitToken(std::string& desc, std::vector<std::string>& result);
 
-    // Task description as string
-    std::string domainDesc;
-    std::string nonFluentsDesc;
-    std::string instanceDesc;
+      std::vector<std::string> tokenizeFormula(std::string& text);
+      bool isNumericConstant(std::string& token);
 
-    // Names
-    std::string domainName;
-    std::string nonFluentsName;
-    std::string instanceName;
+      // Task description as string
+      std::string domainDesc;
+      std::string nonFluentsDesc;
+      std::string instanceDesc;
 
-    // tests which access private members
-    friend class SimplifyTest;
-};
+      // Names
+      std::string domainName;
+      std::string nonFluentsName;
+      std::string instanceName;
+
+      // tests which access private members
+      friend class SimplifyTest;
+  };
+
+} /* rddl_parser */
 
 #endif

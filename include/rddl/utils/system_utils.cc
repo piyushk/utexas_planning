@@ -16,6 +16,7 @@
 #include "stdio.h"
 #include "string.h"
 
+using namespace rddl;
 
 clock_t SystemUtils::start = 0;
 clock_t SystemUtils::lastCPU = 0;

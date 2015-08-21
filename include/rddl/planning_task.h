@@ -5,110 +5,114 @@
 
 #include "states.h"
 
-class Type;
-class Parameter;
-class Object;
-class ParametrizedVariable;
-class LogicalExpression;
-class NonFluent;
-class StateFluent;
-class RewardFunction;
+namespace rddl {
 
-struct PlanningTask {
-    PlanningTask();
+  class Type;
+  class Parameter;
+  class Object;
+  class ParametrizedVariable;
+  class LogicalExpression;
+  class NonFluent;
+  class StateFluent;
+  class RewardFunction;
 
-    void print(std::ostream& out);
+  struct PlanningTask {
+      PlanningTask();
 
-    void addType(std::string const& name, std::string const& superType = "");
-    void addObject(std::string const& typeName, std::string const& objectName);
+      void print(std::ostream& out);
 
-    void addVariableDefinition(ParametrizedVariable* varDef);
+      void addType(std::string const& name, std::string const& superType = "");
+      void addObject(std::string const& typeName, std::string const& objectName);
 
-    void addParametrizedVariable(ParametrizedVariable* parent,
-            std::vector<Parameter*> const& params);
-    void addParametrizedVariable(ParametrizedVariable* parent,
-            std::vector<Parameter*> const& params,
-            double initialValue);
+      void addVariableDefinition(ParametrizedVariable* varDef);
 
-    StateFluent* getStateFluent(std::string const& name);
-    ActionFluent* getActionFluent(std::string const& name);
-    NonFluent* getNonFluent(std::string const& name);
+      void addParametrizedVariable(ParametrizedVariable* parent,
+              std::vector<Parameter*> const& params);
+      void addParametrizedVariable(ParametrizedVariable* parent,
+              std::vector<Parameter*> const& params,
+              double initialValue);
 
-    std::vector<StateFluent*> getStateFluentsOfSchema(ParametrizedVariable* schema);
+      StateFluent* getStateFluent(std::string const& name);
+      ActionFluent* getActionFluent(std::string const& name);
+      NonFluent* getNonFluent(std::string const& name);
 
-    void setRewardCPF(LogicalExpression* const& rewardFormula);
+      std::vector<StateFluent*> getStateFluentsOfSchema(ParametrizedVariable* schema);
 
-    // This instance's name
-    std::string name;
+      void setRewardCPF(LogicalExpression* const& rewardFormula);
 
-    // (Trivial) properties
-    int numberOfConcurrentActions;
-    int horizon;
-    double discountFactor;
+      // This instance's name
+      std::string name;
 
-    // Object types
-    std::map<std::string, Type*> types;
-    std::map<std::string, Object*> objects;
+      // (Trivial) properties
+      int numberOfConcurrentActions;
+      int horizon;
+      double discountFactor;
 
-    // Schematic variables and CPFs
-    std::map<std::string, ParametrizedVariable*> variableDefinitions;
-    std::map<ParametrizedVariable*, LogicalExpression*> CPFDefinitions;
+      // Object types
+      std::map<std::string, Type*> types;
+      std::map<std::string, Object*> objects;
 
-    // Instantiated variables (Careful with state fluents, they are only used to
-    // check for ambiguity. After having read all state fluents, only
-    // stateFluentCPFs and their heads are used!)
-    std::vector<StateFluent*> stateFluents;
-    std::map<std::string, StateFluent*> stateFluentMap;
-    std::map<ParametrizedVariable*, std::vector<StateFluent*> > stateFluentsBySchema;
+      // Schematic variables and CPFs
+      std::map<std::string, ParametrizedVariable*> variableDefinitions;
+      std::map<ParametrizedVariable*, LogicalExpression*> CPFDefinitions;
 
-    std::vector<ActionFluent*> actionFluents;
-    std::map<std::string, ActionFluent*> actionFluentMap;
+      // Instantiated variables (Careful with state fluents, they are only used to
+      // check for ambiguity. After having read all state fluents, only
+      // stateFluentCPFs and their heads are used!)
+      std::vector<StateFluent*> stateFluents;
+      std::map<std::string, StateFluent*> stateFluentMap;
+      std::map<ParametrizedVariable*, std::vector<StateFluent*> > stateFluentsBySchema;
 
-    std::vector<NonFluent*> nonFluents;
-    std::map<std::string, NonFluent*> nonFluentMap;
+      std::vector<ActionFluent*> actionFluents;
+      std::map<std::string, ActionFluent*> actionFluentMap;
 
-    // State action constraints
-    std::vector<LogicalExpression*> SACs;
-    std::vector<ActionPrecondition*> actionPreconds;
-    std::vector<ActionPrecondition*> staticSACs;
-    std::set<ActionFluent*> primitiveStaticSACs;
+      std::vector<NonFluent*> nonFluents;
+      std::map<std::string, NonFluent*> nonFluentMap;
 
-    // Instantiated CPFs
-    std::vector<ConditionalProbabilityFunction*> CPFs;
-    RewardFunction* rewardCPF;
+      // State action constraints
+      std::vector<LogicalExpression*> SACs;
+      std::vector<ActionPrecondition*> actionPreconds;
+      std::vector<ActionPrecondition*> staticSACs;
+      std::set<ActionFluent*> primitiveStaticSACs;
 
-    // Legal action states
-    std::vector<ActionState> actionStates;
+      // Instantiated CPFs
+      std::vector<ConditionalProbabilityFunction*> CPFs;
+      RewardFunction* rewardCPF;
 
-    // (Non-trivial) properties
-    bool rewardFormulaAllowsRewardLockDetection;
-    bool rewardLockDetected;
-    std::string finalRewardCalculationMethod;
-    std::vector<int> candidatesForOptimalFinalAction;
-    bool unreasonableActionDetected;
-    bool unreasonableActionInDeterminizationDetected;
+      // Legal action states
+      std::vector<ActionState> actionStates;
 
-    // These give the number of (unique) states that were encountered during
-    // task analysis. Roughly, the closer these are to each other, the less
-    // stochasticity is in the domain.
-    int numberOfEncounteredStates;
-    int numberOfUniqueEncounteredStates;
+      // (Non-trivial) properties
+      bool rewardFormulaAllowsRewardLockDetection;
+      bool rewardLockDetected;
+      std::string finalRewardCalculationMethod;
+      std::vector<int> candidatesForOptimalFinalAction;
+      bool unreasonableActionDetected;
+      bool unreasonableActionInDeterminizationDetected;
 
-    // This is the number of states that was encountered during task analysis.
-    // Among other things, it is an indicator for how often the planner can
-    // submit the single applicable (reasonable) action and hence save the time.
-    int nonTerminalStatesWithUniqueAction;
-    int uniqueNonTerminalStatesWithUniqueAction;
+      // These give the number of (unique) states that were encountered during
+      // task analysis. Roughly, the closer these are to each other, the less
+      // stochasticity is in the domain.
+      int numberOfEncounteredStates;
+      int numberOfUniqueEncounteredStates;
 
-    // Hash Keys
-    std::vector<std::vector<long> > stateHashKeys;
-    std::vector<long> kleeneStateHashKeyBases;
+      // This is the number of states that was encountered during task analysis.
+      // Among other things, it is an indicator for how often the planner can
+      // submit the single applicable (reasonable) action and hence save the time.
+      int nonTerminalStatesWithUniqueAction;
+      int uniqueNonTerminalStatesWithUniqueAction;
 
-    std::vector<std::vector<std::pair<int, long> > > indexToStateFluentHashKeyMap;
-    std::vector<std::vector<std::pair<int, long> > > indexToKleeneStateFluentHashKeyMap;
+      // Hash Keys
+      std::vector<std::vector<long> > stateHashKeys;
+      std::vector<long> kleeneStateHashKeyBases;
 
-    // Random training set of reachable states
-    std::set<State, State::StateSort> trainingSet;
-};
+      std::vector<std::vector<std::pair<int, long> > > indexToStateFluentHashKeyMap;
+      std::vector<std::vector<std::pair<int, long> > > indexToKleeneStateFluentHashKeyMap;
+
+      // Random training set of reachable states
+      std::set<State, State::StateSort> trainingSet;
+  };
+
+}
 
 #endif

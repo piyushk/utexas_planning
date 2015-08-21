@@ -10,6 +10,7 @@
 #include <cstdlib>
 
 using namespace std;
+using namespace rddl;
 
 /*****************************************************************
                          Constructor
@@ -386,7 +387,7 @@ void RDDLParser::parseVariableDefinition(string& desc) {
         new ParametrizedVariable(name, params, varType, valueType, defaultVal);
 
     task->addVariableDefinition(var);
-        
+
 }
 
 void RDDLParser::parseCPFDefinition(string& desc) {

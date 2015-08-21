@@ -12,6 +12,7 @@
 #include "utils/timer.h"
 
 using namespace std;
+using namespace rddl;
 
 void printUsage() {
     cout << "Usage: ./rddl-parser <rddlDomain> <rddlProblem> <targetDir>" <<

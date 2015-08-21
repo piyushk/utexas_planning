@@ -5,18 +5,22 @@
 
 #include <iosfwd>
 
-class Timer {
-public:
-    Timer();
-    ~Timer() {}
-    void reset();
-    double operator()() const;
-    double getCurrentTime() const;
+namespace rddl {
 
-private:
-    double currentTime;
-};
+  class Timer {
+  public:
+      Timer();
+      ~Timer() {}
+      void reset();
+      double operator()() const;
+      double getCurrentTime() const;
 
-std::ostream& operator<<(std::ostream& os, const Timer& timer);
+  private:
+      double currentTime;
+  };
+
+} /* rddl */
+
+std::ostream& operator<<(std::ostream& os, const rddl::Timer& timer);
 
 #endif

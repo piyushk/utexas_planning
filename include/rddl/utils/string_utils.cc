@@ -4,6 +4,8 @@
 #include <sstream>
 #include <algorithm>
 
+using namespace rddl;
+
 void StringUtils::replaceAll(std::string& s, char const& searchFor,
         char const& replaceBy) {
     std::replace(s.begin(), s.end(), searchFor, replaceBy);

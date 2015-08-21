@@ -9,6 +9,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace rddl;
 
 PlanningTask::PlanningTask() :
     numberOfConcurrentActions(numeric_limits<int>::max()),

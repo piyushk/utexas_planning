@@ -14,6 +14,7 @@
 #include "utils/timer.h"
 
 using namespace std;
+using namespace rddl;
 
 void Preprocessor::preprocess(bool const& output) {
     Timer t;
@@ -85,7 +86,8 @@ void Preprocessor::prepareEvaluatables() {
     bool simplifyAgain = true;
     while (simplifyAgain) {
         simplifyAgain = false;
-        for (ConditionalProbabilityFunction*& cpf : task->CPFs) {
+        for (unsigned int i = 0; i < task->CPFs.size(); ++i) {
+            ConditionalProbabilityFunction*& cpf = task->CPFs[i];
             cpf->simplify(replacements);
             NumericConstant* nc = dynamic_cast<NumericConstant*>(cpf->formula);
             if (nc &&
@@ -307,7 +309,8 @@ void Preprocessor::prepareActions() {
     State current(task->CPFs);
     vector<ActionState> legalActionStates;
 
-    for (ActionState const& actionState: allActionStates) {
+   for (unsigned int i = 0; i < allActionStates.size(); ++i) {
+        const ActionState& actionState = allActionStates[i];
         bool isLegal = true;
         for (unsigned int i = 0; i < task->staticSACs.size(); ++i) {
             double res = 0.0;

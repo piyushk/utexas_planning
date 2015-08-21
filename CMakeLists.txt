@@ -53,6 +53,19 @@ target_link_libraries(utexas_planning_planners ${CLASS_LOADER_LIBRARY})
 add_library(utexas_planning_models SHARED
   src/models/grid_model.cpp
   src/models/grid_model_3d.cpp
+  include/rddl/evaluatables.cc
+  include/rddl/instantiator.cc
+  include/rddl/logical_expressions.cc
+  include/rddl/planning_task.cc
+  include/rddl/preprocessor.cc
+  include/rddl/probability_distribution.cc
+  include/rddl/rddl_parser.cc
+  include/rddl/states.cc
+  include/rddl/task_analyzer.cc
+  include/rddl/utils/math_utils.cc
+  include/rddl/utils/string_utils.cc
+  include/rddl/utils/system_utils.cc
+  include/rddl/utils/timer.cc
 )
 target_link_libraries(utexas_planning_models utexas_planning_core)
 target_link_libraries(utexas_planning_models ${CLASS_LOADER_LIBRARY})

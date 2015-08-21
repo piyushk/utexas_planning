@@ -6,6 +6,7 @@
 #include "utils/timer.h"
 
 using namespace std;
+using namespace rddl;
 
 void Instantiator::instantiate(bool const& output) {
     Timer t;

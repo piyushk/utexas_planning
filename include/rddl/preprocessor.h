@@ -6,60 +6,64 @@
 #include <string>
 #include <vector>
 
-class PlanningTask;
-class Evaluatable;
-class ActionPrecondition;
-class ActionState;
-class State;
-class StateFluent;
+namespace rddl {
 
-class Preprocessor {
-public:
-    Preprocessor(PlanningTask* _task) :
-        task(_task) {}
+  class PlanningTask;
+  class Evaluatable;
+  class ActionPrecondition;
+  class ActionState;
+  class State;
+  class StateFluent;
 
-    void preprocess(bool const& output = true);
+  class Preprocessor {
+  public:
+      Preprocessor(PlanningTask* _task) :
+          task(_task) {}
 
-private:
-    PlanningTask* task;
+      void preprocess(bool const& output = true);
 
-    void prepareEvaluatables();
-    void prepareActions();
-    void removeInapplicableActionFluents(bool const& updateActionStates);
-    void initializeActionStates();
+  private:
+      PlanningTask* task;
 
-    void calcAllActionStates(std::vector<ActionState>& result,
-                             int minElement = 0,
-                             int scheduledActions = 0) const;
+      void prepareEvaluatables();
+      void prepareActions();
+      void removeInapplicableActionFluents(bool const& updateActionStates);
+      void initializeActionStates();
 
-    bool sacContainsNegativeActionFluent(ActionPrecondition* const& sac,
-            ActionState const& actionState) const;
-    bool sacContainsAdditionalPositiveActionFluent(
-            ActionPrecondition* const& sac,
-            ActionState const& actionState) const;
+      void calcAllActionStates(std::vector<ActionState>& result,
+                               int minElement = 0,
+                               int scheduledActions = 0) const;
 
-    void calculateCPFDomains();
-    void finalizeEvaluatables();
-    void determinize();
+      bool sacContainsNegativeActionFluent(ActionPrecondition* const& sac,
+              ActionState const& actionState) const;
+      bool sacContainsAdditionalPositiveActionFluent(
+              ActionPrecondition* const& sac,
+              ActionState const& actionState) const;
 
-    void determineTaskProperties();
-    bool actionStateIsDominated(int stateIndex) const;
-    bool actionStateDominates(ActionState const& lhs,
-            ActionState const& rhs) const;
-    void addDominantState(int stateIndex) const;
+      void calculateCPFDomains();
+      void finalizeEvaluatables();
+      void determinize();
 
-    void prepareStateHashKeys();
-    void prepareKleeneStateHashKeys();
-    void prepareStateFluentHashKeys();
+      void determineTaskProperties();
+      bool actionStateIsDominated(int stateIndex) const;
+      bool actionStateDominates(ActionState const& lhs,
+              ActionState const& rhs) const;
+      void addDominantState(int stateIndex) const;
 
-    void precomputeEvaluatables();
-    void precomputeEvaluatable(Evaluatable* eval);
-    void createRelevantStates(std::vector<StateFluent*>& dependentStateFluents,
-            std::vector<State>& result);
-    long calculateStateFluentHashKey(Evaluatable* eval,
-            State const& state) const;
+      void prepareStateHashKeys();
+      void prepareKleeneStateHashKeys();
+      void prepareStateFluentHashKeys();
 
-    void calculateMinAndMaxReward() const;
-};
+      void precomputeEvaluatables();
+      void precomputeEvaluatable(Evaluatable* eval);
+      void createRelevantStates(std::vector<StateFluent*>& dependentStateFluents,
+              std::vector<State>& result);
+      long calculateStateFluentHashKey(Evaluatable* eval,
+              State const& state) const;
+
+      void calculateMinAndMaxReward() const;
+  };
+
+} /* rddl */
 
 #endif

@@ -1,6 +1,7 @@
 #include "probability_distribution.h"
 
 using namespace std;
+using namespace rddl;
 
 bool DiscretePD::isWellDefined() const {
     // Only use this funciton in assertions, it's quite inefficient!
