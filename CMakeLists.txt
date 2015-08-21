@@ -66,6 +66,7 @@ add_library(utexas_planning_models SHARED
   include/rddl/utils/string_utils.cc
   include/rddl/utils/system_utils.cc
   include/rddl/utils/timer.cc
+  include/rddl/rddl_model.cpp
 )
 target_link_libraries(utexas_planning_models utexas_planning_core)
 target_link_libraries(utexas_planning_models ${CLASS_LOADER_LIBRARY})

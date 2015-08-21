@@ -8,6 +8,12 @@
 
 #include "rddl_model.h"
 
+#include "evaluatables.h"
+#include "rddl_parser.h"
+#include "instantiator.h"
+#include "preprocessor.h"
+#include "utils/math_utils.h"
+
 namespace utexas_planning {
 
   bool RddlAction::operator<(const Action& other_base) const {
@@ -23,7 +29,7 @@ namespace utexas_planning {
     try {
       const RddlAction& other = dynamic_cast<const RddlAction&>(other_base);
       return ((!(*state < *(other.state))) &&
-              (!(*(other.state) < state)));
+              (!(*(other.state) < *state)));
     } catch(const std::bad_cast& exp) {
       throw DowncastException("Action", "RddlAction");
     }
@@ -42,8 +48,9 @@ namespace utexas_planning {
   bool RddlState::operator<(const State& other_base) const {
     try {
       const RddlState& other = dynamic_cast<const RddlState&>(other_base);
-      if (state < *(other.state)) return true;
-      if (*(other.state) < state) return false;
+      rddl::State::StateSort sorter;
+      if (sorter(*state,*(other.state))) return true;
+      if (sorter(*(other.state),*state)) return false;
 
       if (remaining_steps < other.remaining_steps) return true;
       if (other.remaining_steps < remaining_steps) return false;
@@ -60,14 +67,14 @@ namespace utexas_planning {
 
   State::Ptr RddlState::cloneImpl() const {
     boost::shared_ptr<RddlState> clone(new RddlState);
-    clone.state.reset(new rddl::State(*state));
+    clone->state.reset(new rddl::State(*state));
     return clone;
   }
 
   std::map<std::string, std::string> RddlState::asMap() const {
     std::map<std::string, std::string> state_map;
     for (int i = 0; i < state->state.size(); ++i) {
-      state_map["s" + boost::lexical_cast<std::string>(i)] = boost::lexical_cast<std::string(state->state[i]);
+      state_map["s" + boost::lexical_cast<std::string>(i)] = boost::lexical_cast<std::string>(state->state[i]);
     }
     return state_map;
   }
@@ -103,8 +110,8 @@ namespace utexas_planning {
       boost::filesystem::path full_domain_path = dir_path / domain_file;
       boost::filesystem::path full_problem_path = dir_path / problem_file;
       if (boost::filesystem::exists(full_domain_path) && boost::filesystem::exists(full_problem_path)) {
-        params_.rddl_domain = full_domain_path;
-        params_.rddl_problem = full_problem_path;
+        params_.rddl_domain = full_domain_path.string();
+        params_.rddl_problem = full_problem_path.string();
         rddl_files_found = false;
       }
     }
@@ -113,7 +120,7 @@ namespace utexas_planning {
       throw IncorrectUsageException("Unable to located RDDL description files for " + params_.rddl_domain +
                                     " and " + params_.rddl_problem + ". Searched directories specified in " +
                                     "environment variable RDDL_DOMAIN_DIRECTORIES [" +
-                                    boost::algorihm::join(directories, ", ") + "].");
+                                    boost::algorithm::join(directories, ", ") + "].");
     }
 
     std::cout << "RDDL Domain File: " << params_.rddl_domain << std::endl;
@@ -133,7 +140,9 @@ namespace utexas_planning {
     default_action_list_.resize(task_->actionStates.size());
     for (int idx = 0; idx < task_->actionStates.size(); ++idx) {
       rddl::ActionState& action_state = task_->actionStates[idx];
-      default_action_list_[idx].reset(new rddl::ActionState(action_state));
+      boost::shared_ptr<RddlAction> action(new RddlAction);
+      action->state.reset(new rddl::ActionState(action_state));
+      default_action_list_[idx] = action;
     }
 
   }
@@ -146,17 +155,24 @@ namespace utexas_planning {
     return state->remaining_steps == 0;
   }
 
-  void RddlModel::getActionsAtState(const State::ConstPtr& state,
+  void RddlModel::getActionsAtState(const State::ConstPtr& state_base,
                                     std::vector<Action::ConstPtr>& actions) const {
+
+    boost::shared_ptr<const RddlState> state = boost::dynamic_pointer_cast<const RddlState>(state_base);
+    if (!state) {
+      throw DowncastException("State", "RddlState");
+    }
 
     actions.resize(default_action_list_.size());
     int valid_actions_counter = 0;
 
     for (int idx = 0; idx < task_->actionStates.size(); ++idx) {
-      const ActionState& action = default_action_list_[idx]->action_state;
+      boost::shared_ptr<const RddlAction> default_action =
+        boost::dynamic_pointer_cast<const RddlAction>(default_action_list_[idx]);
+      const rddl::ActionState& action = *(default_action->state);
       for (unsigned int precond_idx = 0; precond_idx < action.relevantSACs.size(); ++precond_idx) {
         double res = 0.0;
-        action.relevantSACs[precond_idx]->formula->evaluate(res, state, action);
+        action.relevantSACs[precond_idx]->formula->evaluate(res, *(state->state), action);
         if (!(rddl::MathUtils::doubleIsEqual(res, 0.0))) {
           actions[valid_actions_counter] = default_action_list_[idx];
           ++valid_actions_counter;
@@ -193,16 +209,16 @@ namespace utexas_planning {
       throw IncorrectUsageException("RddlModel: takeAction called on a terminal state, which is not allowed");
     }
 
-    RddlState::Ptr next_state_mutable(new RddlState);
+    boost::shared_ptr<RddlState> next_state_mutable(new RddlState);
     next_state_mutable->state.reset(new rddl::State(task_->CPFs.size()));
     for(unsigned int i = 0; i < task_->CPFs.size(); ++i) {
-      task_->CPFs[i]->formula->evaluate((*(next_state_mutable->state))[i], current, action->state);
+      task_->CPFs[i]->formula->evaluate((*(next_state_mutable->state))[i], *(state->state), *(action->state));
     }
     next_state_mutable->remaining_steps = state->remaining_steps - 1;
     next_state = next_state_mutable; // copy over to const container.
 
     double reward_as_double;
-    task_->rewardCPF->formula->evaluate(reward_as_double, current, action->state);
+    task_->rewardCPF->formula->evaluate(reward_as_double, *(state->state), *(action->state));
     reward = reward_as_double; // implicit conversion to float.
 
     post_action_timeout = params_.per_step_planning_time;

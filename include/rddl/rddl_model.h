@@ -10,6 +10,8 @@
 #include <utexas_planning/core/declarative_model.h>
 
 #include "states.h"
+#include "planning_task.h"
+
 namespace utexas_planning {
 
   class RddlAction : public Action {
@@ -36,6 +38,7 @@ namespace utexas_planning {
   class RddlState : public State {
     public:
       boost::shared_ptr<rddl::State> state;
+      int remaining_steps;
 
       bool operator<(const State& other_base) const;
       void serialize(std::ostream& stream) const;
@@ -101,6 +104,8 @@ namespace utexas_planning {
       std::vector<Action::ConstPtr> default_action_list_;
 
       Params params_;
+      rddl::PlanningTask* task_;
+      boost::shared_ptr<RddlState> start_state_;
 
   };
 
