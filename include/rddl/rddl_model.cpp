@@ -63,11 +63,25 @@ namespace utexas_planning {
 
   void RddlState::serialize(std::ostream& stream) const {
     state->print(stream);
+    for (int i = 0; i < state->state.size(); ++i) {
+      const double& state_member = state->state[i];
+      if (rddl::MathUtils::doubleIsEqual(state_member, 1.0)) {
+        stream << task->CPFs[i]->name;
+      } else if (rddl::MathUtils::doubleIsEqual(state_member, 0.0)) {
+        stream << "~" << task->CPFs[i]->name;
+      } else {
+        stream << task->CPFs[i]->name << "=" << state_member;
+      }
+      stream << " ";
+    }
+    stream << "(Remaining steps: " << remaining_steps << ")";
   }
 
   State::Ptr RddlState::cloneImpl() const {
     boost::shared_ptr<RddlState> clone(new RddlState);
     clone->state.reset(new rddl::State(*state));
+    clone->remaining_steps = remaining_steps;
+    clone->task = task;
     return clone;
   }
 
@@ -112,7 +126,7 @@ namespace utexas_planning {
       if (boost::filesystem::exists(full_domain_path) && boost::filesystem::exists(full_problem_path)) {
         params_.rddl_domain = full_domain_path.string();
         params_.rddl_problem = full_problem_path.string();
-        rddl_files_found = false;
+        rddl_files_found = true;
       }
     }
 
@@ -136,6 +150,7 @@ namespace utexas_planning {
     start_state_.reset(new RddlState);
     start_state_->state.reset(new rddl::State(task_->CPFs));
     start_state_->remaining_steps = task_->horizon;
+    start_state_->task = task_;
 
     default_action_list_.resize(task_->actionStates.size());
     for (int idx = 0; idx < task_->actionStates.size(); ++idx) {
@@ -144,6 +159,10 @@ namespace utexas_planning {
       action->state.reset(new rddl::ActionState(action_state));
       default_action_list_[idx] = action;
     }
+
+    // std::cout << default_action_list_.size() << std::endl;
+    // std::cout << task_->stateFluents.size() << std::endl;
+    // std::cout << task_->CPFs.size() << std::endl;
 
   }
 
@@ -170,13 +189,18 @@ namespace utexas_planning {
       boost::shared_ptr<const RddlAction> default_action =
         boost::dynamic_pointer_cast<const RddlAction>(default_action_list_[idx]);
       const rddl::ActionState& action = *(default_action->state);
+      bool action_valid = true;
       for (unsigned int precond_idx = 0; precond_idx < action.relevantSACs.size(); ++precond_idx) {
         double res = 0.0;
         action.relevantSACs[precond_idx]->formula->evaluate(res, *(state->state), action);
-        if (!(rddl::MathUtils::doubleIsEqual(res, 0.0))) {
-          actions[valid_actions_counter] = default_action_list_[idx];
-          ++valid_actions_counter;
+        if (rddl::MathUtils::doubleIsEqual(res, 0.0)) {
+          action_valid = false;
+          break;
         }
+      }
+      if (action_valid) {
+        actions[valid_actions_counter] = default_action_list_[idx];
+        ++valid_actions_counter;
       }
     }
 
@@ -215,6 +239,7 @@ namespace utexas_planning {
       task_->CPFs[i]->formula->evaluate((*(next_state_mutable->state))[i], *(state->state), *(action->state));
     }
     next_state_mutable->remaining_steps = state->remaining_steps - 1;
+    next_state_mutable->task = task_;
     next_state = next_state_mutable; // copy over to const container.
 
     double reward_as_double;
