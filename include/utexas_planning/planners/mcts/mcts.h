@@ -67,6 +67,7 @@ namespace utexas_planning {
       _(float,unknown_action_value,unknown_action_value,-1e10f) \
       _(std::string,action_selection_strategy,action_selection_strategy,UCT) \
       _(float,uct_reward_bound,uct_reward_bound,10000) \
+      _(int,thompson_initial_random_trials,thompson_initial_random_trials,5) \
       _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
       _(float,eligibility_lambda,eligibility_lambda,0.0) \
 

@@ -1,0 +1,13 @@
+models:
+  - name: utexas_planning::GridModel
+    start_x: 2
+    start_y: 4
+planners:
+  - name: utexas_planning::MCTS
+    max_playouts: 1000
+    max_depth: 25
+    action_selection_strategy: thompson
+    #uct_reward_bound: 100
+    thompson_initial_random_trials: 10
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0

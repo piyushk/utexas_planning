@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 project(utexas_planning)
 
 find_package(Boost REQUIRED COMPONENTS filesystem program_options serialization system)
-## find_package(class_loader REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp>=0.5)
@@ -21,7 +20,7 @@ include_directories(${YAML_CPP_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CLASS_LOADER_INCLUDE_DIRS})
 
-#add_definitions(-DMCTS_DEBUG)
+## add_definitions(-DMCTS_DEBUG)
 
 add_library(utexas_planning_common SHARED
   src/common/farmhash.cc

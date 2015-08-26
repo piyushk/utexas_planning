@@ -57,9 +57,18 @@ namespace utexas_planning {
         std::cout << "    Reached state " << *next_state << " with reward: " << reward << std::endl;
       }
       cumulative_reward += reward;
-      planner->performPostActionProcessing(state, action, post_action_timeout);
-      state = next_state;
+
       ++action_count;
+      current_time = boost::posix_time::microsec_clock::local_time();
+
+      // Only perform search for next state, if
+      if (((max_trial_time != NO_TIMEOUT) && (current_time >= end_time)) ||
+          ((max_trial_depth != NO_MAX_DEPTH) && (action_count >= max_trial_depth))) {
+        break;
+      }
+      planner->performPostActionProcessing(state, action, post_action_timeout);
+
+      state = next_state;
       current_time = boost::posix_time::microsec_clock::local_time();
     }
 

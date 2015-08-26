@@ -266,9 +266,13 @@ namespace utexas_planning {
               planning_bound = action_info_pair.second->mean_value +
                 params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
             } else {
-              planning_bound = rng_->normalFloat(action_info_pair.second->mean_value,
-                                                 sqrtf(action_info_pair.second->variance));
-
+              // TODO: This is a hack to prevent underexploration because of the normal distribution.
+              if (action_info_pair.second->visits >= params_.thompson_initial_random_trials) {
+                planning_bound = rng_->normalFloat(action_info_pair.second->mean_value,
+                                                   sqrtf(action_info_pair.second->variance));
+              } else {
+                planning_bound = 1e9f; // Always choose unexplored actions first.
+              }
             }
           }
           /* std::cout << planning_bound << " " << max_value << " " << best_actions.size() << std::endl; */
@@ -295,8 +299,8 @@ namespace utexas_planning {
     StateNode::Ptr& state_info = step.state;
     ++(state_info->state_visits);
     StateActionNode::Ptr& action_info = state_info->actions[step.action];
-    MCTS_DEBUG_OUTPUT("  Original value and visits for this state-action: " << action_info->mean_value <<
-                      " (" << action_info->visits << ")");
+    MCTS_DEBUG_OUTPUT("  Original value, variance and visits for this state-action: " << action_info->mean_value <<
+                      "+-" << action_info->variance << " (" << action_info->visits << ")");
     ++(action_info->visits);
     action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
     action_info->sum_squares += backup_value * backup_value;
@@ -304,7 +308,8 @@ namespace utexas_planning {
       ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
 
     if (params_.backup_strategy == ELIGIBILITY_TRACE) {
-      MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << " (" << action_info->visits << ")");
+      MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<
+                        action_info->visits << ")");
       // Prepare backup using eligiblity trace methodology.
       float max_value = maxValueForState(state_info);
       backup_value = params_.eligibility_lambda * backup_value + (1.0 - params_.eligibility_lambda) * max_value;
