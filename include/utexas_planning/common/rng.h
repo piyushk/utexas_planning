@@ -43,6 +43,12 @@ class RNG : public boost::mt19937 {
       return gen();
     }
 
+    inline float normalFloat(float mean, float variance) {
+      boost::normal_distribution<float> dist(mean, variance);
+      boost::variate_generator<boost::mt19937&, boost::normal_distribution<float> > gen(*this, dist);
+      return gen();
+    }
+
     inline void randomOrdering(std::vector<unsigned int>& inds) {
       unsigned int j;
       unsigned int temp;

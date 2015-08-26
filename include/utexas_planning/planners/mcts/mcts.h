@@ -33,14 +33,18 @@ namespace utexas_planning {
       typedef boost::shared_ptr<StateActionNode> Ptr;
       typedef boost::shared_ptr<StateActionNode const> ConstPtr;
 
-      StateActionNode(unsigned int visits = 0, float mean_value = 0.0f) : visits(visits), mean_value(mean_value) {}
+      StateActionNode(unsigned int visits = 0, float mean_value = 0.0f) :
+        visits(visits), mean_value(mean_value), variance(0), sum_squares(0) {}
       std::map<State::ConstPtr, StateNode::Ptr, State::PtrComparator> next_states;
       unsigned int visits;
       float mean_value;
+      float variance;
+      float sum_squares;
   };
 
   const int NO_MAX_PLAYOUTS = -1;
   const std::string UCT = "uct";
+  const std::string THOMPSON = "thompson";
   const std::string ELIGIBILITY_TRACE = "eligibility";
 
   class MCTS : public AbstractPlanner {

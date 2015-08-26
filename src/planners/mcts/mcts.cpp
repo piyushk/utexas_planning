@@ -250,7 +250,8 @@ namespace utexas_planning {
 
     std::vector<Action::ConstPtr> best_actions;
 
-    if (params_.action_selection_strategy == UCT) {
+    if (params_.action_selection_strategy == UCT ||
+        params_.action_selection_strategy == THOMPSON) {
       typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
 
       if (state_node->state_visits == 0) {
@@ -261,8 +262,14 @@ namespace utexas_planning {
         BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
           float planning_bound = 1e10f;
           if (action_info_pair.second->visits != 0) {
-            planning_bound = action_info_pair.second->mean_value +
-              params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
+            if (params_.action_selection_strategy == UCT) {
+              planning_bound = action_info_pair.second->mean_value +
+                params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
+            } else {
+              planning_bound = rng_->normalFloat(action_info_pair.second->mean_value,
+                                                 sqrtf(action_info_pair.second->variance));
+
+            }
           }
           /* std::cout << planning_bound << " " << max_value << " " << best_actions.size() << std::endl; */
           if (fabs(planning_bound - max_value) < 1e-10f) {
@@ -285,18 +292,19 @@ namespace utexas_planning {
   void MCTS::updateState(HistoryStep& step, float& backup_value) {
 
     /* Update mean value for this action. */
+    StateNode::Ptr& state_info = step.state;
+    ++(state_info->state_visits);
+    StateActionNode::Ptr& action_info = state_info->actions[step.action];
+    MCTS_DEBUG_OUTPUT("  Original value and visits for this state-action: " << action_info->mean_value <<
+                      " (" << action_info->visits << ")");
+    ++(action_info->visits);
+    action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
+    action_info->sum_squares += backup_value * backup_value;
+    action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits)) -
+      ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
 
     if (params_.backup_strategy == ELIGIBILITY_TRACE) {
-
-      StateNode::Ptr& state_info = step.state;
-      ++(state_info->state_visits);
-      StateActionNode::Ptr& action_info = state_info->actions[step.action];
-      MCTS_DEBUG_OUTPUT("  Original value and visits for this state-action: " << action_info->mean_value <<
-                        " (" << action_info->visits << ")");
-      ++(action_info->visits);
-      action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
       MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << " (" << action_info->visits << ")");
-
       // Prepare backup using eligiblity trace methodology.
       float max_value = maxValueForState(state_info);
       backup_value = params_.eligibility_lambda * backup_value + (1.0 - params_.eligibility_lambda) * max_value;
