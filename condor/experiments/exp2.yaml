@@ -1,0 +1,59 @@
+models:
+  - name: utexas_planning::GridModel3D
+  - name: utexas_planning::GridModel3D
+    num_actions: 18
+  - name: utexas_planning::GridModel3D
+    num_actions: 26
+planners:
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 25
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0

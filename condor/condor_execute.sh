@@ -16,5 +16,6 @@ cp /u/piyushk/utexas_planning/utexas_planning/condor/template.condor $CONDOR_FIL
 echo "Arguments = --data-directory $CURRENT_DIR --experiment-file $1 --seed \$(Process)" >> $CONDOR_FILE
 echo "Queue $2" >> $CONDOR_FILE
 
+mkdir -p logs
 condor_submit $CONDOR_FILE
 rm -f $CONDOR_FILE

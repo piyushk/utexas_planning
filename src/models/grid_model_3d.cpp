@@ -264,7 +264,11 @@ namespace utexas_planning {
         (params_.start_y < 0 || params_.start_y >= params_.grid_size) ||
         (params_.start_z < 0 || params_.start_z >= params_.grid_size)) {
       RNG rng(seed);
-      return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
+      int idx = rng.randomInt(complete_state_vector_.size() - 1);
+      while (isTerminalState(complete_state_vector_[idx])) {
+        idx = rng.randomInt(complete_state_vector_.size() - 1);
+      }
+      return complete_state_vector_[idx];
     }
     int idx =
       params_.start_x * params_.grid_size * params_.grid_size +

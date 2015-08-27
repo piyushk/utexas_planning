@@ -11,7 +11,7 @@
 Executable = /u/piyushk/utexas_planning/utexas_planning/condor/condor_runner.sh
 Requirements = Arch == "X86_64"
 
-Error = /projects/agents1/piyushk/logs/err.$(Process)
-Output = /projects/agents1/piyushk/logs/out.$(Process)
+Error = logs/err.$(Process)
+Output = logs/out.$(Process)
 Log = condor.log
 
