@@ -1,9 +1,9 @@
 models:
   - name: utexas_planning::GridModel3D
   - name: utexas_planning::GridModel3D
-    grid_size: 20
+    grid_size: 15
   - name: utexas_planning::GridModel3D
-    grid_size: 40
+    grid_size: 20
 planners:
   - name: utexas_planning::MCTS
     max_playouts: 10000
