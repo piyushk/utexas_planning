@@ -110,6 +110,7 @@ namespace utexas_planning {
       virtual State::ConstPtr getStartState(long seed) const;
 
       virtual float getInitialTimeout() const;
+      virtual std::map<std::string, std::string> getParamsAsMap() const;
       virtual std::string getName() const;
 
     private:

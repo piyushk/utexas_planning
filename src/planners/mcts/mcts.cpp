@@ -27,7 +27,6 @@ namespace utexas_planning {
     default_planner_.reset(new RandomPlanner);
     default_planner_->init(model, params, output_directory, rng);
 
-    std::cout << "verbosity: " << verbose << std::endl;
     rng_ = rng;
     verbose_ = verbose;
     start_action_available_ = false;
@@ -304,8 +303,10 @@ namespace utexas_planning {
     ++(action_info->visits);
     action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
     action_info->sum_squares += backup_value * backup_value;
-    action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits)) -
-      ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
+    action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
+    action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
+    // Always ensure that variance is positive. Due to floating point arithmetic, sometimes it turns up to be negative.
+    action_info->variance = std::max(action_info->variance, 1e-10f);
 
     if (params_.backup_strategy == ELIGIBILITY_TRACE) {
       MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<

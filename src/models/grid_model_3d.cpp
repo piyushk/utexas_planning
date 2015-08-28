@@ -281,6 +281,10 @@ namespace utexas_planning {
     return params_.initial_planning_time;
   }
 
+  std::map<std::string, std::string> GridModel3D::getParamsAsMap() const {
+    return params_.asMap();
+  }
+
   std::string GridModel3D::getName() const {
     return std::string("Grid3D");
   }
