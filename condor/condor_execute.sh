@@ -17,11 +17,11 @@ cp /u/piyushk/utexas_planning/utexas_planning/condor/template.condor $CONDOR_FIL
 if [ "$#" -eq 2 ]; then
   ARGUMENTS="Arguments = --data-directory $CURRENT_DIR --experiment-file $1 --seed \$(Process)"
 else
-  ARGUMENTS="Arguments = --data-directory $CURRENT_DIR --experiment-file $1 --max-trial-length $3 --seed \$(Process)"
+  ARGUMENTS="Arguments = --data-directory $CURRENT_DIR --experiment-file $1 --max-trial-depth $3 --seed \$(Process)"
 fi
 echo "$ARGUMENTS" >> $CONDOR_FILE
 echo "Queue $2" >> $CONDOR_FILE
 
 mkdir -p logs
-cat $CONDOR_FILE
+condor_submit $CONDOR_FILE
 rm -f $CONDOR_FILE
