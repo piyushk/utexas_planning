@@ -74,6 +74,8 @@ namespace utexas_planning {
       _(int,start_z,start_z,-1) \
       _(int,grid_size,grid_size,10) \
       _(int,num_actions,num_actions,6) \
+      _(bool,goal_in_cardinal_direction,goal_in_cardinal_direction,false) \
+      _(int,goal_distance,goal_distance,-1) \
       _(float,non_determinism,non_determinism,0.1f) \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \

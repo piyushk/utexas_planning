@@ -1,8 +1,14 @@
 models:
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
     num_actions: 18
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
     num_actions: 26
 planners:
   - name: utexas_planning::MCTS

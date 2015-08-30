@@ -259,21 +259,53 @@ namespace utexas_planning {
 
   State::ConstPtr GridModel3D::getStartState(long seed) const {
     RNG rng(seed);
-    return complete_state_vector_[rng.randomInt(complete_state_vector_.size() - 1)];
-    if ((params_.start_x < 0 || params_.start_x >= params_.grid_size) ||
-        (params_.start_y < 0 || params_.start_y >= params_.grid_size) ||
-        (params_.start_z < 0 || params_.start_z >= params_.grid_size)) {
-      RNG rng(seed);
-      int idx = rng.randomInt(complete_state_vector_.size() - 1);
-      while (isTerminalState(complete_state_vector_[idx])) {
-        idx = rng.randomInt(complete_state_vector_.size() - 1);
+    int idx;
+    if ((params_.start_x > 0 && params_.start_x < params_.grid_size) &&
+        (params_.start_y > 0 && params_.start_y < params_.grid_size) &&
+        (params_.start_z > 0 && params_.start_z < params_.grid_size)) {
+      idx =
+        params_.start_x * params_.grid_size * params_.grid_size +
+        params_.start_y * params_.grid_size +
+        params_.start_z;
+      if (isTerminalState(complete_state_vector_[idx])) {
+        throw IncorrectUsageException("GridModel3D: Provided start state is terminal.");
       }
-      return complete_state_vector_[idx];
+    } else {
+      if (params_.goal_in_cardinal_direction) {
+        int directions[6][3] = {
+          {1, 0, 0},
+          {0, 1, 0},
+          {0, 0, 1},
+          {-1, 0, 0},
+          {0, -1, 0},
+          {0, 0, -1}
+        };
+        // First pick a direction.
+        int dir_idx = rng.randomInt(5); // max value is included.
+
+        int distance;
+        if (params_.goal_distance > 0) {
+          distance = std::min(params_.goal_distance, params_.grid_size / 2);
+        } else {
+          distance = rng.randomInt(1, params_.grid_size / 2); // A minimum of 1 prevents start == goal
+        }
+
+        int start_x = params_.grid_size / 2 + distance * directions[dir_idx][0];
+        int start_y = params_.grid_size / 2 + distance * directions[dir_idx][1];
+        int start_z = params_.grid_size / 2 + distance * directions[dir_idx][2];
+
+        if (start_x == params_.grid_size) start_x = 0; // Keeps the distance same.
+        if (start_y == params_.grid_size) start_y = 0;
+        if (start_z == params_.grid_size) start_z = 0;
+
+        idx = start_x * params_.grid_size * params_.grid_size + start_y * params_.grid_size + start_z;
+      } else {
+        idx = rng.randomInt(complete_state_vector_.size() - 1);
+        while (isTerminalState(complete_state_vector_[idx])) {
+          idx = rng.randomInt(complete_state_vector_.size() - 1);
+        }
+      }
     }
-    int idx =
-      params_.start_x * params_.grid_size * params_.grid_size +
-      params_.start_y * params_.grid_size +
-      params_.start_z;
     return complete_state_vector_[idx];
   }
 

@@ -1,10 +1,18 @@
 models:
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
     non_determinism: 0.0
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
     non_determinism: 0.2
   - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    goal_distance: 5
     non_determinism: 0.5
 planners:
   - name: utexas_planning::MCTS
