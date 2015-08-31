@@ -297,22 +297,6 @@ namespace utexas_planning {
         }
       }
 
-    } else if (params_.action_selection_strategy == UNIFORM) {
-
-      bool first = true;
-      int num_visits;
-      BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
-        if (first) {
-          best_actions.push_back(action_info_pair.first);
-          num_visits = action_info_pair.second->visits;
-          first = false;
-        } else if (action_info_pair.second->visits < num_visits) {
-          best_actions.clear();
-          best_actions.push_back(action_info_pair.first);
-          break;
-        }
-      }
-
     } else {
       throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
     }
