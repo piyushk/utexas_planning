@@ -247,11 +247,13 @@ namespace utexas_planning {
   Action::ConstPtr MCTS::getPlanningAction(const State::ConstPtr& state,
                                            const StateNode::ConstPtr& state_node) const {
 
+    typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
     std::vector<Action::ConstPtr> best_actions;
 
     if (params_.action_selection_strategy == UCT ||
-        params_.action_selection_strategy == THOMPSON) {
-      typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
+        params_.action_selection_strategy == THOMPSON ||
+        params_.action_selection_strategy == HIGHEST_MEAN ||
+        params_.action_selection_strategy == RANDOM) {
 
       if (state_node->state_visits == 0) {
         // This is the first time this state node is being visited. Simply return the action from the default policy.
@@ -259,31 +261,55 @@ namespace utexas_planning {
       } else {
         float max_value = -std::numeric_limits<float>::max();
         BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
-          float planning_bound = 1e10f;
+          // Give a really high value for cases where the state-action pair has not been visited.
+          float planning_value = 1e10f;
           if (action_info_pair.second->visits != 0) {
             if (params_.action_selection_strategy == UCT) {
-              planning_bound = action_info_pair.second->mean_value +
+              // UCT comptues the planning value as the upper confidence bound.
+              planning_value = action_info_pair.second->mean_value +
                 params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
             } else {
-              // TODO: This is a hack to prevent underexploration because of the normal distribution.
-              if (action_info_pair.second->visits >= params_.thompson_initial_random_trials) {
-                planning_bound = rng_->normalFloat(action_info_pair.second->mean_value,
-                                                   sqrtf(action_info_pair.second->variance));
-              } else {
-                planning_bound = 1e9f; // Always choose unexplored actions first.
+              // Give this action a high value, and change it as per .
+              planning_value = 1e9f; // This value is good enough for random exploration.
+              if (params_.action_selection_strategy == THOMPSON) {
+                if (action_info_pair.second->visits >= params_.thompson_initial_random_trials) {
+                  planning_value = rng_->normalFloat(action_info_pair.second->mean_value,
+                                                     sqrtf(action_info_pair.second->variance));
+                }
+              } else if (params_.action_selection_strategy == HIGHEST_MEAN) {
+                if (action_info_pair.second->visits >= params_.mean_initial_random_trials) {
+                  planning_value = action_info_pair.second->mean_value;
+                }
               }
             }
           }
-          /* std::cout << planning_bound << " " << max_value << " " << best_actions.size() << std::endl; */
-          if (fabs(planning_bound - max_value) < 1e-10f) {
+          /* std::cout << planning_value << " " << max_value << " " << best_actions.size() << std::endl; */
+          if (fabs(planning_value - max_value) < 1e-10f) {
             best_actions.push_back(action_info_pair.first);
-          } else if (planning_bound > max_value) {
-            max_value = planning_bound;
+          } else if (planning_value > max_value) {
+            max_value = planning_value;
             best_actions.clear();
             best_actions.push_back(action_info_pair.first);
           }
         }
       }
+
+    } else if (params_.action_selection_strategy == UNIFORM) {
+
+      bool first = true;
+      int num_visits;
+      BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
+        if (first) {
+          best_actions.push_back(action_info_pair.first);
+          num_visits = action_info_pair.second->visits;
+          first = false;
+        } else if (action_info_pair.second->visits < num_visits) {
+          best_actions.clear();
+          best_actions.push_back(action_info_pair.first);
+          break;
+        }
+      }
+
     } else {
       throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
     }

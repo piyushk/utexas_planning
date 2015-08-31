@@ -177,7 +177,7 @@ namespace utexas_planning {
     std::map<std::string, std::string> planner_params = params_.asMap();
     all_params.insert(planner_params.begin(), planner_params.end());
     all_params["planner_name"] = getName();
-    return createHashFromStringMap(all_params);
+    return "vi." + createHashFromStringMap(all_params);
   }
 
 } /* utexas_planning */

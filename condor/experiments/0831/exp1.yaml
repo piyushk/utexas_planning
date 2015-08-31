@@ -1,0 +1,49 @@
+models:
+  - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    grid_size: 30
+    goal_distance: 10
+  - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    grid_size: 30
+    goal_distance: 10
+    num_actions: 18
+  - name: utexas_planning::GridModel3D
+    goal_in_cardinal_direction: true
+    grid_size: 30
+    goal_distance: 10
+    num_actions: 26
+planners:
+  - name: utexas_planning::VI
+    reuse_policy_from_file: true
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 30
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 30
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 30
+    action_selection_strategy: random
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 30
+    action_selection_strategy: uniform
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 30
+    action_selection_strategy: mean
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0

@@ -48,6 +48,9 @@ namespace utexas_planning {
   const int NO_MAX_PLAYOUTS = -1;
   const std::string UCT = "uct";
   const std::string THOMPSON = "thompson";
+  const std::string RANDOM = "random";
+  const std::string HIGHEST_MEAN = "mean";
+  const std::string UNIFORM = "uniform";
   const std::string ELIGIBILITY_TRACE = "eligibility";
 
   class MCTS : public AbstractPlanner {
@@ -71,6 +74,7 @@ namespace utexas_planning {
       _(std::string,action_selection_strategy,action_selection_strategy,UCT) \
       _(float,uct_reward_bound,uct_reward_bound,10000) \
       _(int,thompson_initial_random_trials,thompson_initial_random_trials,5) \
+      _(int,mean_initial_random_trials,mean_initial_random_trials,5) \
       _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
       _(float,eligibility_lambda,eligibility_lambda,0.0) \
 
