@@ -45,7 +45,7 @@ def get_formatted_float(f):
     s = "%.2f"%f
     return s.rstrip('0').rstrip('.') if '.' in s else s
 
-def draw_bar_chart(samples, top_level_names, second_level_names=None, 
+def draw_bar_chart(samples, top_level_names, second_level_names=None,
                    title=None, xlabel=None, ylabel=None, color=None,
                    bottom=None, yticklabels=None):
 
@@ -53,7 +53,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
     # contains top level groups, and the second level list contains actual
     # samples (top_level_grouping_only = true)
 
-    # Alternatively, samples may be a list of lists of lists, with top-level 
+    # Alternatively, samples may be a list of lists of lists, with top-level
     # groups, second level groups and actual samples. (top_level_grouping_only)
 
     means = []
@@ -62,7 +62,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
             isinstance(samples[0][0], collections.Sequence)
     top_level_methods = len(samples)
 
-    if second_level_grouping_available: 
+    if second_level_grouping_available:
         second_level_methods = len(samples[0])
         samples2 = samples
     else:
@@ -79,7 +79,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
             m, h = calculate_mean_and_standard_error(samples2[i][j])
             print str(top_level_names[i]) + ",",
             if second_level_names is not None:
-                print str(second_level_names[j]), 
+                print str(second_level_names[j]),
             else:
                 print j,
             print ": " + "%.2f"%m + "+-" + "%.2f"%h
@@ -107,7 +107,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
             barcolor = METHOD_COLORS[i % len(METHOD_COLORS)]
             barhatch = METHOD_HATCH[i % len(METHOD_HATCH)]
         rect = ax.bar(ind + i*width, means[i], width,
-                      color=barcolor, 
+                      color=barcolor,
                       hatch=barhatch,
                       yerr=confs[i], ecolor='black', bottom=bottom)
         rects.append(rect)
@@ -130,18 +130,18 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
         ax.set_yticklabels(yticklabels)
 
     if top_level_names:
-        ax.legend(rects, top_level_names)
+        ax.legend(rects, top_level_names, mode='expand', ncol=2, loc='lower center')
 
     return fig, ax, rects, means
 
-def draw_line_graph(samples, top_level_names, second_level_names=None, 
+def draw_line_graph(samples, top_level_names, second_level_names=None,
                     title=None, xlabel=None, ylabel=None, yticklabels=None):
 
     # So, samples can either contain a list of lists. The top level list
     # contains top level groups, and the second level list contains actual
     # samples (top_level_grouping_only = true)
 
-    # Alternatively, samples may be a list of lists of lists, with top-level 
+    # Alternatively, samples may be a list of lists of lists, with top-level
     # groups, second level groups and actual samples. (top_level_grouping_only)
 
     means = []
@@ -150,7 +150,7 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
             isinstance(samples[0][0], collections.Sequence)
     top_level_methods = len(samples)
 
-    if second_level_grouping_available: 
+    if second_level_grouping_available:
         second_level_methods = len(samples[0])
         samples2 = samples
     else:
@@ -197,7 +197,7 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
 
     return fig, ax, rects, means
 
-def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None, 
+def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None,
                       title=None, xlabel=None, ylabel=None, zlabel=None,
                       flip_y=True, third_level_names=None):
 
@@ -205,7 +205,7 @@ def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None,
     # contains top level groups, and the second level list contains actual
     # samples (top_level_grouping_only = true)
 
-    # Alternatively, samples may be a list of lists of lists, with top-level 
+    # Alternatively, samples may be a list of lists of lists, with top-level
     # groups, second level groups and actual samples. (top_level_grouping_only)
 
     means = []
@@ -214,7 +214,7 @@ def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None,
             isinstance(samples[0][0], collections.Sequence)
     top_level_methods = len(samples)
 
-    if second_level_grouping_available: 
+    if second_level_grouping_available:
         second_level_methods = len(samples[0])
         samples2 = samples
     else:
@@ -332,7 +332,7 @@ def get_formatted_combination_name(name_dict, name_mappings=None):
             formatted_name = str(name_dict["name"]) + "[" + formatted_name + "]"
     return formatted_name
 
-def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_filter=None, 
+def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_filter=None,
                          attempt_auto_mapping=True, name_mappings=None):
 
     data_per_file = []
@@ -376,14 +376,14 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
         primary_unique_values = []
         primary_filters_copy = copy.deepcopy(primary_filters)
         for i, pf in enumerate(primary_filters_copy):
-            if len(data[pf].unique().tolist()) == 1: # This column is not really being used. 
+            if len(data[pf].unique().tolist()) == 1: # This column is not really being used.
                 primary_filters.remove(pf)
             else:
                 primary_unique_values.append(data[pf].unique().tolist())
-        
+
         all_possible_primary_combinations = list(itertools.product(*primary_unique_values))
         all_possible_primary_combinations.sort()
-        
+
         top_level_names = []
         for primary_combination in all_possible_primary_combinations:
             combination_data = data
@@ -412,7 +412,7 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
                 secondary_filters_copy = copy.deepcopy(secondary_filters)
                 for i, sf in enumerate(secondary_filters_copy):
                     secondary_unique_values.append(combination_data[sf].unique().tolist())
-                
+
                 all_possible_secondary_combinations = list(itertools.product(*secondary_unique_values))
                 all_possible_secondary_combinations.sort()
 

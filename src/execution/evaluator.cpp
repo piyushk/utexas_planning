@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
   YAML::Node models_yaml = experiment_["models"];
   YAML::Node planners_yaml = experiment_["planners"];
   models.resize(models_yaml.size());
-  planners.resize(planners_yaml.size());
+  planners.resize(models_yaml.size());
   for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
     boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();

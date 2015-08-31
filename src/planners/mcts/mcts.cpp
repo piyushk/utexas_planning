@@ -253,7 +253,8 @@ namespace utexas_planning {
     if (params_.action_selection_strategy == UCT ||
         params_.action_selection_strategy == THOMPSON ||
         params_.action_selection_strategy == HIGHEST_MEAN ||
-        params_.action_selection_strategy == RANDOM) {
+        params_.action_selection_strategy == RANDOM ||
+        params_.action_selection_strategy == UNIFORM) {
 
       if (state_node->state_visits == 0) {
         // This is the first time this state node is being visited. Simply return the action from the default policy.
@@ -268,6 +269,8 @@ namespace utexas_planning {
               // UCT comptues the planning value as the upper confidence bound.
               planning_value = action_info_pair.second->mean_value +
                 params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
+            } else if (params_.action_selection_strategy == UNIFORM) {
+              planning_value = 1e5f / (1 + action_info_pair.second->visits);
             } else {
               // Give this action a high value, and change it as per .
               planning_value = 1e9f; // This value is good enough for random exploration.
