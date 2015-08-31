@@ -1,8 +1,9 @@
 models:
   - name: utexas_planning::RddlModel
+    rddl_domain: academic_advising
 planners:
   - name: utexas_planning::MCTS
     max_playouts: 10000
-    max_depth: 10
-    uct_reward_bound: 1000
-    eligibility_lambda: 0.0
+    max_depth: 40
+    uct_reward_bound: 100
+    eligibility_lambda: 1.0

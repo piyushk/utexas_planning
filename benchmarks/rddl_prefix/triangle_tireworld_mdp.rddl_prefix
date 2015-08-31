@@ -25,5 +25,15 @@ domain triangle_tireworld_mdp {
     (not-flattire') = (if (exists ( (?from : location) (?to : location) ) (^ (move-car ?from ?to) (vehicle-at ?from) (road ?from ?to) (not-flattire) )) then (Bernoulli (FLAT-PROB)) else (if (^ (changetire) (hasspare) ) then true else (not-flattire)));
   };
   reward = (if (^ (~ (goal-reward-received)) (exists ( (?l : location) ) (^ (vehicle-at ?l) (goal-location ?l) )) ) then 100 else (if (goal-reward-received) then 0 else (- 0 1)));
+  state-action-constraints {
+    (forall ( (?from : location) (?to : location) ) (=> (~ (road ?from ?to)) (~ (move-car ?from ?to)) ));
+    (forall ( (?from : location) (?to : location) ) (=> (~ (vehicle-at ?from)) (~ (move-car ?from ?to)) ));
+    (forall ( (?from : location) (?to : location) ) (=> (~ (not-flattire)) (~ (move-car ?from ?to)) ));
+    (forall ( (?loc : location) ) (=> (~ (vehicle-at ?loc)) (~ (loadtire ?loc)) ));
+    (forall ( (?loc : location) ) (=> (~ (spare-in ?loc)) (~ (loadtire ?loc)) ));
+    (forall ( (?loc : location) ) (=> (hasspare) (~ (loadtire ?loc)) ));
+    (=> (not-flattire) (~ (changetire)) );
+    (=> (~ (hasspare)) (~ (changetire)) );
+  };
 }
 

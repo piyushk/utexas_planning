@@ -21,5 +21,8 @@ domain academic_advising_mdp {
     (passed' ?c) = (if (^ (takeCourse ?c) (~ (passed ?c)) ) then (if (~ (exists ( (?c2 : course) ) (PREREQ ?c2 ?c))) then (Bernoulli (PRIOR_PROB_PASS_NO_PREREQ ?c)) else (Bernoulli (+ (PRIOR_PROB_PASS ?c) (* (- 1 (PRIOR_PROB_PASS ?c)) (/ (sum ( (?c2 : course) ) (^ (PREREQ ?c2 ?c) (passed ?c2) )) (+ 1 (sum ( (?c2 : course) ) (PREREQ ?c2 ?c)))))))) else (passed ?c));
   };
   reward = (+ (+ (sum ( (?c : course) ) (* (COURSE_COST ?c) (^ (takeCourse ?c) (~ (taken ?c)) ))) (sum ( (?c : course) ) (* (COURSE_RETAKE_COST ?c) (^ (takeCourse ?c) (taken ?c) )))) (* (PROGRAM_INCOMPLETE_PENALTY) (~ (forall ( (?c : course) ) (=> (PROGRAM_REQUIREMENT ?c) (passed ?c) )))));
+  state-action-constraints {
+    (forall ( (?c : course) ) (=> (passed ?c) (~ (takeCourse ?c)) ));
+  };
 }
 

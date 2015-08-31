@@ -66,8 +66,8 @@ namespace utexas_planning {
     public:
 
 #define PARAMS(_) \
-      _(std::string,rddl_domain,rddl_domain,"triangle_tireworld_mdp.rddl_prefix") \
-      _(std::string,rddl_problem,rddl_problem,"triangle_tireworld_inst_mdp__1.rddl_prefix") \
+      _(std::string,rddl_domain,rddl_domain,"triangle_tireworld") \
+      _(std::string,rddl_problem,rddl_problem,"5") \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 

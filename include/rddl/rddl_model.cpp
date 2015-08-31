@@ -62,7 +62,7 @@ namespace utexas_planning {
   }
 
   void RddlState::serialize(std::ostream& stream) const {
-    state->print(stream);
+    //state->print(stream);
     for (int i = 0; i < state->state.size(); ++i) {
       const double& state_member = state->state[i];
       if (rddl::MathUtils::doubleIsEqual(state_member, 1.0)) {
@@ -106,6 +106,16 @@ namespace utexas_planning {
                        const boost::shared_ptr<RNG>& rng) {
 
     params_.fromYaml(params);
+
+    if (params_.rddl_problem.empty()) {
+      int problem_idx = rng->randomInt(1,10);
+      params_.rddl_problem =
+        params_.rddl_domain + "_inst_mdp__" + boost::lexical_cast<std::string>(problem_idx) + ".rddl_prefix";
+    } else {
+      params_.rddl_problem =
+        params_.rddl_domain + "_inst_mdp__" + params_.rddl_problem + ".rddl_prefix";
+    }
+    params_.rddl_domain = params_.rddl_domain + "_mdp.rddl_prefix";
 
     char* directories_as_char;
     directories_as_char = getenv("RDDL_DOMAIN_DIRECTORIES");
@@ -204,7 +214,14 @@ namespace utexas_planning {
       }
     }
 
-    actions.resize(valid_actions_counter);
+    // Remove the noop action if there are more than 1 valid actions.
+    // if (valid_actions_counter > 1) {
+    //   actions.erase(actions.begin());
+    //   actions.resize(valid_actions_counter - 1);
+    // } else {
+      actions.resize(valid_actions_counter);
+    /* } */
+
   }
 
   void RddlModel::takeAction(const State::ConstPtr& state_base,
