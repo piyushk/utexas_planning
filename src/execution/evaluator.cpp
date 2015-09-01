@@ -86,9 +86,6 @@ int main(int argc, char** argv) {
     return ret;
   }
 
-  std::vector<GenerativeModel::ConstPtr> models;
-  std::vector<std::vector<AbstractPlanner::Ptr> > planners;
-
   // Load all libraries_as_char from environment variable.
   ClassLoader::Ptr loader(new ClassLoader);
 
@@ -105,34 +102,24 @@ int main(int argc, char** argv) {
 
   boost::shared_ptr<RNG> rng(new RNG(seed_));
 
-  std::cout << "Initializing all models and planners..." << std::endl;
   YAML::Node models_yaml = experiment_["models"];
   YAML::Node planners_yaml = experiment_["planners"];
-  models.resize(models_yaml.size());
-  planners.resize(models_yaml.size());
+  std::vector<std::map<std::string, std::string> > records;
   for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
     boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
-    models[model_idx] = loader->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
-    planners[model_idx].resize(planners_yaml.size());
+    GenerativeModel::ConstPtr model = loader->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
     for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
       boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
       std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
-      planners[model_idx][planner_idx] = loader->loadPlanner(planner_name,
-                                                            models[model_idx],
-                                                            planner_rng,
-                                                            planners_yaml[planner_idx],
-                                                            data_directory_,
-                                                            verbose_);
-    }
-  }
-
-  // Running trials
-  std::vector<std::map<std::string, std::string> > records;
-  for (unsigned model_idx = 0; model_idx < models.size(); ++model_idx) {
-    for (unsigned planner_idx = 0; planner_idx < planners.size(); ++planner_idx) {
-      records.push_back(runSingleTrial(models[model_idx],
-                                       planners[model_idx][planner_idx],
+      AbstractPlanner::Ptr planner = loader->loadPlanner(planner_name,
+                                                         model,
+                                                         planner_rng,
+                                                         planners_yaml[planner_idx],
+                                                         data_directory_,
+                                                         verbose_);
+      records.push_back(runSingleTrial(model,
+                                       planner,
                                        data_directory_,
                                        seed_,
                                        max_trial_depth_,
@@ -140,11 +127,9 @@ int main(int argc, char** argv) {
                                        verbose_));
     }
   }
-  writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);
 
-  // Make sure you clear up all the models and planners beofre the ClassLoader resets at the end of this function call.
-  models.clear();
-  planners.clear();
+  // Running trials
+  writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);
 
   return 0;
 }
