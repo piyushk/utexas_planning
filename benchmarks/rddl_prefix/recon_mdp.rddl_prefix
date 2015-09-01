@@ -51,5 +51,14 @@ domain recon_mdp {
     (waterDetected' ?o) = (if (waterDetected ?o) then (KronDelta true) else (if (waterChecked ?o) then (KronDelta false) else (if (exists ( (?t : tool) (?x : x_pos) (?y : y_pos) (?a : agent) ) (^ (WATER_TOOL ?t) (damaged ?t) (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) )) then (Bernoulli (DETECT_PROB_DAMAGED)) else (if (exists ( (?t : tool) (?x : x_pos) (?y : y_pos) (?a : agent) ) (^ (WATER_TOOL ?t) (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) )) then (Bernoulli (DETECT_PROB)) else (KronDelta false)))));
   };
   reward = (+ (sum ( (?o : obj) ) (* (GOOD_PIC_WEIGHT) (^ (~ (pictureTaken ?o)) (lifeDetected ?o) (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (CAMERA_TOOL ?t) (~ (damaged ?t)) )) ))) (sum ( (?o : obj) ) (- 0 (* (BAD_PIC_WEIGHT) (^ (~ (lifeDetected ?o)) (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (CAMERA_TOOL ?t) )) )))));
+  state-action-constraints {
+    (forall ( (?a : agent) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (~ (exists ( (?x2 : x_pos) ) (^ (~ (== ?x1 ?x2)) (ADJACENT-LEFT ?x1 ?x2) ))) (agentAt ?a ?x1 ?y1) ) (~ (left ?a)) ));
+    (forall ( (?a : agent) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (~ (exists ( (?x2 : x_pos) ) (^ (~ (== ?x1 ?x2)) (ADJACENT-RIGHT ?x1 ?x2) ))) (agentAt ?a ?x1 ?y1) ) (~ (right ?a)) ));
+    (forall ( (?a : agent) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (~ (exists ( (?y2 : y_pos) ) (^ (~ (== ?y1 ?y2)) (ADJACENT-UP ?y1 ?y2) ))) (agentAt ?a ?x1 ?y1) ) (~ (up ?a)) ));
+    (forall ( (?a : agent) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (~ (exists ( (?y2 : y_pos) ) (^ (~ (== ?y1 ?y2)) (ADJACENT-DOWN ?y1 ?y2) ))) (agentAt ?a ?x1 ?y1) ) (~ (down ?a)) ));
+    (forall ( (?a : agent) (?o : obj) (?t : tool) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (agentAt ?a ?x1 ?y1) (~ (objAt ?o ?x1 ?y1)) ) (~ (useToolOn ?a ?t ?o)) ));
+    (forall ( (?a : agent) (?t : tool) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (agentAt ?a ?x1 ?y1) (~ (BASE ?x1 ?y1)) ) (~ (repair ?a ?t)) ));
+    (forall ( (?a : agent) (?t : tool) ) (=> (~ (damaged ?t)) (~ (repair ?a ?t)) ));
+  };
 }
 
