@@ -37,7 +37,15 @@ domain elevators_mdp {
   };
   reward = (+ (+ (+ (+ (sum ( (?e : elevator) ) (* (- 0 (ELEVATOR-PENALTY-RIGHT-DIR)) (^ (person-in-elevator-going-up ?e) (elevator-dir-up ?e) ))) (sum ( (?e : elevator) ) (* (- 0 (ELEVATOR-PENALTY-RIGHT-DIR)) (^ (person-in-elevator-going-down ?e) (~ (elevator-dir-up ?e)) )))) (sum ( (?e : elevator) ) (* (- 0 (ELEVATOR-PENALTY-WRONG-DIR)) (^ (person-in-elevator-going-up ?e) (~ (elevator-dir-up ?e)) )))) (sum ( (?e : elevator) ) (* (- 0 (ELEVATOR-PENALTY-WRONG-DIR)) (^ (person-in-elevator-going-down ?e) (elevator-dir-up ?e) )))) (sum ( (?f : floor) ) (- (- 0 (person-waiting-up ?f)) (person-waiting-down ?f))));
   state-action-constraints {
-    (forall ( (?e : elevator) ) (<= (+ (+ (+ (open-door-going-up ?e) (open-door-going-down ?e)) (close-door ?e)) (move-current-dir ?e)) 1));
+    (forall ( (?e : elevator) ) (== (+ (+ (+ (open-door-going-up ?e) (open-door-going-down ?e)) (close-door ?e)) (move-current-dir ?e)) 1));
+    (forall ( (?e : elevator) ) (=> (elevator-closed ?e) (~ (close-door ?e)) ));
+    (forall ( (?e : elevator) ) (=> (~ (elevator-closed ?e)) (~ (move-current-dir ?e)) ));
+    (forall ( (?e : elevator) (?f : floor) ) (=> (^ (elevator-at-floor ?e ?f) (TOP-FLOOR ?f) ) (~ (open-door-going-up ?e)) ));
+    (forall ( (?e : elevator) (?f : floor) ) (=> (^ (elevator-at-floor ?e ?f) (TOP-FLOOR ?f) (elevator-dir-up ?e) ) (~ (move-current-dir ?e)) ));
+    (forall ( (?e : elevator) (?f : floor) ) (=> (^ (elevator-at-floor ?e ?f) (BOTTOM-FLOOR ?f) ) (~ (open-door-going-down ?e)) ));
+    (forall ( (?e : elevator) (?f : floor) ) (=> (^ (elevator-at-floor ?e ?f) (BOTTOM-FLOOR ?f) (~ (elevator-dir-up ?e)) ) (~ (move-current-dir ?e)) ));
+    (forall ( (?e : elevator) ) (=> (^ (elevator-dir-up ?e) (~ (elevator-closed ?e)) ) (~ (open-door-going-up ?e)) ));
+    (forall ( (?e : elevator) ) (=> (^ (~ (elevator-dir-up ?e)) (~ (elevator-closed ?e)) ) (~ (open-door-going-down ?e)) ));
   };
 }
 
