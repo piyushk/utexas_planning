@@ -6,5 +6,5 @@ planners:
     max_playouts: 10000
     # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
     max_depth: 1000
-    uct_reward_bound: 100
+    uct_reward_bound: 10
     eligibility_lambda: 0.0

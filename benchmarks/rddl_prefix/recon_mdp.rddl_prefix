@@ -46,7 +46,7 @@ domain recon_mdp {
     (waterChecked' ?o) = (KronDelta (| (waterChecked ?o) (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (WATER_TOOL ?t) )) ));
     (lifeChecked' ?o) = (KronDelta (| (lifeChecked ?o) (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (LIFE_TOOL ?t) )) ));
     (damaged' ?t) = (if (^ (damaged ?t) (~ (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) ) (^ (agentAt ?a ?x ?y) (BASE ?x ?y) (repair ?a ?t) ))) ) then (KronDelta true) else (if (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) ) (^ (agentAt ?a ?x ?y) (~ (BASE ?x ?y)) (HAZARD ?x ?y) )) then (Bernoulli (DAMAGE_PROB ?t)) else (if (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?x2 : x_pos) ) (^ (agentAt ?a ?x ?y) (~ (BASE ?x ?y)) (HAZARD ?x2 ?y) (| (ADJACENT-LEFT ?x ?x2) (ADJACENT-RIGHT ?x ?x2) ) )) then (Bernoulli (/ (DAMAGE_PROB ?t) 2.0)) else (if (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?y2 : y_pos) ) (^ (agentAt ?a ?x ?y) (~ (BASE ?x ?y)) (HAZARD ?x ?y2) (| (ADJACENT-UP ?y ?y2) (ADJACENT-DOWN ?y ?y2) ) )) then (Bernoulli (/ (DAMAGE_PROB ?t) 2.0)) else (KronDelta false)))));
-    (pictureTaken' ?o) = (KronDelta (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (CAMERA_TOOL ?t) (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (~ (damaged ?t)) )));
+    (pictureTaken' ?o) = (KronDelta (| (pictureTaken ?o) (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (CAMERA_TOOL ?t) (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (~ (damaged ?t)) )) ));
     (lifeChecked2' ?o) = (KronDelta (| (lifeChecked2 ?o) (^ (lifeChecked ?o) (exists ( (?x : x_pos) (?y : y_pos) (?a : agent) (?t : tool) ) (^ (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) (LIFE_TOOL ?t) )) ) ));
     (waterDetected' ?o) = (if (waterDetected ?o) then (KronDelta true) else (if (waterChecked ?o) then (KronDelta false) else (if (exists ( (?t : tool) (?x : x_pos) (?y : y_pos) (?a : agent) ) (^ (WATER_TOOL ?t) (damaged ?t) (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) )) then (Bernoulli (DETECT_PROB_DAMAGED)) else (if (exists ( (?t : tool) (?x : x_pos) (?y : y_pos) (?a : agent) ) (^ (WATER_TOOL ?t) (agentAt ?a ?x ?y) (objAt ?o ?x ?y) (useToolOn ?a ?t ?o) )) then (Bernoulli (DETECT_PROB)) else (KronDelta false)))));
   };
@@ -59,6 +59,7 @@ domain recon_mdp {
     (forall ( (?a : agent) (?o : obj) (?t : tool) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (agentAt ?a ?x1 ?y1) (~ (objAt ?o ?x1 ?y1)) ) (~ (useToolOn ?a ?t ?o)) ));
     (forall ( (?a : agent) (?t : tool) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (agentAt ?a ?x1 ?y1) (~ (BASE ?x1 ?y1)) ) (~ (repair ?a ?t)) ));
     (forall ( (?a : agent) (?t : tool) ) (=> (~ (damaged ?t)) (~ (repair ?a ?t)) ));
+    (exists ( (?a : agent) (?t : tool) (?o : obj) ) (| (up ?a) (down ?a) (left ?a) (right ?a) (useToolOn ?a ?t ?o) (repair ?a ?t) ));
   };
 }
 
