@@ -16,5 +16,9 @@ domain sysadmin_mdp {
     (running' ?x) = (if (reboot ?x) then (KronDelta true) else (if (running ?x) then (Bernoulli (+ 0.45 (/ (* 0.5 (+ 1 (sum ( (?y : computer) ) (^ (CONNECTED ?y ?x) (running ?y) )))) (+ 1 (sum ( (?y : computer) ) (CONNECTED ?y ?x)))))) else (Bernoulli (REBOOT-PROB))));
   };
   reward = (sum ( (?c : computer) ) (- (running ?c) (* (REBOOT-PENALTY) (reboot ?c))));
+  state-action-constraints {
+    (forall ( (?c : computer) ) (=> (running ?c) (~ (reboot ?c)) ));
+    (=> (exists ( (?c : computer) ) (~ (running ?c))) (exists ( (?c : computer) ) (reboot ?c)) );
+  };
 }
 

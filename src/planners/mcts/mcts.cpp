@@ -187,10 +187,10 @@ namespace utexas_planning {
           state_node = action->next_states.find(discretized_state)->second;
           use_default_action = false;
         } else {
-          MCTS_VERBOSE_OUTPUT("  This state was not found in the search tree! Taking action using default policy!");
-          MCTS_VERBOSE_OUTPUT("    The following states were found!");
+          MCTS_DEBUG_OUTPUT("  This state was not found in the search tree! Taking action using default policy!");
+          MCTS_DEBUG_OUTPUT("    The following states were found!");
           BOOST_FOREACH(const State2StateInfoPair& state_info_pair, action->next_states) {
-            MCTS_VERBOSE_OUTPUT("    " << *(state_info_pair.first));
+            MCTS_DEBUG_OUTPUT("    " << *(state_info_pair.first));
           }
         }
       } else {

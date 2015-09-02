@@ -1,6 +1,6 @@
 models:
   - name: utexas_planning::RddlModel
-    rddl_domain: skill_teaching
+    rddl_domain: sysadmin
 planners:
   - name: utexas_planning::MCTS
     max_playouts: 10000
