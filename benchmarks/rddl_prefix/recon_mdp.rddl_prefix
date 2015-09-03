@@ -59,7 +59,6 @@ domain recon_mdp {
     (forall ( (?a : agent) (?o : obj) (?t : tool) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (agentAt ?a ?x1 ?y1) (~ (objAt ?o ?x1 ?y1)) ) (~ (useToolOn ?a ?t ?o)) ));
     (forall ( (?a : agent) (?t : tool) (?x1 : x_pos) (?y1 : y_pos) ) (=> (^ (agentAt ?a ?x1 ?y1) (~ (BASE ?x1 ?y1)) ) (~ (repair ?a ?t)) ));
     (forall ( (?a : agent) (?t : tool) ) (=> (~ (damaged ?t)) (~ (repair ?a ?t)) ));
-    (exists ( (?a : agent) (?t : tool) (?o : obj) ) (| (up ?a) (down ?a) (left ?a) (right ?a) (useToolOn ?a ?t ?o) (repair ?a ?t) ));
   };
 }
 

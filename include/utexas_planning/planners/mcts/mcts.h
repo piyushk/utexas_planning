@@ -102,6 +102,9 @@ namespace utexas_planning {
       virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state,
                                                  float timeout = NO_TIMEOUT);
 
+      virtual void performPreActionProcessing(const State::ConstPtr& state,
+                                              float timeout = NO_TIMEOUT);
+
       virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                const Action::ConstPtr& action,
                                                float timeout = NO_TIMEOUT);

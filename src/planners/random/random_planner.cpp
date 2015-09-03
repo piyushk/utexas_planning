@@ -23,10 +23,12 @@ namespace utexas_planning {
     return actions[rng_->randomInt(actions.size() - 1)];
   }
 
+  void RandomPlanner::performPreActionProcessing(const State::ConstPtr& /* state */,
+                                                 float /* timeout */) {}
+
   void RandomPlanner::performPostActionProcessing(const State::ConstPtr& /* state */,
                                                   const Action::ConstPtr& /* action */,
                                                   float /* timeout */) {}
-
   std::string RandomPlanner::getName() const {
     return std::string("Random");
   }

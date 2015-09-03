@@ -32,11 +32,10 @@ domain navigation_mdp {
     (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MAX-XPOS ?x) (robot-at ?x ?y) ) (~ (move-east)) ));
     (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MIN-YPOS ?y) (robot-at ?x ?y) ) (~ (move-south)) ));
     (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MAX-YPOS ?y) (robot-at ?x ?y) ) (~ (move-north)) ));
-    (=> (== (sum ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y)) 0) (~ (move-north)) );
-    (=> (== (sum ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y)) 0) (~ (move-south)) );
-    (=> (== (sum ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y)) 0) (~ (move-east)) );
-    (=> (== (sum ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y)) 0) (~ (move-west)) );
-    (=> (exists ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y)) (== (+ (+ (+ (move-north) (move-south)) (move-east)) (move-west)) 1) );
+    (=> (~ (exists ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y))) (~ (move-north)) );
+    (=> (~ (exists ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y))) (~ (move-south)) );
+    (=> (~ (exists ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y))) (~ (move-east)) );
+    (=> (~ (exists ( (?x : xpos) (?y : ypos) ) (robot-at ?x ?y))) (~ (move-west)) );
   };
 }
 

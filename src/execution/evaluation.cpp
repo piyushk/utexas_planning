@@ -11,6 +11,7 @@ namespace utexas_planning {
                                                     int seed,
                                                     int max_trial_depth,
                                                     float max_trial_time,
+                                                    bool post_action_processing,
                                                     bool verbose) {
 
     RewardMetrics::Ptr reward_metrics = model->getRewardMetricsAtEpisodeStart();
@@ -43,7 +44,7 @@ namespace utexas_planning {
            ((max_trial_depth == NO_MAX_DEPTH) || (action_count < max_trial_depth))) {
       action = planner->getBestAction(state);
       if (verbose) {
-        std::cout << "  Taking action " << *action << " at state: " << *state << std::endl;
+        std::cout << "  Taking action " << *action << std::endl;
       }
       model->takeAction(state,
                         action,
@@ -66,7 +67,11 @@ namespace utexas_planning {
           ((max_trial_depth != NO_MAX_DEPTH) && (action_count >= max_trial_depth))) {
         break;
       }
-      planner->performPostActionProcessing(state, action, post_action_timeout);
+      if (post_action_processing) {
+        planner->performPostActionProcessing(state, action, post_action_timeout);
+      } else {
+        planner->performPreActionProcessing(next_state, post_action_timeout);
+      }
 
       state = next_state;
       current_time = boost::posix_time::microsec_clock::local_time();

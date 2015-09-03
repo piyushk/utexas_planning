@@ -209,7 +209,7 @@ namespace utexas_planning {
 
     float max_value = -std::numeric_limits<float>::max();
     std::vector<Action::ConstPtr> best_actions;
-    MCTS_VERBOSE_OUTPUT("  Value of actions:- ");
+    MCTS_VERBOSE_OUTPUT("  Total visits to this state: " << state_node->state_visits);
     BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_node->actions) {
       float val = getStateActionValue(action_info_pair.second);
       MCTS_VERBOSE_OUTPUT("    " << *(action_info_pair.first) << ": " << val << "(" << action_info_pair.second->visits << ")");
@@ -227,6 +227,13 @@ namespace utexas_planning {
 
   void MCTS::performEpisodeStartProcessing(const State::ConstPtr& start_state,
                                            float timeout) {
+    restart();
+    last_action_selected_.reset();
+    search(start_state, timeout, params_.max_playouts);
+  }
+
+  void MCTS::performPreActionProcessing(const State::ConstPtr& start_state,
+                                        float timeout) {
     restart();
     last_action_selected_.reset();
     search(start_state, timeout, params_.max_playouts);

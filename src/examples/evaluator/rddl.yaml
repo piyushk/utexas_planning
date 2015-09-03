@@ -1,10 +1,10 @@
 models:
   - name: utexas_planning::RddlModel
-    rddl_domain: tamarisk
+    rddl_domain: game_of_life
 planners:
   - name: utexas_planning::MCTS
     max_playouts: 10000
     # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
     max_depth: 1000
-    uct_reward_bound: 500
+    uct_reward_bound: 100
     eligibility_lambda: 0.0

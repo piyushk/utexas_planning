@@ -13,6 +13,7 @@ namespace utexas_planning {
                                                     int seed,
                                                     int max_trial_depth,
                                                     float max_trial_time,
+                                                    bool post_action_processing,
                                                     bool verbose);
 
 } /* utexas_planning */

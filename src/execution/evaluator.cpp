@@ -19,6 +19,7 @@ std::string data_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
 bool verbose_ = false;
+bool post_action_processing_ = false;
 int max_trial_depth_ = NO_MAX_DEPTH;
 float max_trial_time_ = NO_TIMEOUT;
 
@@ -37,6 +38,7 @@ int processOptions(int argc, char** argv) {
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
     ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
     ("verbose", "Increased verbosity in planner and trial output.")
+    ("post-action-processing", "Planners plan using previous state and selected action instead of planning using the current state.")
     ("max-trial-depth", po::value<int>(&max_trial_depth_), "Maximum number of actions that should be taken inside MDP in case a terminal state is not reached.")
     ("max-trial-time", po::value<float>(&max_trial_time_), "Maximum time each trial should run for in case a terminal state is not reached.");
 
@@ -62,6 +64,10 @@ int processOptions(int argc, char** argv) {
 
   if (vm.count("verbose")) {
     verbose_ = true;
+  }
+
+  if (vm.count("post-action-processing")) {
+    post_action_processing_ = true;
   }
 
   /* Read in methods */
@@ -124,6 +130,7 @@ int main(int argc, char** argv) {
                                        seed_,
                                        max_trial_depth_,
                                        max_trial_time_,
+                                       post_action_processing_,
                                        verbose_));
     }
   }

@@ -29,6 +29,9 @@ namespace utexas_planning {
 
       virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const = 0;
 
+      virtual void performPreActionProcessing(const State::ConstPtr& state,
+                                              float timeout = NO_TIMEOUT) = 0;
+
       virtual void performPostActionProcessing(const State::ConstPtr& state,
                                                const Action::ConstPtr& action,
                                                float timeout = NO_TIMEOUT) = 0;

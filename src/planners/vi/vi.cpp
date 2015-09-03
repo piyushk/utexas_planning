@@ -157,9 +157,14 @@ namespace utexas_planning {
     return best_action;
   }
 
+  void VI::performPreActionProcessing(const State::ConstPtr& /* state */,
+                                      float /* timeout */) {
+    // VI does not need to anything here.
+  }
+
   void VI::performPostActionProcessing(const State::ConstPtr& /* state */,
-                                                   const Action::ConstPtr& /* action */,
-                                                   float /* timeout */) {
+                                       const Action::ConstPtr& /* action */,
+                                       float /* timeout */) {
     // VI does not need to anything here.
   }
 
