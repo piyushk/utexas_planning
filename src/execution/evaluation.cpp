@@ -67,10 +67,13 @@ namespace utexas_planning {
           ((max_trial_depth != NO_MAX_DEPTH) && (action_count >= max_trial_depth))) {
         break;
       }
-      if (post_action_processing) {
-        planner->performPostActionProcessing(state, action, post_action_timeout);
-      } else {
-        planner->performPreActionProcessing(next_state, post_action_timeout);
+
+      if (!(model->isTerminalState(next_state))) {
+        if (post_action_processing) {
+          planner->performPostActionProcessing(state, action, post_action_timeout);
+        } else {
+          planner->performPreActionProcessing(next_state, post_action_timeout);
+        }
       }
 
       state = next_state;
