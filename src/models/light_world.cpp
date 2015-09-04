@@ -63,15 +63,15 @@ namespace utexas_planning {
   void LightWorldState::serialize(std::ostream& stream) const {
     stream << "(" << x << "," << y << ",";
     if (key_picked_up) {
-      stream << "KEY";
+      stream << "key";
     } else {
-      stream << "NO KEY";
+      stream << "no key";
     }
     stream << ",";
     if (goal_unlocked) {
-      stream << "UNLOCKED";
+      stream << "unlocked";
     } else {
-      stream << "LOCKED";
+      stream << "locked";
     }
     stream << ",UnlockAttemptsLeft=";
     stream << unlock_attempts_left << ")";
@@ -112,22 +112,36 @@ namespace utexas_planning {
     // Precache the complete state vector of 100 states.
     for (int x = 0; x < params_.grid_size; ++x) {
       for (int y = 0; y < params_.grid_size; ++y) {
-        for (int unlock_attempts_left = 0; unlock_attempts_left <= params_.initial_unlock_attempts; ++unlock_attempts_left) {
-        boost::shared_ptr<LightWorldState> s(new LightWorldState);
-        s->x = x;
-        s->y = y;
-        s->key_picked_up = key_picked_up;
-        s->goal_unlocked = goal_unlocked;
-        s->unlock_attempts_left = unlock_attempts_left;
-        complete_state_vector_.push_back(s);
+        for (int key_pickup_up = 0; key_pickup_up < 2; ++key_pickup_up) {
+          for (int goal_unlocked = 0; goal_unlocked < 2; ++goal_unlocked) {
+            for (int unlock_attempts_left = 0;
+                 unlock_attempts_left <= params_.initial_unlock_attempts;
+                 ++unlock_attempts_left) {
+              boost::shared_ptr<LightWorldState> s(new LightWorldState);
+              s->x = x;
+              s->y = y;
+              s->key_picked_up = key_picked_up;
+              s->goal_unlocked = goal_unlocked;
+              s->unlock_attempts_left = unlock_attempts_left;
+              complete_state_vector_.push_back(s);
+            }
+          }
+        }
       }
     }
 
-    for (int action_type = 0; action_type < NUM_ACTIONS; ++action_type) {
-      boost::shared_ptr<LightWorldAction> a(new LightWorldAction);
-      a->type = (LightWorldActionType)action_type;
-      default_action_list_.push_back(a);
-    }
+    up_action.reset(new LightWorldAction);
+    up_action->type = UP;
+    down_action.reset(new LightWorldAction);
+    down_action->type = DOWN;
+    left_action.reset(new LightWorldAction);
+    left_action->type = LEFT;
+    right_action.reset(new LightWorldAction);
+    right_action->type = RIGHT;
+    pickup_action.reset(new LightWorldAction);
+    pickup_action->type = PICKUP;
+    unlock_action.reset(new LightWorldAction);
+    unlock_action->type = UNLOCK;
 
   }
 
@@ -139,12 +153,32 @@ namespace utexas_planning {
     return ((state->x == params_.goal_x) && (state->y == params_.goal_y) && (state->goal_unlocked));
   }
 
-  void LightWorldModel::getActionsAtState(const State::ConstPtr& state,
+  void LightWorldModel::getActionsAtState(const State::ConstPtr& state_base,
                                           std::vector<Action::ConstPtr>& actions) const {
     actions.clear();
     if (!isTerminalState(state)) {
-      boost::shared_ptr<LightWorldAction> upa(new LightWorldAction);
-      actions = default_action_list_;
+      boost::shared_ptr<const LightWorldState> state = boost::dynamic_pointer_cast<const LightWorldState>(state_base);
+      if (!state) {
+        throw DowncastException("State", "LightWorldState");
+      }
+      if (state.x > 0) {
+        actions.push_back(left_action);
+      }
+      if (state.x < params_.grid_size - 1) {
+        actions.push_back(right_action);
+      }
+      if (state.y > 0) {
+        actions.push_back(down_action);
+      }
+      if (state.y < params_.grid_size - 1) {
+        actions.push_back(up_action);
+      }
+      if (!state.key_picked_up) {
+        actions.push_back(pickup_action);
+      }
+      if (!state.goal_unlocked) {
+        actions.push_back(unlock_action);
+      }
     }
   }
 
@@ -173,6 +207,11 @@ namespace utexas_planning {
     probabilities.clear();
 
     if (!isTerminalState(state)) {
+
+      if (state == 0
+      LightWorldState next_state = *state;
+
+      //
       boost::shared_ptr<LightWorldState> ns(new LightWorldState);
       ns->x = state->x;
       ns->y = (state->y == 0) ? params_.grid_size - 1 : state->y - 1;
@@ -204,7 +243,6 @@ namespace utexas_planning {
       probabilities.push_back(p_down);
       probabilities.push_back(p_left);
       probabilities.push_back(p_right);
-
     }
 
   }

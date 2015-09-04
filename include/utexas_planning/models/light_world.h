@@ -26,7 +26,6 @@ namespace utexas_planning {
       bool operator<(const Action& other_base) const;
       void serialize(std::ostream& stream) const;
 
-
     private:
       friend class boost::serialization::access;
       template <typename Archive> void serialize(Archive& ar, const unsigned int version) {
@@ -129,12 +128,12 @@ namespace utexas_planning {
       std::vector<State::ConstPtr> complete_state_vector_;
       Params params_;
 
-      boost::shared_ptr<LightWorldAction> up_action_;
-      boost::shared_ptr<LightWorldAction> down_action_;
-      boost::shared_ptr<LightWorldAction> left_action_;
-      boost::shared_ptr<LightWorldAction> right_action_;
-      boost::shared_ptr<LightWorldAction> pickup_action_;
-      boost::shared_ptr<LightWorldAction> unlock_action_;
+      boost::shared_ptr<LightWorldAction> up_action;
+      boost::shared_ptr<LightWorldAction> down_action;
+      boost::shared_ptr<LightWorldAction> left_action;
+      boost::shared_ptr<LightWorldAction> right_action;
+      boost::shared_ptr<LightWorldAction> pickup_action;
+      boost::shared_ptr<LightWorldAction> unlock_action;
   };
 
 } /* utexas_planning */
