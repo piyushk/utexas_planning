@@ -1,0 +1,60 @@
+domain light_world_mdp {
+  requirements = {
+    reward-deterministic,
+    intermediate-nodes
+  };
+  types {
+    xpos : object;
+    ypos : object;
+    movement_dir : {@north, @south, @east, @west, @noop};
+  };
+  pvariables {
+    MIN-YPOS(ypos) : {non-fluent, bool, default = false};
+    unlock : {action-fluent, bool, default = false};
+    pickup : {action-fluent, bool, default = false};
+    robot-at(xpos, ypos) : {state-fluent, bool, default = false};
+    LOCK(xpos, ypos) : {non-fluent, bool, default = false};
+    unlock-attempts-left : {state-fluent, int, default = 5};
+    MIN-XPOS(xpos) : {non-fluent, bool, default = false};
+    key-picked-up : {state-fluent, bool, default = false};
+    NORTH(ypos, ypos) : {non-fluent, bool, default = false};
+    MAX-XPOS(xpos) : {non-fluent, bool, default = false};
+    num-valid-dirs : {interm-fluent, int, level = 1};
+    GOAL(xpos, ypos) : {non-fluent, bool, default = false};
+    move-east : {action-fluent, bool, default = false};
+    move-west : {action-fluent, bool, default = false};
+    move-south : {action-fluent, bool, default = false};
+    MAX-YPOS(ypos) : {non-fluent, bool, default = false};
+    SOUTH(ypos, ypos) : {non-fluent, bool, default = false};
+    MOVEMENT_NONDETERMINISM : {non-fluent, real, default = 0.1};
+    move-north : {action-fluent, bool, default = false};
+    movement-dir : {interm-fluent, movement_dir, level = 2};
+    EAST(xpos, xpos) : {non-fluent, bool, default = false};
+    goal-locked : {state-fluent, bool, default = true};
+    WEST(xpos, xpos) : {non-fluent, bool, default = false};
+    KEY(xpos, ypos) : {non-fluent, bool, default = false};
+  };
+  cpfs {
+    (robot-at' ?x ?y) = (if (^ (| (move-north) (move-south) (move-east) (move-west) ) (robot-at ?x ?y) ) then (KronDelta false) else (if (| (^ (== (movement_dir) @north) (exists ( (?y2 : ypos) ) (^ (NORTH ?y ?y2) (robot-at ?x ?y) )) ) (^ (== (movement_dir) @south) (exists ( (?y2 : ypos) ) (^ (SOUTH ?y ?y2) (robot-at ?x ?y) )) ) (^ (== (movement_dir) @east) (exists ( (?x2 : xpos) ) (^ (EAST ?x ?x2) (robot-at ?x ?y) )) ) (^ (== (movement_dir) @west) (exists ( (?x2 : xpos) ) (^ (WEST ?x ?x2) (robot-at ?x ?y) )) ) ) then (KronDelta true) else (KronDelta (robot-at ?x ?y))));
+    (key-picked-up') = (if (^ (pickup) (exists ( (?x : xpos) (?y : ypos) ) (^ (KEY ?x ?y) (robot-at ?x ?y) )) ) then (KronDelta true) else (KronDelta (key-picked-up)));
+    (unlock-attempts-left') = (if (^ (unlock) (> (unlock-attempts-left) 0) ) then (- (unlock-attempts-left) 1) else (unlock-attempts-left));
+    (movement-dir) = (if (| (move-north) (move-south) (move-east) (move-west) ) then (Discrete movement_dir ( (@north : (if (move-north) then (+ (- 1.0 (MOVEMENT_NONDETERMINISM)) (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs))) else (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs)))) (@south : (if (move-south) then (+ (- 1.0 (MOVEMENT_NONDETERMINISM)) (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs))) else (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs)))) (@east : (if (move-east) then (+ (- 1.0 (MOVEMENT_NONDETERMINISM)) (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs))) else (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs)))) (@west : (if (move-west) then (+ (- 1.0 (MOVEMENT_NONDETERMINISM)) (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs))) else (/ (MOVEMENT_NONDETERMINISM) (num-valid-dirs)))) )) else (KronDelta @noop));
+    (num-valid-dirs) = (+ (+ (+ (exists ( (?x : xpos) (?y : ypos) (?y2 : ypos) ) (^ (NORTH ?y ?y2) (robot-at ?x ?y) )) (exists ( (?x : xpos) (?y : ypos) (?y2 : ypos) ) (^ (SOUTH ?y ?y2) (robot-at ?x ?y) ))) (exists ( (?x : xpos) (?y : ypos) (?x2 : xpos) ) (^ (EAST ?x ?x2) (robot-at ?x ?y) ))) (exists ( (?x : xpos) (?y : ypos) (?x2 : xpos) ) (^ (WEST ?x ?x2) (robot-at ?x ?y) )));
+    (goal-locked') = (if (^ (unlock) (> (unlock-attempts-left) 0) (exists ( (?x : xpos) (?y : ypos) ) (^ (LOCK ?x ?y) (robot-at ?x ?y) )) ) then (KronDelta false) else (KronDelta (goal-locked)));
+  };
+  reward = (if (^ (~ (goal-locked)) (exists ( (?x : xpos) (?y : ypos) ) (^ (GOAL ?x ?y) (robot-at ?x ?y) )) ) then 0.0 else (- 0 1.0));
+  state-action-constraints {
+    (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MIN-XPOS ?x) (robot-at ?x ?y) ) (~ (move-west)) ));
+    (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MAX-XPOS ?x) (robot-at ?x ?y) ) (~ (move-east)) ));
+    (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MIN-YPOS ?y) (robot-at ?x ?y) ) (~ (move-south)) ));
+    (forall ( (?x : xpos) (?y : ypos) ) (=> (^ (MAX-YPOS ?y) (robot-at ?x ?y) ) (~ (move-north)) ));
+    (=> (| (goal-locked) (~ (exists ( (?x : xpos) (?y : ypos) ) (^ (GOAL ?x ?y) (robot-at ?x ?y) ))) ) (== (+ (+ (+ (+ (+ (move-north) (move-south)) (move-east)) (move-west)) (pickup)) (unlock)) 1) );
+    (=> (key-picked-up) (~ (pickup)) );
+    (=> (~ (goal-locked)) (~ (unlock)) );
+    (=> (^ (~ (goal-locked)) (exists ( (?x : xpos) (?y : ypos) ) (^ (GOAL ?x ?y) (robot-at ?x ?y) )) ) (~ (move-west)) );
+    (=> (^ (~ (goal-locked)) (exists ( (?x : xpos) (?y : ypos) ) (^ (GOAL ?x ?y) (robot-at ?x ?y) )) ) (~ (move-east)) );
+    (=> (^ (~ (goal-locked)) (exists ( (?x : xpos) (?y : ypos) ) (^ (GOAL ?x ?y) (robot-at ?x ?y) )) ) (~ (move-south)) );
+    (=> (^ (~ (goal-locked)) (exists ( (?x : xpos) (?y : ypos) ) (^ (GOAL ?x ?y) (robot-at ?x ?y) )) ) (~ (move-north)) );
+  };
+}
+

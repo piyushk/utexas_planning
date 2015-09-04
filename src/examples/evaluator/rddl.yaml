@@ -1,6 +1,6 @@
 models:
   - name: utexas_planning::RddlModel
-    rddl_domain: game_of_life
+    rddl_domain: academic_advising
 planners:
   - name: utexas_planning::MCTS
     max_playouts: 10000
