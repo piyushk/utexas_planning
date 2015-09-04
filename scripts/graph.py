@@ -47,7 +47,7 @@ def get_formatted_float(f):
 
 def draw_bar_chart(samples, top_level_names, second_level_names=None,
                    title=None, xlabel=None, ylabel=None, color=None,
-                   bottom=None, yticklabels=None):
+                   bottom=None, yticklabels=None, legend_loc=None):
 
     # So, samples can either contain a list of lists. The top level list
     # contains top level groups, and the second level list contains actual
@@ -130,7 +130,9 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
         ax.set_yticklabels(yticklabels)
 
     if top_level_names:
-        ax.legend(rects, top_level_names, mode='expand', ncol=2, loc='lower center')
+        if legend_loc is None:
+            legend_loc = 'upper center'
+        ax.legend(rects, top_level_names, mode='expand', ncol=2, loc=legend_loc)
 
     return fig, ax, rects, means
 
@@ -333,7 +335,7 @@ def get_formatted_combination_name(name_dict, name_mappings=None):
     return formatted_name
 
 def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_filter=None,
-                         attempt_auto_mapping=True, name_mappings=None):
+                         attempt_auto_mapping=True, name_mappings=None, legend_loc=None):
 
     data_per_file = []
     for file in filename:
@@ -457,4 +459,4 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
     else:
         xlabel = ylabel
         ylabel = zlabel
-        return draw_bar_chart(samples, top_level_names, second_level_names, title, xlabel, ylabel)
+        return draw_bar_chart(samples, top_level_names, second_level_names, title, xlabel, ylabel, legend_loc=legend_loc)

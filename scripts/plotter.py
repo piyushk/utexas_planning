@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("data", help="The directory containing csv files or a single csv file.", type=str)
 parser.add_argument("output", help="Column name in csv to plot.", type=str)
 parser.add_argument("--plot-type", help="Plot type. One of ['line', 'bar', '3d'].", type=str)
+parser.add_argument("--legend-loc", help="Legend location. 2 word combination of ['upper','lower','center','left','right'].", type=str)
 parser.add_argument("--filter", help="Comma separated primary grouping filter. Defaults to 'planner_name' if available",
                     type=str)
 parser.add_argument("--secondary-filter", help="Comma separated secondary grouping filter.", type=str)
@@ -31,7 +32,7 @@ if args.name_mappings is not None:
 
 fig, ax, rects, means= \
         graph.draw_from_data_frame(fs.expand_path_to_filelist(args.data), args.output, args.plot_type, args.filter,
-                                   args.secondary_filter, args.attempt_auto_mapping, name_mappings)
+                                   args.secondary_filter, args.attempt_auto_mapping, name_mappings, args.legend_loc)
 
 
 fig = plt.gcf()
