@@ -85,7 +85,7 @@ planners:
     action_selection_strategy: thompson_beta
     backup_strategy: eligibility
     eligibility_lambda: 0.0
-    thompson_beta_min_reward: 0
+    thompson_beta_min_reward: -1
     thompson_beta_max_reward: 1200
   - name: utexas_planning::MCTS
     max_playouts: 10000
@@ -93,7 +93,7 @@ planners:
     action_selection_strategy: thompson_beta
     backup_strategy: eligibility
     eligibility_lambda: 0.5
-    thompson_beta_min_reward: 0
+    thompson_beta_min_reward: -1
     thompson_beta_max_reward: 1200
   - name: utexas_planning::MCTS
     max_playouts: 10000
@@ -101,7 +101,7 @@ planners:
     action_selection_strategy: thompson_beta
     backup_strategy: eligibility
     eligibility_lambda: 0.9
-    thompson_beta_min_reward: 0
+    thompson_beta_min_reward: -1
     thompson_beta_max_reward: 1200
   - name: utexas_planning::MCTS
     max_playouts: 10000
@@ -109,5 +109,5 @@ planners:
     action_selection_strategy: thompson_beta
     backup_strategy: eligibility
     eligibility_lambda: 1.0
-    thompson_beta_min_reward: 0
+    thompson_beta_min_reward: -1
     thompson_beta_max_reward: 1200
