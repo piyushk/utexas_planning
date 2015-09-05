@@ -259,6 +259,7 @@ namespace utexas_planning {
 
     if (params_.action_selection_strategy == UCT ||
         params_.action_selection_strategy == THOMPSON ||
+        params_.action_selection_strategy == THOMPSON_BETA ||
         params_.action_selection_strategy == HIGHEST_MEAN ||
         params_.action_selection_strategy == RANDOM ||
         params_.action_selection_strategy == UNIFORM) {
@@ -286,6 +287,9 @@ namespace utexas_planning {
                   planning_value = rng_->normalFloat(action_info_pair.second->mean_value,
                                                      sqrtf(action_info_pair.second->variance));
                 }
+              } else if (params_.action_selection_strategy == THOMPSON_BETA) {
+                planning_value = rng_->betaFloat(action_info_pair.second->alpha,
+                                                 action_info_pair.second->beta);
               } else if (params_.action_selection_strategy == HIGHEST_MEAN) {
                 if (action_info_pair.second->visits >= params_.mean_initial_random_trials) {
                   planning_value = action_info_pair.second->mean_value;
@@ -322,11 +326,26 @@ namespace utexas_planning {
                       "+-" << action_info->variance << " (" << action_info->visits << ")");
     ++(action_info->visits);
     action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
-    action_info->sum_squares += backup_value * backup_value;
-    action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
-    action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
-    // Always ensure that variance is positive. Due to floating point arithmetic, sometimes it turns up to be negative.
-    action_info->variance = std::max(action_info->variance, 1e-10f);
+
+    if (params_.action_selection_strategy == THOMPSON) {
+      action_info->sum_squares += backup_value * backup_value;
+      action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
+      action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
+      // Always ensure that variance is positive. Due to floating point arithmetic, sometimes it turns up to be negative.
+      action_info->variance = std::max(action_info->variance, 1e-10f);
+    }
+
+    if (params_.action_selection_strategy == THOMPSON_BETA) {
+      float normalized_reward =
+        (backup_value - params_.thompson_beta_min_reward) /
+        (params_.thompson_beta_max_reward - params_.thompson_beta_min_reward);
+      if (normalized_reward < 0.0f || normalized_reward > 1.0f) {
+        throw IncorrectUsageException("Received normalized reward outside [0, 1] range: " +
+                                      boost::lexical_cast<std::string>(normalized_reward));
+      }
+      action_info->alpha += normalized_reward;
+      action_info->beta += (1.0f - normalized_reward);
+    }
 
     if (params_.backup_strategy == ELIGIBILITY_TRACE) {
       MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<

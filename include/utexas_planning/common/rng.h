@@ -1,6 +1,7 @@
 #ifndef UTEXAS_PLANNING_RNG_H_
 #define UTEXAS_PLANNING_RNG_H_
 
+#include <boost/math/distributions.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/normal_distribution.hpp>
@@ -48,6 +49,12 @@ class RNG : public boost::mt19937 {
       boost::normal_distribution<float> dist(mean, variance);
       boost::variate_generator<boost::mt19937&, boost::normal_distribution<float> > gen(*this, dist);
       return gen();
+    }
+
+    inline float betaFloat(float alpha, float beta) {
+      float rand_from_uniform = randomFloat();
+      boost::math::beta_distribution<float> dist(alpha, beta);
+      return boost::math::quantile(dist, rand_from_uniform);
     }
 
     inline void randomOrdering(std::vector<unsigned int>& inds) {

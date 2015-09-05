@@ -36,18 +36,28 @@ namespace utexas_planning {
       StateActionNode(unsigned int visits = 0,
                       float mean_value = 0.0f,
                       float variance = 0.0f,
-                      float sum_squares = 0.0f) :
-        visits(visits), mean_value(mean_value), variance(variance), sum_squares(sum_squares) {}
+                      float sum_squares = 0.0f,
+                      float alpha = 1.0f,
+                      float beta = 1.0f) :
+        visits(visits),
+        mean_value(mean_value),
+        variance(variance),
+        sum_squares(sum_squares),
+        alpha(alpha),
+        beta(beta) {}
       std::map<State::ConstPtr, StateNode::Ptr, State::PtrComparator> next_states;
       unsigned int visits;
       float mean_value;
       float variance;
       float sum_squares;
+      float alpha;
+      float beta;
   };
 
   const int NO_MAX_PLAYOUTS = -1;
   const std::string UCT = "uct";
   const std::string THOMPSON = "thompson";
+  const std::string THOMPSON_BETA = "thompson_beta";
   const std::string RANDOM = "random";
   const std::string HIGHEST_MEAN = "mean";
   const std::string UNIFORM = "uniform";
@@ -74,6 +84,8 @@ namespace utexas_planning {
       _(std::string,action_selection_strategy,action_selection_strategy,UCT) \
       _(float,uct_reward_bound,uct_reward_bound,10000) \
       _(int,thompson_initial_random_trials,thompson_initial_random_trials,5) \
+      _(int,thompson_beta_max_reward,thompson_beta_max_reward,100) \
+      _(int,thompson_beta_min_reward,thompson_beta_min_reward,-100) \
       _(int,mean_initial_random_trials,mean_initial_random_trials,5) \
       _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
       _(float,eligibility_lambda,eligibility_lambda,0.0) \
