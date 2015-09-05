@@ -339,9 +339,14 @@ namespace utexas_planning {
       float normalized_reward =
         (backup_value - params_.thompson_beta_min_reward) /
         (params_.thompson_beta_max_reward - params_.thompson_beta_min_reward);
-      if (normalized_reward < 0.0f || normalized_reward > 1.0f) {
-        throw IncorrectUsageException("Received normalized reward outside [0, 1] range: " +
-                                      boost::lexical_cast<std::string>(normalized_reward));
+      if (normalized_reward < 0.0f) {
+        std::cerr << "Received reward: " << backup_value <<
+          " below specified min: " << params_.thompson_beta_min_reward << std::endl;
+        normalized_reward = 0.0f;
+      } else if (normalized_reward > 1.0f) {
+        std::cerr << "Received reward: " << backup_value <<
+          " above specified max: " << params_.thompson_beta_max_reward << std::endl;
+        normalized_reward = 1.0f;
       }
       action_info->alpha += normalized_reward;
       action_info->beta += (1.0f - normalized_reward);

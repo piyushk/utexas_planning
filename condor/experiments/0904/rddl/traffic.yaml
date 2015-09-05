@@ -1,0 +1,113 @@
+models:
+  - name: utexas_planning::RddlModel
+    rddl_domain: traffic
+planners:
+  - name: utexas_planning::RandomPlanner
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uniform
+    backup_strategy: eligibility
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uniform
+    backup_strategy: eligibility
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uniform
+    backup_strategy: eligibility
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uniform
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson_beta
+    backup_strategy: eligibility
+    eligibility_lambda: 0.0
+    thompson_beta_min_reward: -2080 #all 56 cells occupied.
+    thompson_beta_max_reward: 0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson_beta
+    backup_strategy: eligibility
+    eligibility_lambda: 0.5
+    thompson_beta_min_reward: -2080 #all 56 cells occupied.
+    thompson_beta_max_reward: 0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson_beta
+    backup_strategy: eligibility
+    eligibility_lambda: 0.9
+    thompson_beta_min_reward: -2080 #all 56 cells occupied.
+    thompson_beta_max_reward: 0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: thompson_beta
+    backup_strategy: eligibility
+    eligibility_lambda: 1.0
+    thompson_beta_min_reward: -2080 #all 56 cells occupied.
+    thompson_beta_max_reward: 0
