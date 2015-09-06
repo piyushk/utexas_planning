@@ -58,6 +58,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
 
     means = []
     confs = []
+    sigs = []
     second_level_grouping_available = \
             isinstance(samples[0][0], collections.Sequence)
     top_level_methods = len(samples)
@@ -73,6 +74,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
     for i in range(top_level_methods):
         means.append([])
         confs.append([])
+        sigs.append([])
 
     for i in range(top_level_methods):
         for j in range(second_level_methods):
@@ -84,17 +86,25 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
                 print j,
             print ": " + "%.2f"%m + "+-" + "%.2f"%h
             is_sig = True
-            for k in range(second_level_methods):
-                if j == k:
-                    continue
-                is_sig = is_significant(samples2[i][j], samples2[i][k])
-                if not is_sig:
-                    break
+            if second_level_grouping_available:
+                for k in range(second_level_methods):
+                    if j == k:
+                        continue
+                    is_sig = is_significant(samples2[i][j], samples2[i][k])
+                    if not is_sig:
+                        break
+            else:
+                for k in range(top_level_methods):
+                    if i == k:
+                        continue
+                    is_sig = is_significant(samples2[i][j], samples2[k][j])
+                    if not is_sig:
+                        break
             if is_sig:
                 print "  is significantly different from all other methods in the group."
             means[i].append(m)
             confs[i].append(h)
-
+            sigs[i].append(is_sig)
 
     ind = np.arange(second_level_methods)
     width = 1.0 / (top_level_methods + 1)
@@ -134,7 +144,7 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
             legend_loc = 'upper center'
         ax.legend(rects, top_level_names, mode='expand', ncol=2, loc=legend_loc)
 
-    return fig, ax, rects, means
+    return fig, ax, rects, means, sigs
 
 def draw_line_graph(samples, top_level_names, second_level_names=None,
                     title=None, xlabel=None, ylabel=None, yticklabels=None):

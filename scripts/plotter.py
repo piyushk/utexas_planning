@@ -5,6 +5,7 @@ import graph
 import filesystem as fs
 import json
 import matplotlib.pyplot as plt; plt.rcdefaults()
+from matplotlib.font_manager import FontProperties
 
 parser = argparse.ArgumentParser()
 parser.add_argument("data", help="The directory containing csv files or a single csv file.", type=str)
@@ -30,10 +31,27 @@ name_mappings = None
 if args.name_mappings is not None:
     name_mappings = json.loads(args.name_mappings)
 
-fig, ax, rects, means= \
+fig, ax, rects, means, sigs = \
         graph.draw_from_data_frame(fs.expand_path_to_filelist(args.data), args.output, args.plot_type, args.filter,
                                    args.secondary_filter, args.attempt_auto_mapping, name_mappings, args.legend_loc)
 
+
+# from IPython import embed
+# embed()
+
+font0 = FontProperties()
+
+if args.plot_type == "bar":
+    for i in range(len(rects)):
+        for j in range(len(rects[i])):
+            height = rects[i][j].get_height()
+            if means[i][j] < 0:
+                height = -height
+            font = font0.copy()
+            if sigs[i][j]:
+                font.set_weight('bold')
+            ax.text(rects[i][j].get_x()+rects[i][j].get_width()/2., 1.03*height, "%.1f"%means[i][j], ha='center',
+                    va='center', fontproperties=font)
 
 fig = plt.gcf()
 fig.set_size_inches(5,4)
