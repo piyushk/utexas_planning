@@ -85,6 +85,7 @@ namespace utexas_planning {
       _(int,goal_y,goal_y,3) \
       _(int,initial_unlock_attempts,initial_unlock_attempts,5) \
       _(int,grid_size,grid_size,10) \
+      _(int,nondeterminism,nondeterminism,0.1f) \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 
@@ -124,6 +125,16 @@ namespace utexas_planning {
       virtual std::string getName() const;
 
     protected:
+
+      inline int getStateIndex(const LightWorldState& state) const {
+        int idx =
+          state.unlock_attempts_left +
+          (state.goal_unlocked * (params_.initial_unlock_attempts + 1)) +
+          (state.key_picked_up * 2 * (params_.initial_unlock_attempts + 1)) +
+          (state.y * 2 * 2 * (params_.initial_unlock_attempts + 1)) +
+          (state.x * (params_.grid_size) * 2 * 2 * (params_.initial_unlock_attempts + 1));
+        return idx;
+      }
 
       std::vector<State::ConstPtr> complete_state_vector_;
       Params params_;

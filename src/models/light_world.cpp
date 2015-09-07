@@ -1,7 +1,7 @@
 #include <boost/lexical_cast.hpp>
 #include <class_loader/class_loader.h>
 #include <utexas_planning/common/exceptions.h>
-#include <utexas_planning/models/grid_model.h>
+#include <utexas_planning/models/light_world.h>
 
 namespace utexas_planning {
 
@@ -112,7 +112,7 @@ namespace utexas_planning {
     // Precache the complete state vector of 100 states.
     for (int x = 0; x < params_.grid_size; ++x) {
       for (int y = 0; y < params_.grid_size; ++y) {
-        for (int key_pickup_up = 0; key_pickup_up < 2; ++key_pickup_up) {
+        for (int key_picked_up = 0; key_picked_up < 2; ++key_picked_up) {
           for (int goal_unlocked = 0; goal_unlocked < 2; ++goal_unlocked) {
             for (int unlock_attempts_left = 0;
                  unlock_attempts_left <= params_.initial_unlock_attempts;
@@ -150,34 +150,41 @@ namespace utexas_planning {
     if (!state) {
       throw DowncastException("State", "LightWorldState");
     }
-    return ((state->x == params_.goal_x) && (state->y == params_.goal_y) && (state->goal_unlocked));
+    return ((!(state->goal_unlocked)) && (state->unlock_attempts_left == 0)) ||
+      ((state->x == params_.goal_x) && (state->y == params_.goal_y) && (state->goal_unlocked));
   }
 
   void LightWorldModel::getActionsAtState(const State::ConstPtr& state_base,
                                           std::vector<Action::ConstPtr>& actions) const {
     actions.clear();
+    boost::shared_ptr<const LightWorldState> state = boost::dynamic_pointer_cast<const LightWorldState>(state_base);
+    if (!state) {
+      throw DowncastException("State", "LightWorldState");
+    }
     if (!isTerminalState(state)) {
       boost::shared_ptr<const LightWorldState> state = boost::dynamic_pointer_cast<const LightWorldState>(state_base);
       if (!state) {
         throw DowncastException("State", "LightWorldState");
       }
-      if (state.x > 0) {
+      if (state->x > 0) {
         actions.push_back(left_action);
       }
-      if (state.x < params_.grid_size - 1) {
+      if (state->x < params_.grid_size - 1) {
         actions.push_back(right_action);
       }
-      if (state.y > 0) {
+      if (state->y > 0) {
         actions.push_back(down_action);
       }
-      if (state.y < params_.grid_size - 1) {
+      if (state->y < params_.grid_size - 1) {
         actions.push_back(up_action);
       }
-      if (!state.key_picked_up) {
+      if (!state->key_picked_up) {
         actions.push_back(pickup_action);
-      }
-      if (!state.goal_unlocked) {
-        actions.push_back(unlock_action);
+      } else {
+        // Can only unlock when you have the key.
+        if (!state->goal_unlocked) {
+          actions.push_back(unlock_action);
+        }
       }
     }
   }
@@ -208,43 +215,103 @@ namespace utexas_planning {
 
     if (!isTerminalState(state)) {
 
-      if (state == 0
-      LightWorldState next_state = *state;
+      if (action->type == PICKUP || action->type == UNLOCK) {
+        LightWorldState next_state = *state;
+        float reward = 0.0f;
+        if (action->type == PICKUP &&
+            state->x == params_.key_x &&
+            state->y == params_.key_y) {
+          next_state.key_picked_up = true;
+        } else if (action->type == UNLOCK) {
+          if (state->unlock_attempts_left > 0) {
+            next_state.unlock_attempts_left -= 1;
+            if (state->x == params_.lock_x &&
+                state->y == params_.lock_y) {
+              next_state.goal_unlocked = true;
+            } else if (next_state.unlock_attempts_left == 0) {
+              reward = -100.0f;
+            }
+          }
+        }
+        rewards.push_back(reward);
+        probabilities.push_back(1.0f);
 
-      //
-      boost::shared_ptr<LightWorldState> ns(new LightWorldState);
-      ns->x = state->x;
-      ns->y = (state->y == 0) ? params_.grid_size - 1 : state->y - 1;
-      next_states.push_back(ns);
-      ns.reset(new LightWorldState);
-      ns->x = state->x;
-      ns->y = (state->y + 1) % params_.grid_size;
-      next_states.push_back(ns);
-      ns.reset(new LightWorldState);
-      ns->x = (state->x == 0) ? params_.grid_size - 1 : state->x - 1;
-      ns->y = state->y;
-      next_states.push_back(ns);
-      ns.reset(new LightWorldState);
-      ns->x = (state->x + 1) % params_.grid_size;
-      ns->y = state->y;
-      next_states.push_back(ns);
+        int idx = getStateIndex(next_state);
+        next_states.push_back(complete_state_vector_[idx]);
+      } else {
+        // We're performing a navigation action.
+        int num_valid_nav_actions = 0;
+        if (state->x > 0) {
+          ++num_valid_nav_actions;
+        }
+        if (state->x < params_.grid_size - 1) {
+          ++num_valid_nav_actions;
+        }
+        if (state->y > 0) {
+          ++num_valid_nav_actions;
+        }
+        if (state->y < params_.grid_size - 1) {
+          ++num_valid_nav_actions;
+        }
 
-      rewards.push_back(-1);
-      rewards.push_back(-1);
-      rewards.push_back(-1);
-      rewards.push_back(-1);
+        LightWorldState state_down = *state;
+        ++state_down.y;
+        LightWorldState state_left = *state;
+        --state_left.x;
+        LightWorldState state_right = *state;
+        ++state_right.x;
 
-      float p_up = (action->type == UP) ? 0.85f : 0.05f;
-      float p_down = (action->type == DOWN) ? 0.85f : 0.05f;
-      float p_left = (action->type == LEFT) ? 0.85f : 0.05f;
-      float p_right = (action->type == RIGHT) ? 0.85f : 0.05f;
+        if (state->x > 0) {
+          // Left action is valid;
+          LightWorldState next_state = *state;
+          --next_state.x;
+          float p = (action->type == LEFT) ?
+            ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
+            (params_.nondeterminism / num_valid_nav_actions);
+          int idx = getStateIndex(next_state);
+          next_states.push_back(complete_state_vector_[idx]);
+          probabilities.push_back(p);
+          rewards.push_back(-1);
+        }
+        if (state->x < params_.grid_size - 1) {
+          // Right action is valid;
+          LightWorldState next_state = *state;
+          ++next_state.x;
+          float p = (action->type == RIGHT) ?
+            ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
+            (params_.nondeterminism / num_valid_nav_actions);
+          int idx = getStateIndex(next_state);
+          next_states.push_back(complete_state_vector_[idx]);
+          probabilities.push_back(p);
+          rewards.push_back(-1);
+        }
+        if (state->y > 0) {
+          // Down action is valid;
+          LightWorldState next_state = *state;
+          --next_state.y;
+          float p = (action->type == DOWN) ?
+            ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
+            (params_.nondeterminism / num_valid_nav_actions);
+          int idx = getStateIndex(next_state);
+          next_states.push_back(complete_state_vector_[idx]);
+          probabilities.push_back(p);
+          rewards.push_back(-1);
+        }
+        if (state->y < params_.grid_size - 1) {
+          // Up action is valid;
+          LightWorldState next_state = *state;
+          ++next_state.y;
+          float p = (action->type == UP) ?
+            ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
+            (params_.nondeterminism / num_valid_nav_actions);
+          int idx = getStateIndex(next_state);
+          next_states.push_back(complete_state_vector_[idx]);
+          probabilities.push_back(p);
+          rewards.push_back(-1);
+        }
 
-      probabilities.push_back(p_up);
-      probabilities.push_back(p_down);
-      probabilities.push_back(p_left);
-      probabilities.push_back(p_right);
+      }
     }
-
   }
 
   void LightWorldModel::takeAction(const State::ConstPtr& state,
@@ -267,17 +334,13 @@ namespace utexas_planning {
   }
 
   State::ConstPtr LightWorldModel::getStartState(long seed) const {
-    if ((params_.start_x < 0 || params_.start_x >= params_.grid_size) ||
-        (params_.start_y < 0 || params_.start_y >= params_.grid_size)) {
-      RNG rng(seed);
-      int idx = rng.randomInt(complete_state_vector_.size() - 1);
-      while (isTerminalState(complete_state_vector_[idx])) {
-        idx = rng.randomInt(complete_state_vector_.size() - 1);
-      }
-      return complete_state_vector_[idx];
-    }
-    // Vector is ordered in column major.
-    return complete_state_vector_[params_.start_x * params_.grid_size + params_.start_y];
+    LightWorldState start_state;
+    start_state.x = params_.start_x;
+    start_state.y = params_.start_y;
+    start_state.unlock_attempts_left = params_.initial_unlock_attempts;
+    start_state.goal_unlocked = false;
+    start_state.key_picked_up = false;
+    return complete_state_vector_[getStateIndex(start_state)];
   }
 
   float LightWorldModel::getInitialTimeout() const {
@@ -289,7 +352,7 @@ namespace utexas_planning {
   }
 
   std::string LightWorldModel::getName() const {
-    return std::string("Grid");
+    return std::string("LightWorld");
   }
 
 } /* utexas_planning */
