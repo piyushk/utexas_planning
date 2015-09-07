@@ -1,0 +1,46 @@
+models:
+  - name: utexas_planning::LightWorldModel
+    incorrect_pickup_reward: -1.0
+    incorrect_unlock_reward: -1.0
+    initial_unlock_attempts: 3
+  - name: utexas_planning::LightWorldModel
+    incorrect_pickup_reward: -5.0
+    incorrect_unlock_reward: -5.0
+    initial_unlock_attempts: 3
+  - name: utexas_planning::LightWorldModel
+    incorrect_pickup_reward: -10.0
+    incorrect_unlock_reward: -10.0
+    initial_unlock_attempts: 3
+  - name: utexas_planning::LightWorldModel
+    incorrect_pickup_reward: -15.0
+    incorrect_unlock_reward: -15.0
+    initial_unlock_attempts: 3
+  - name: utexas_planning::LightWorldModel
+    incorrect_pickup_reward: -20.0
+    incorrect_unlock_reward: -20.0
+    initial_unlock_attempts: 3
+planners:
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 1000
+    max_depth: 30
+    eligibility_lambda: 0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 1000
+    max_depth: 30
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 1000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 1000
+    max_depth: 30
+    eligibility_lambda: 1.0
