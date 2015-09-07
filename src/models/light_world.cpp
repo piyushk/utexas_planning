@@ -227,7 +227,7 @@ namespace utexas_planning {
           if (state->x == params_.key_x && state->y == params_.key_y) {
             next_state.key_picked_up = true;
           } else {
-            reward = -10.0f;
+            reward = -5.0f;
           }
         } else if (action->type == UNLOCK) {
           if (state->unlock_attempts_left > 0) {
@@ -236,7 +236,7 @@ namespace utexas_planning {
                 state->y == params_.lock_y) {
               next_state.goal_unlocked = true;
             } else {
-              reward = -10.0f;
+              reward = -5.0f;
             }
           }
         }
