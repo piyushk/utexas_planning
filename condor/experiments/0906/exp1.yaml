@@ -6,7 +6,23 @@ models:
     nondeterminism: 0.5
 planners:
   - name: utexas_planning::MCTS
-    action_selection_strategy: thompson
+    action_selection_strategy: thompson_beta
+    thompson_beta_min_reward: -1550
+    thompson_beta_max_reward: 100
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson_beta
+    thompson_beta_min_reward: -1550
+    thompson_beta_max_reward: 100
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson_beta
+    thompson_beta_min_reward: -1550
+    thompson_beta_max_reward: 100
     max_playouts: 2000
     max_depth: 30
     eligibility_lambda: 0.9
@@ -16,7 +32,19 @@ planners:
     thompson_beta_max_reward: 100
     max_playouts: 2000
     max_depth: 30
-    eligibility_lambda: 0.9
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.5
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 200
@@ -24,7 +52,28 @@ planners:
     max_depth: 30
     eligibility_lambda: 0.9
   - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
     action_selection_strategy: uniform
     max_playouts: 2000
     max_depth: 30
     eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 1.0
