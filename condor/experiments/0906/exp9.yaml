@@ -3,32 +3,32 @@ models:
     incorrect_pickup_reward: -3.0
     incorrect_unlock_reward: -3.0
     initial_unlock_attempts: 3
-    nondeterminism: 0.0f
+    nondeterminism: 0.0
   - name: utexas_planning::LightWorldModel
     incorrect_pickup_reward: -3.0
     incorrect_unlock_reward: -3.0
     initial_unlock_attempts: 3
-    nondeterminism: 0.1f
+    nondeterminism: 0.1
   - name: utexas_planning::LightWorldModel
     incorrect_pickup_reward: -3.0
     incorrect_unlock_reward: -3.0
     initial_unlock_attempts: 3
-    nondeterminism: 0.2f
+    nondeterminism: 0.2
   - name: utexas_planning::LightWorldModel
     incorrect_pickup_reward: -3.0
     incorrect_unlock_reward: -3.0
     initial_unlock_attempts: 3
-    nondeterminism: 0.3f
+    nondeterminism: 0.3
   - name: utexas_planning::LightWorldModel
     incorrect_pickup_reward: -3.0
     incorrect_unlock_reward: -3.0
     initial_unlock_attempts: 3
-    nondeterminism: 0.4f
+    nondeterminism: 0.4
   - name: utexas_planning::LightWorldModel
     incorrect_pickup_reward: -3.0
     incorrect_unlock_reward: -3.0
     initial_unlock_attempts: 3
-    nondeterminism: 0.5f
+    nondeterminism: 0.5
 planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
