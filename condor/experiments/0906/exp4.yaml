@@ -31,28 +31,28 @@ models:
 planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: thompson_beta
-    thompson_beta_min_reward: -150
+    thompson_beta_min_reward: -30
     thompson_beta_max_reward: 100
     max_playouts: 1000
     max_depth: 30
     eligibility_lambda: 0
   - name: utexas_planning::MCTS
     action_selection_strategy: thompson_beta
-    thompson_beta_min_reward: -150
+    thompson_beta_min_reward: -30
     thompson_beta_max_reward: 100
     max_playouts: 1000
     max_depth: 30
     eligibility_lambda: 0.5
   - name: utexas_planning::MCTS
     action_selection_strategy: thompson_beta
-    thompson_beta_min_reward: -150
+    thompson_beta_min_reward: -30
     thompson_beta_max_reward: 100
     max_playouts: 1000
     max_depth: 30
     eligibility_lambda: 0.9
   - name: utexas_planning::MCTS
     action_selection_strategy: thompson_beta
-    thompson_beta_min_reward: -150
+    thompson_beta_min_reward: -30
     thompson_beta_max_reward: 100
     max_playouts: 1000
     max_depth: 30
