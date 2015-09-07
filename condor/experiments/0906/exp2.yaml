@@ -1,9 +1,13 @@
 models:
   - name: utexas_planning::LightWorldModel
   - name: utexas_planning::LightWorldModel
-    nondeterminism: 0.2
+    initial_unlock_attempts: 4
   - name: utexas_planning::LightWorldModel
-    nondeterminism: 0.5
+    initial_unlock_attempts: 3
+  - name: utexas_planning::LightWorldModel
+    initial_unlock_attempts: 2
+  - name: utexas_planning::LightWorldModel
+    initial_unlock_attempts: 1
 planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: thompson

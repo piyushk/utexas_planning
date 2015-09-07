@@ -1,0 +1,72 @@
+models:
+  - name: utexas_planning::LightWorldModel
+planners:
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson_beta
+    thompson_beta_min_reward: -1550
+    thompson_beta_max_reward: 100
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson
+    max_playouts: 4000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson_beta
+    thompson_beta_min_reward: -1550
+    thompson_beta_max_reward: 100
+    max_playouts: 4000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 4000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    max_playouts: 4000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson
+    max_playouts: 8000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: thompson_beta
+    thompson_beta_min_reward: -1550
+    thompson_beta_max_reward: 100
+    max_playouts: 8000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    max_playouts: 8000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    max_playouts: 8000
+    max_depth: 30
+    eligibility_lambda: 0.9

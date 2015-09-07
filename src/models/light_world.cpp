@@ -114,8 +114,7 @@ namespace utexas_planning {
       for (int y = 0; y < params_.grid_size; ++y) {
         for (int key_picked_up = 0; key_picked_up < 2; ++key_picked_up) {
           for (int goal_unlocked = 0; goal_unlocked < 2; ++goal_unlocked) {
-            for (int unlock_attempts_left = 0;
-                 unlock_attempts_left <= params_.initial_unlock_attempts;
+            for (int unlock_attempts_left = 0; unlock_attempts_left <= params_.initial_unlock_attempts;
                  ++unlock_attempts_left) {
               boost::shared_ptr<LightWorldState> s(new LightWorldState);
               s->x = x;
@@ -150,7 +149,8 @@ namespace utexas_planning {
     if (!state) {
       throw DowncastException("State", "LightWorldState");
     }
-    return ((!(state->goal_unlocked)) && (state->unlock_attempts_left == 0)) ||
+    return
+      /* ((!(state->goal_unlocked)) && (state->unlock_attempts_left == 0)) || */
       ((state->x == params_.goal_x) && (state->y == params_.goal_y) && (state->goal_unlocked));
   }
 
@@ -182,10 +182,15 @@ namespace utexas_planning {
         actions.push_back(pickup_action);
       } else {
         // Can only unlock when you have the key.
-        if (!state->goal_unlocked) {
+        if (!state->goal_unlocked && state->unlock_attempts_left > 0) {
           actions.push_back(unlock_action);
         }
       }
+    }
+    if (actions.size() == 0) {
+      std::stringstream ss;
+      ss << *state;
+      throw std::runtime_error("Bug! Found 0 actions at state " + ss.str());
     }
   }
 
@@ -217,19 +222,21 @@ namespace utexas_planning {
 
       if (action->type == PICKUP || action->type == UNLOCK) {
         LightWorldState next_state = *state;
-        float reward = 0.0f;
-        if (action->type == PICKUP &&
-            state->x == params_.key_x &&
-            state->y == params_.key_y) {
-          next_state.key_picked_up = true;
+        float reward = -1.0f;
+        if (action->type == PICKUP) {
+          if (state->x == params_.key_x && state->y == params_.key_y) {
+            next_state.key_picked_up = true;
+          } else {
+            reward = -10.0f;
+          }
         } else if (action->type == UNLOCK) {
           if (state->unlock_attempts_left > 0) {
             next_state.unlock_attempts_left -= 1;
             if (state->x == params_.lock_x &&
                 state->y == params_.lock_y) {
               next_state.goal_unlocked = true;
-            } else if (next_state.unlock_attempts_left == 0) {
-              reward = -100.0f;
+            } else {
+              reward = -10.0f;
             }
           }
         }
@@ -254,13 +261,6 @@ namespace utexas_planning {
           ++num_valid_nav_actions;
         }
 
-        LightWorldState state_down = *state;
-        ++state_down.y;
-        LightWorldState state_left = *state;
-        --state_left.x;
-        LightWorldState state_right = *state;
-        ++state_right.x;
-
         if (state->x > 0) {
           // Left action is valid;
           LightWorldState next_state = *state;
@@ -269,9 +269,13 @@ namespace utexas_planning {
             ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
             (params_.nondeterminism / num_valid_nav_actions);
           int idx = getStateIndex(next_state);
+          float reward = -1.0f;
+          if (isTerminalState(complete_state_vector_[idx])) {
+            reward += 100.0f;
+          }
           next_states.push_back(complete_state_vector_[idx]);
           probabilities.push_back(p);
-          rewards.push_back(-1);
+          rewards.push_back(reward);
         }
         if (state->x < params_.grid_size - 1) {
           // Right action is valid;
@@ -281,9 +285,13 @@ namespace utexas_planning {
             ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
             (params_.nondeterminism / num_valid_nav_actions);
           int idx = getStateIndex(next_state);
+          float reward = -1.0f;
+          if (isTerminalState(complete_state_vector_[idx])) {
+            reward += 100.0f;
+          }
           next_states.push_back(complete_state_vector_[idx]);
           probabilities.push_back(p);
-          rewards.push_back(-1);
+          rewards.push_back(reward);
         }
         if (state->y > 0) {
           // Down action is valid;
@@ -293,9 +301,13 @@ namespace utexas_planning {
             ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
             (params_.nondeterminism / num_valid_nav_actions);
           int idx = getStateIndex(next_state);
+          float reward = -1.0f;
+          if (isTerminalState(complete_state_vector_[idx])) {
+            reward += 100.0f;
+          }
           next_states.push_back(complete_state_vector_[idx]);
           probabilities.push_back(p);
-          rewards.push_back(-1);
+          rewards.push_back(reward);
         }
         if (state->y < params_.grid_size - 1) {
           // Up action is valid;
@@ -305,9 +317,13 @@ namespace utexas_planning {
             ((1.0f - params_.nondeterminism) + (params_.nondeterminism / num_valid_nav_actions)) :
             (params_.nondeterminism / num_valid_nav_actions);
           int idx = getStateIndex(next_state);
+          float reward = -1.0f;
+          if (isTerminalState(complete_state_vector_[idx])) {
+            reward += 100.0f;
+          }
           next_states.push_back(complete_state_vector_[idx]);
           probabilities.push_back(p);
-          rewards.push_back(-1);
+          rewards.push_back(reward);
         }
 
       }

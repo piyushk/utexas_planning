@@ -75,8 +75,8 @@ namespace utexas_planning {
     public:
 
 #define PARAMS(_) \
-      _(int,start_x,start_x,-1) \
-      _(int,start_y,start_y,-1) \
+      _(int,start_x,start_x,0) \
+      _(int,start_y,start_y,0) \
       _(int,key_x,key_x,1) \
       _(int,key_y,key_y,3) \
       _(int,lock_x,lock_x,4) \
@@ -84,8 +84,8 @@ namespace utexas_planning {
       _(int,goal_x,goal_x,4) \
       _(int,goal_y,goal_y,3) \
       _(int,initial_unlock_attempts,initial_unlock_attempts,5) \
-      _(int,grid_size,grid_size,10) \
-      _(int,nondeterminism,nondeterminism,0.1f) \
+      _(int,grid_size,grid_size,5) \
+      _(float,nondeterminism,nondeterminism,0.1f) \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 
