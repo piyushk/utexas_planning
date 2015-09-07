@@ -85,6 +85,8 @@ namespace utexas_planning {
       _(int,goal_y,goal_y,3) \
       _(int,initial_unlock_attempts,initial_unlock_attempts,5) \
       _(int,grid_size,grid_size,5) \
+      _(float,incorrect_pickup_reward,incorrect_pickup_reward,-1.0f) \
+      _(float,incorrect_unlock_reward,incorrect_unlock_reward,-1.0f) \
       _(float,nondeterminism,nondeterminism,0.1f) \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
