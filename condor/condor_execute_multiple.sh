@@ -14,5 +14,5 @@ shopt -s nullglob
 for f in $1/*yaml
 do
   basename=$(basename "$f" ".yaml")
-  mkdir $basename && cd $basename && /u/piyushk/utexas_planning/utexas_planning/condor/condor_execute.sh "$f" "$2" "$3" && cd ../
+  mkdir $basename && cd $basename && /u/piyushk/utexas_planning/utexas_planning/condor/condor_execute.sh "$f" $2 $3 && cd ../
 done
