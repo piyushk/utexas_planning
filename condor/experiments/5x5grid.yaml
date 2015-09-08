@@ -1,0 +1,28 @@
+models:
+  - name: utexas_planning::SimpleGuidanceModel
+    grid_size: 5
+planners:
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    max_playouts: 100
+    max_depth: 25
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    max_playouts: 100
+    max_depth: 25
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    max_playouts: 100
+    max_depth: 25
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    max_playouts: 100
+    max_depth: 25
+    eligibility_lambda: 1.0
