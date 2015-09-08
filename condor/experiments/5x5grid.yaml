@@ -1,5 +1,5 @@
 models:
-  - name: utexas_planning::SimpleGuidanceModel
+  - name: utexas_planning::GridModel
     grid_size: 5
 planners:
   - name: utexas_planning::MCTS
