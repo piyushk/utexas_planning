@@ -53,6 +53,7 @@ add_library(utexas_planning_models SHARED
   src/models/grid_model.cpp
   src/models/grid_model_3d.cpp
   src/models/light_world.cpp
+  src/models/simple_guidance.cpp
   include/rddl/evaluatables.cc
   include/rddl/instantiator.cc
   include/rddl/logical_expressions.cc

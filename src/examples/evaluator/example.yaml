@@ -1,30 +1,46 @@
 models:
-  - name: utexas_planning::LightWorldModel
-  - name: utexas_planning::LightWorldModel
-    nondeterminism: 0.2
-  - name: utexas_planning::LightWorldModel
-    nondeterminism: 0.5
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 40
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 80
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 120
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 160
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 200
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 240
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 280
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 320
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 360
+  - name: utexas_planning::SimpleGuidanceModel
+    num_roundabouts: 400
 planners:
   - name: utexas_planning::MCTS
-    action_selection_strategy: thompson
+    action_selection_strategy: uct
+    uct_reward_bound: 100
     max_playouts: 2000
-    max_depth: 30
-    eligibility_lambda: 0.9
+    max_depth: 500
+    eligibility_lambda: 0
   - name: utexas_planning::MCTS
-    action_selection_strategy: thompson_beta
-    thompson_beta_min_reward: -1550
-    thompson_beta_max_reward: 100
+    action_selection_strategy: uct
+    uct_reward_bound: 100
     max_playouts: 2000
-    max_depth: 30
+    max_depth: 500
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    max_playouts: 2000
+    max_depth: 500
     eligibility_lambda: 0.9
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
-    uct_reward_bound: 200
+    uct_reward_bound: 100
     max_playouts: 2000
-    max_depth: 30
-    eligibility_lambda: 0.9
-  - name: utexas_planning::MCTS
-    action_selection_strategy: uniform
-    max_playouts: 2000
-    max_depth: 30
-    eligibility_lambda: 0.9
+    max_depth: 500
+    eligibility_lambda: 1.0
