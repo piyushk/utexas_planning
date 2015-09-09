@@ -1,6 +1,7 @@
 #ifndef UTEXAS_PLANNING_GRID_MODEL_H_
 #define UTEXAS_PLANNING_GRID_MODEL_H_
 
+#include <boost/lexical_cast.hpp>
 #include <boost/serialization/export.hpp>
 
 #include <utexas_planning/common/constants.h>
@@ -16,6 +17,20 @@ namespace utexas_planning {
     LEFT = 2,
     RIGHT = 3,
     NUM_ACTIONS = 4
+  };
+
+  class GridModelRewardMetrics : public RewardMetrics {
+    public:
+      typedef boost::shared_ptr<GridModelRewardMetrics> Ptr;
+      typedef boost::shared_ptr<const GridModelRewardMetrics> ConstPtr;
+
+      bool halfway_reached;
+      float halfway_reward;
+      virtual std::map<std::string, std::string> asMap() const {
+        std::map<std::string, std::string> metric_map;
+        metric_map["halfway_reward"] = boost::lexical_cast<std::string>(halfway_reward);
+        return metric_map;
+      }
   };
 
   class GridAction : public Action {
@@ -110,10 +125,12 @@ namespace utexas_planning {
 
       virtual float getInitialTimeout() const;
       virtual std::map<std::string, std::string> getParamsAsMap() const;
+      virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart() const;
       virtual std::string getName() const;
 
     protected:
 
+      bool halfway_reached_;
       std::vector<State::ConstPtr> complete_state_vector_;
       std::vector<Action::ConstPtr> default_action_list_;
       Params params_;

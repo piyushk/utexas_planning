@@ -188,6 +188,31 @@ namespace utexas_planning {
                                  depth_count,
                                  post_action_timeout,
                                  rng);
+
+    if (reward_metrics) {
+      boost::shared_ptr<GridModelRewardMetrics> reward_metrics_derived =
+        boost::dynamic_pointer_cast<GridModelRewardMetrics>(reward_metrics);
+      if (!reward_metrics_derived) {
+        throw DowncastException("State", "GridState");
+      }
+      if (!reward_metrics_derived->halfway_reached) {
+        boost::shared_ptr<const GridState> state_derived = boost::dynamic_pointer_cast<const GridState>(state);
+        if (!state_derived) {
+          throw DowncastException("State", "GridState");
+        }
+        reward_metrics_derived->halfway_reward += reward;
+
+        boost::shared_ptr<const GridState> next_state_derived = boost::dynamic_pointer_cast<const GridState>(next_state);
+        if (!next_state_derived) {
+          throw DowncastException("State", "GridState");
+        }
+        if (abs(next_state_derived->x - params_.grid_size/2) <= params_.grid_size/4 &&
+            abs(next_state_derived->y - params_.grid_size/2) <= params_.grid_size/4) {
+          reward_metrics_derived->halfway_reached = true;
+        }
+      }
+    }
+
     post_action_timeout = params_.per_step_planning_time;
   }
 
@@ -215,6 +240,13 @@ namespace utexas_planning {
 
   std::string GridModel::getName() const {
     return std::string("Grid");
+  }
+
+  RewardMetrics::Ptr GridModel::getRewardMetricsAtEpisodeStart() const {
+    GridModelRewardMetrics::Ptr metric(new GridModelRewardMetrics);
+    metric->halfway_reached = false;
+    metric->halfway_reward = 0.0f;
+    return metric;
   }
 
 } /* utexas_planning */
