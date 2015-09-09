@@ -2,31 +2,31 @@ models:
   - name: utexas_planning::GridModel
     grid_size: 10
     start_x: 5
-    start_y: 0
+    start_y: 1
     terminal_states: 0,8,100
     toroidal: false
   - name: utexas_planning::GridModel
     grid_size: 10
-    start_x: 4
+    start_x: 5
     start_y: 1
     terminal_states: 0,8,100;2,5,-100;7,5,-100
     toroidal: false
   - name: utexas_planning::GridModel
     grid_size: 10
-    start_x: 4
-    start_y: 2
+    start_x: 5
+    start_y: 1
     terminal_states: 0,8,100;2,5,-100;3,5,-100;7,5,-100;8,5,-100
     toroidal: false
   - name: utexas_planning::GridModel
     grid_size: 10
-    start_x: 4
-    start_y: 2
+    start_x: 5
+    start_y: 1
     terminal_states: 0,8,100;1,5,-100;2,5,-100;3,5,-100;6,5,-100;7,5,-100;8,5,-100
     toroidal: false
   - name: utexas_planning::GridModel
     grid_size: 10
-    start_x: 4
-    start_y: 2
+    start_x: 5
+    start_y: 1
     terminal_states: 0,8,100;1,5,-100;2,5,-100;3,5,-100;4,5,-100;5,5,-100;6,5,-100;7,5,-100;8,5,-100
     toroidal: false
 planners:
