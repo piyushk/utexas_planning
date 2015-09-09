@@ -72,7 +72,7 @@ namespace utexas_planning {
         if (post_action_processing) {
           planner->performPostActionProcessing(state, action, post_action_timeout);
         } else {
-          planner->performPreActionProcessing(next_state, post_action_timeout);
+          planner->performPreActionProcessing(next_state, action, post_action_timeout);
         }
       }
 

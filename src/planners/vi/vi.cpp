@@ -158,6 +158,7 @@ namespace utexas_planning {
   }
 
   void VI::performPreActionProcessing(const State::ConstPtr& /* state */,
+                                      const Action::ConstPtr& /* prev_action */,
                                       float /* timeout */) {
     // VI does not need to anything here.
   }

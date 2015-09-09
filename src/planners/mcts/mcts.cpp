@@ -233,8 +233,24 @@ namespace utexas_planning {
   }
 
   void MCTS::performPreActionProcessing(const State::ConstPtr& start_state,
+                                        const Action::ConstPtr& prev_action,
                                         float timeout) {
-    restart();
+
+    // TODO discretize this state.
+    State::Ptr discretized_state = start_state->clone();
+    if (root_node_) {
+      if (prev_action) {
+        StateActionNode::ConstPtr action = root_node_->actions.find(prev_action)->second;
+        if (action->next_states.find(discretized_state) != action->next_states.end()) {
+          root_node_ = action->next_states.find(discretized_state)->second;
+        } else {
+          restart();
+        }
+      } else {
+        restart();
+      }
+    }
+
     last_action_selected_.reset();
     search(start_state, timeout, params_.max_playouts);
   }
@@ -242,8 +258,8 @@ namespace utexas_planning {
   void MCTS::performPostActionProcessing(const State::ConstPtr& state,
                                          const Action::ConstPtr& action,
                                          float timeout) {
+    // TODO also lookup past search history.
     restart();
-    last_action_selected_ = action;
     search(state, action, timeout, params_.max_playouts);
   }
 

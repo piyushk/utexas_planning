@@ -42,6 +42,7 @@ namespace utexas_planning {
       virtual void performEpisodeStartProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
                                                  float timeout = NO_TIMEOUT);
       virtual void performPreActionProcessing(const State::ConstPtr& start_state = State::ConstPtr(),
+                                              const Action::ConstPtr& prev_action = Action::ConstPtr(),
                                               float timeout = NO_TIMEOUT);
       virtual Action::ConstPtr getBestAction(const State::ConstPtr& state) const;
       virtual void performPostActionProcessing(const State::ConstPtr& state,

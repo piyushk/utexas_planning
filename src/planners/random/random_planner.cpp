@@ -24,6 +24,7 @@ namespace utexas_planning {
   }
 
   void RandomPlanner::performPreActionProcessing(const State::ConstPtr& /* state */,
+                                                 const Action::ConstPtr& /* prev_action */,
                                                  float /* timeout */) {}
 
   void RandomPlanner::performPostActionProcessing(const State::ConstPtr& /* state */,

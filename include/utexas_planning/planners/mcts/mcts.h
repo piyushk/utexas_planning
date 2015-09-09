@@ -115,6 +115,7 @@ namespace utexas_planning {
                                                  float timeout = NO_TIMEOUT);
 
       virtual void performPreActionProcessing(const State::ConstPtr& state,
+                                              const Action::ConstPtr& prev_action = Action::ConstPtr(),
                                               float timeout = NO_TIMEOUT);
 
       virtual void performPostActionProcessing(const State::ConstPtr& state,
