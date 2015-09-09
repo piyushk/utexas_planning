@@ -1,3 +1,5 @@
+#include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <class_loader/class_loader.h>
 #include <utexas_planning/common/exceptions.h>
@@ -93,6 +95,28 @@ namespace utexas_planning {
       default_action_list_.push_back(a);
     }
 
+    // If no terminal state specified, assume it is center of the grid.
+    if (params_.terminal_states.empty()) {
+      int idx =
+        params_.grid_size / 2 +
+        (params_.grid_size / 2) * (params_.grid_size);
+      terminal_states_to_reward_map_[complete_state_vector_[idx]] = params_.goal_reward;
+    } else {
+      std::vector<std::string> terminal_state_tuples;
+      boost::split(terminal_state_tuples, params_.terminal_states, boost::is_any_of(";"));
+      BOOST_FOREACH(const std::string& tuple, terminal_state_tuples) {
+        std::vector<std::string> coordinates;
+        boost::split(coordinates, tuple, boost::is_any_of(","));
+        int x_idx = boost::lexical_cast<int>(coordinates[0]);
+        int y_idx = boost::lexical_cast<int>(coordinates[1]);
+        float reward = 0.0f;
+        if (coordinates.size() == 3) {
+          reward = boost::lexical_cast<float>(coordinates[2]);
+        }
+        int idx = y_idx + x_idx * params_.grid_size;
+        terminal_states_to_reward_map_[complete_state_vector_[idx]] = reward;
+      }
+    }
   }
 
   bool GridModel::isTerminalState(const State::ConstPtr& state_base) const {
@@ -100,7 +124,7 @@ namespace utexas_planning {
     if (!state) {
       throw DowncastException("State", "GridState");
     }
-    return ((state->x == params_.grid_size / 2) && (state->y == params_.grid_size / 2));
+    return terminal_states_to_reward_map_.find(state) != terminal_states_to_reward_map_.end();
   }
 
   void GridModel::getActionsAtState(const State::ConstPtr& state,
@@ -153,10 +177,10 @@ namespace utexas_planning {
       ns->y = state->y;
       next_states.push_back(ns);
 
-      float r_up = (isTerminalState(next_states[0])) ? -1.0f + params_.goal_reward : -1.0f;
-      float r_down = (isTerminalState(next_states[1])) ? -1.0f + params_.goal_reward : -1.0f;
-      float r_left = (isTerminalState(next_states[2])) ? -1.0f + params_.goal_reward : -1.0f;
-      float r_right = (isTerminalState(next_states[3])) ? -1.0f + params_.goal_reward : -1.0f;
+      float r_up = (isTerminalState(next_states[0])) ? -1.0f + (terminal_states_to_reward_map_.find(next_states[0]))->second : -1.0f;
+      float r_down = (isTerminalState(next_states[1])) ? -1.0f + (terminal_states_to_reward_map_.find(next_states[1]))->second : -1.0f;
+      float r_left = (isTerminalState(next_states[2])) ? -1.0f + (terminal_states_to_reward_map_.find(next_states[2]))->second : -1.0f;
+      float r_right = (isTerminalState(next_states[3])) ? -1.0f + (terminal_states_to_reward_map_.find(next_states[3]))->second : -1.0f;
 
       rewards.push_back(r_up);
       rewards.push_back(r_down);

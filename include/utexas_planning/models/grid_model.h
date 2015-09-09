@@ -90,6 +90,7 @@ namespace utexas_planning {
       _(int,start_y,start_y,-1) \
       _(int,grid_size,grid_size,10) \
       _(float,goal_reward,goal_reward,0.0f) \
+      _(std::string,terminal_states,terminal_states,"") \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 
@@ -133,6 +134,7 @@ namespace utexas_planning {
 
       bool halfway_reached_;
       std::vector<State::ConstPtr> complete_state_vector_;
+      std::map<State::ConstPtr, float, State::PtrComparator> terminal_states_to_reward_map_;
       std::vector<Action::ConstPtr> default_action_list_;
       Params params_;
   };
