@@ -280,7 +280,9 @@ namespace utexas_planning {
   }
 
   std::map<std::string, std::string> GridModel::getParamsAsMap() const {
-    return params_.asMap();
+    std::map<std::string, std::string> params_map = params_.asMap();
+    params_map["terminal_states"] = "";
+    return params_map;
   }
 
   std::string GridModel::getName() const {
