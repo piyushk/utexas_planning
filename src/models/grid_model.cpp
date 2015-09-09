@@ -282,6 +282,22 @@ namespace utexas_planning {
   std::map<std::string, std::string> GridModel::getParamsAsMap() const {
     std::map<std::string, std::string> params_map = params_.asMap();
     params_map["terminal_states"] = "";
+    int positive_terminal_states = 0;
+    int negative_terminal_states = 0;
+    int num_terminal_states = 0;
+    typedef std::pair<State::ConstPtr, float> State2RewardPair;
+    BOOST_FOREACH(const State2RewardPair& pair, terminal_states_to_reward_map_) {
+      if (pair.second < 0) {
+        --negative_terminal_states;
+      }
+      if (pair.second > 0) {
+        ++positive_terminal_states;
+      }
+      ++num_terminal_states;
+    }
+    params_map["positive_terminal_states"] = boost::lexical_cast<std::string>(positive_terminal_states);
+    params_map["negative_terminal_states"] = boost::lexical_cast<std::string>(negative_terminal_states);
+    params_map["num_terminal_states"] = boost::lexical_cast<std::string>(num_terminal_states);
     return params_map;
   }
 
