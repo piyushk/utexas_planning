@@ -33,25 +33,25 @@ planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 250
-    max_playouts: 500
+    max_playouts: 2000
     max_depth: 30
     eligibility_lambda: 0.0
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 250
-    max_playouts: 500
+    max_playouts: 2000
     max_depth: 30
     eligibility_lambda: 0.5
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 250
-    max_playouts: 500
+    max_playouts: 2000
     max_depth: 30
     eligibility_lambda: 0.9
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 250
-    max_playouts: 500
+    max_playouts: 2000
     max_depth: 30
     eligibility_lambda: 1.0
   # - name: utexas_planning::MCTS
@@ -81,25 +81,25 @@ planners:
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 0.0
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 0.5
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 0.9
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 1.0
   # - name: utexas_planning::MCTS
@@ -297,24 +297,24 @@ planners:
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 0.0
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 0.5
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 0.9
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
-  #   max_playouts: 500
+  #   max_playouts: 2000
   #   max_depth: 60
   #   eligibility_lambda: 1.0
