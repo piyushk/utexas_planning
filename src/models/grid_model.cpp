@@ -153,10 +153,15 @@ namespace utexas_planning {
       ns->y = state->y;
       next_states.push_back(ns);
 
-      rewards.push_back(-1);
-      rewards.push_back(-1);
-      rewards.push_back(-1);
-      rewards.push_back(-1);
+      float r_up = (isTerminalState(next_states[0])) ? -1.0f + params_.goal_reward : -1.0f;
+      float r_down = (isTerminalState(next_states[1])) ? -1.0f + params_.goal_reward : -1.0f;
+      float r_left = (isTerminalState(next_states[2])) ? -1.0f + params_.goal_reward : -1.0f;
+      float r_right = (isTerminalState(next_states[3])) ? -1.0f + params_.goal_reward : -1.0f;
+
+      rewards.push_back(r_up);
+      rewards.push_back(r_down);
+      rewards.push_back(r_left);
+      rewards.push_back(r_right);
 
       float p_up = (action->type == UP) ? 0.85f : 0.05f;
       float p_down = (action->type == DOWN) ? 0.85f : 0.05f;

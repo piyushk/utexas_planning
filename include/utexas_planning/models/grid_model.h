@@ -89,6 +89,7 @@ namespace utexas_planning {
       _(int,start_x,start_x,-1) \
       _(int,start_y,start_y,-1) \
       _(int,grid_size,grid_size,10) \
+      _(float,goal_reward,goal_reward,0.0f) \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 
