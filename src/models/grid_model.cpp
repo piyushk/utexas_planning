@@ -203,10 +203,10 @@ namespace utexas_planning {
       rewards.push_back(r_left);
       rewards.push_back(r_right);
 
-      float p_up = (action->type == UP) ? 1.0f : 0.0f;
-      float p_down = (action->type == DOWN) ? 1.0f : 0.0f;
-      float p_left = (action->type == LEFT) ? 1.0f : 0.0f;
-      float p_right = (action->type == RIGHT) ? 1.0f : 0.0f;
+      float p_up = (action->type == UP) ? 0.925f : 0.250f;
+      float p_down = (action->type == DOWN) ? 0.925f : 0.250f;
+      float p_left = (action->type == LEFT) ? 0.925f : 0.250f;
+      float p_right = (action->type == RIGHT) ? 0.925f : 0.250f;
 
       probabilities.push_back(p_up);
       probabilities.push_back(p_down);
