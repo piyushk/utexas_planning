@@ -162,18 +162,34 @@ namespace utexas_planning {
     if (!isTerminalState(state)) {
       boost::shared_ptr<GridState> ns(new GridState);
       ns->x = state->x;
-      ns->y = (state->y == 0) ? params_.grid_size - 1 : state->y - 1;
+      if (params_.toroidal) {
+        ns->y = (state->y == 0) ? params_.grid_size - 1 : state->y - 1;
+      } else {
+        ns->y = (state->y == 0) ? 0 : state->y - 1;
+      }
       next_states.push_back(ns);
       ns.reset(new GridState);
       ns->x = state->x;
-      ns->y = (state->y + 1) % params_.grid_size;
+      if (params_.toroidal) {
+        ns->y = (state->y + 1) % params_.grid_size;
+      } else {
+        ns->y = (state->y == params_.grid_size - 1) ? params_.grid_size - 1 : state->y + 1;
+      }
       next_states.push_back(ns);
       ns.reset(new GridState);
-      ns->x = (state->x == 0) ? params_.grid_size - 1 : state->x - 1;
+      if (params_.toroidal) {
+        ns->x = (state->x == 0) ? params_.grid_size - 1 : state->x - 1;
+      } else {
+        ns->x = (state->x == 0) ? 0 : state->x - 1;
+      }
       ns->y = state->y;
       next_states.push_back(ns);
       ns.reset(new GridState);
-      ns->x = (state->x + 1) % params_.grid_size;
+      if (params_.toroidal) {
+        ns->x = (state->x + 1) % params_.grid_size;
+      } else {
+        ns->x = (state->x == params_.grid_size - 1) ? params_.grid_size - 1 : state->x + 1;
+      }
       ns->y = state->y;
       next_states.push_back(ns);
 
