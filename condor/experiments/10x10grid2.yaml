@@ -3,7 +3,7 @@ models:
     grid_size: 10
     start_x: 4
     start_y: 2
-    terminal_states: 1,8,100;7,5,-100
+    terminal_states: 1,8,100;3,5,-100;7,5,-100
     toroidal: false
 planners:
   - name: utexas_planning::MCTS
