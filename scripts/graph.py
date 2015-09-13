@@ -17,7 +17,7 @@ import pandas as pd
 METHOD_COLORS = ['yellow', 'red', 'aqua', 'green', 'lightgray', 'blue']
 METHOD_HATCH = ['/', '\\', 'x', '*', 'o', 'O', '.']
 LINE_COLORS = ['red', 'blue', 'green']
-LINE_HATCH = [(20,0),(20,5),(5,5),(15,5,5,5),(15,5,2,5)]
+LINE_HATCH = [(1000000,1),(20,5),(5,5),(15,5,5,5),(15,5,2,5)]
 
 def calculate_mean_and_standard_error(data):
     a = 1.0 * np.array(data)
@@ -205,9 +205,9 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
 
     if yticklabels:
         ax.set_yticklabels(yticklabels)
-    ax.legend(rects, top_level_names, handlelength=4) #mode='expand', ncol=4)
+    #ax.legend(rects, top_level_names, ncol=1, loc='best', handlelength=4)
 
-    return fig, ax, rects, means
+    return fig, ax, rects, means, None
 
 def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None,
                       title=None, xlabel=None, ylabel=None, zlabel=None,
