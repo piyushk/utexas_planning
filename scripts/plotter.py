@@ -53,6 +53,25 @@ if args.plot_type == "bar":
             ax.text(rects[i][j].get_x()+rects[i][j].get_width()/2., 1.03*height, "%.1f"%means[i][j], ha='center',
                     va='center', fontproperties=font)
 
+highest = [0] * len(means)
+
+for i in range(len(means)):
+    for j in range(len(means[i])):
+        if means[i][j] > means[i][highest[i]]:
+            highest[i] = j
+
+for i in range(len(means)):
+    for j in range(len(means[i])):
+        if sigs[i][j] and highest[i] == j:
+            print "\\textit{",
+        print "%.2f"%means[i][j],
+        if sigs[i][j] and highest[i] == j:
+            print "}",
+        if j != len(means[i]) - 1 or i != len(means) - 1:
+            print " && ",
+        else:
+            print "\\\\"
+
 fig = plt.gcf()
 fig.set_size_inches(5,4)
 pad_inches = 0.1

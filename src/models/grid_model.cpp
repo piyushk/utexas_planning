@@ -288,7 +288,7 @@ namespace utexas_planning {
     typedef std::pair<State::ConstPtr, float> State2RewardPair;
     BOOST_FOREACH(const State2RewardPair& pair, terminal_states_to_reward_map_) {
       if (pair.second < 0) {
-        --negative_terminal_states;
+        ++negative_terminal_states;
       }
       if (pair.second > 0) {
         ++positive_terminal_states;
