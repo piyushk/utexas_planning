@@ -92,6 +92,7 @@ namespace utexas_planning {
       _(float,goal_reward,goal_reward,0.0f) \
       _(std::string,terminal_states,terminal_states,"") \
       _(bool,toroidal,toroidal,true) \
+      _(float,nondeterminism,nondeterminism,0.1f) \
       _(float,initial_planning_time,initial_planning_time,NO_TIMEOUT) \
       _(float,per_step_planning_time,per_step_planning_time,NO_TIMEOUT) \
 
