@@ -18,6 +18,7 @@ METHOD_COLORS = ['yellow', 'red', 'aqua', 'green', 'lightgray', 'blue']
 METHOD_HATCH = ['/', '\\', 'x', '*', 'o', 'O', '.']
 LINE_COLORS = ['red', 'blue', 'green']
 LINE_HATCH = [(1000000,1),(20,5),(5,5),(15,5,5,5),(15,5,2,5)]
+LINE_STYLES = ['-','--','-.',':']
 
 def calculate_mean_and_standard_error(data):
     a = 1.0 * np.array(data)
@@ -184,10 +185,22 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
     fig, ax = plt.subplots()
     rects = []
     for i in range(top_level_methods):
-        rect, = ax.plot(np.arange(0, second_level_methods), means[i],
-                        color=LINE_COLORS[i%len(LINE_COLORS)],
-                        dashes=LINE_HATCH[i%len(LINE_HATCH)],
-                        linewidth = 2)
+        # if top_level_names[i] != "$\lambda$=0":
+        #     rect, = ax.plot(np.arange(0, second_level_methods), means[i],
+        #                     color=LINE_COLORS[i%len(LINE_COLORS)],
+        #                     dashes=LINE_HATCH[i%len(LINE_HATCH)],
+        #                     linewidth = 2)
+        # else:
+        displacement = 0
+        rect = ax.errorbar(np.arange(0, second_level_methods) + displacement,
+                           means[i],
+                           color=LINE_COLORS[i%len(LINE_COLORS)],
+                           dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                           yerr=confs[i],
+                           linewidth=2,
+                           elinewidth=1,
+                           capthick=1)
+
         rects.append(rect)
 
     if xlabel:
@@ -203,9 +216,12 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
         if second_level_names:
             ax.set_xticklabels(second_level_names)
 
+
     if yticklabels:
         ax.set_yticklabels(yticklabels)
-    #ax.legend(rects, top_level_names, ncol=1, loc='best', handlelength=4)
+    ax.legend(rects, top_level_names, ncol=1, loc='best', handlelength=4)
+
+    plt.xlim([-0.1,9.1])
 
     return fig, ax, rects, means, None
 

@@ -60,15 +60,15 @@ for i in range(len(means)):
         if means[i][j] > means[i][highest[i]]:
             highest[i] = j
 
-for i in range(len(means)):
-    for j in range(len(means[i])):
-        if sigs[i][j] and highest[i] == j:
-            print "\\textit{",
+for j in range(len(means[0])):
+    for i in range(len(means)):
+        # if sigs[i][j] and highest[i] == j:
+        #     print "\\textit{",
         print "%.2f"%means[i][j],
-        if sigs[i][j] and highest[i] == j:
-            print "}",
-        if j != len(means[i]) - 1 or i != len(means) - 1:
-            print " && ",
+        # if sigs[i][j] and highest[i] == j:
+        #     print "}",
+        if i != len(means) - 1: # or i != len(means) - 1:
+            print " & ",
         else:
             print "\\\\"
 
@@ -85,4 +85,4 @@ if args.plot_type == "3d":
     ax.view_init(elev=float(elev), azim=float(azim))
 
 plt.savefig('out.png',bbox_inches='tight',pad_inches=pad_inches,dpi=100)
-plt.show()
+# plt.show()
