@@ -5,6 +5,35 @@ models:
     start_y: 0
     terminal_states: 0,12,100
     toroidal: false
+    nondeterminism: 0.0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100
+    toroidal: false
+    nondeterminism: 0.1
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100
+    toroidal: false
+    nondeterminism: 0.25
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100
+    toroidal: false
+    nondeterminism: 0.5
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100
+    toroidal: false
+    nondeterminism: 1.0
 planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
