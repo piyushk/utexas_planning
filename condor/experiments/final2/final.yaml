@@ -1,0 +1,83 @@
+models:
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 0
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 1
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 2
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 3
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 4
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 5
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 6
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 7
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 8
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 9
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 10
+    toroidal: false
+planners:
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 130
+    max_playouts: 2000
+    max_depth: 30
+    eligibility_lambda: 1.0
