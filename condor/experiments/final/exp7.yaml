@@ -17,7 +17,7 @@ models:
     grid_size: 15
     start_x: 7
     start_y: 0
-    terminal_states: 0,12,100;4,7,-100;3,7,-100;11,7,-100;10,7,-100
+    terminal_states: 7,12,100;4,7,-100;3,7,-100;11,7,-100;10,7,-100
     toroidal: false
     nondeterminism: 0
   # - name: utexas_planning::GridModel
@@ -63,12 +63,12 @@ models:
   #   terminal_states: 0,12,100;0,7,-100;1,7,-100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;6,7,-100;8,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100;13,7,-100;14,7,-100
   #   toroidal: false
 planners:
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uct
-  #   uct_reward_bound: 250
-  #   max_playouts: 2000
-  #   max_depth: 45
-  #   eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 0.0
   # - name: utexas_planning::MCTS
   #   action_selection_strategy: uct
   #   uct_reward_bound: 250
@@ -84,7 +84,7 @@ planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 250
-    max_playouts: 10000
+    max_playouts: 2000
     max_depth: 45
     eligibility_lambda: 1.0
   # - name: utexas_planning::MCTS
