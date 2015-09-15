@@ -1,11 +1,11 @@
 models:
-  # - name: utexas_planning::GridModel
-  #   grid_size: 15
-  #   start_x: 7
-  #   start_y: 0
-  #   terminal_states: 0,12,100
-  #   toroidal: false
-  #   nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100
+    toroidal: false
+    nondeterminism: 0
   # - name: utexas_planning::GridModel
   #   grid_size: 15
   #   start_x: 7
@@ -17,7 +17,49 @@ models:
     grid_size: 15
     start_x: 7
     start_y: 0
-    terminal_states: 7,12,100;4,7,-100;3,7,-100;11,7,-100;10,7,-100
+    terminal_states: 0,12,100;0,7,-5;14,7,-5
+    toroidal: false
+    nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;0,7,-5;1,7,-5;13,7,-5;14,7,-5
+    toroidal: false
+    nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;0,7,-5;1,7,-5;2,7,-5;12,7,-5;13,7,-5;14,7,-5
+    toroidal: false
+    nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;0,7,-5;1,7,-5;2,7,-5;3,7,-5;11,7,-5;12,7,-5;13,7,-5;14,7,-5
+    toroidal: false
+    nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;0,7,-5;1,7,-5;2,7,-5;3,7,-5;4,7,-5;10,7,-5;11,7,-5;12,7,-5;13,7,-5;14,7,-5
+    toroidal: false
+    nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;0,7,-5;1,7,-5;2,7,-5;3,7,-5;4,7,-5;5,7,-5;9,7,-5;10,7,-5;11,7,-5;12,7,-5;13,7,-5;14,7,-5
+    toroidal: false
+    nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;0,7,-5;1,7,-5;2,7,-5;3,7,-5;4,7,-5;5,7,-5;6,7,-5;8,7,-5;9,7,-5;10,7,-5;11,7,-5;12,7,-5;13,7,-5;14,7,-5
     toroidal: false
     nondeterminism: 0
   # - name: utexas_planning::GridModel
@@ -66,48 +108,48 @@ planners:
   - name: utexas_planning::MCTS
     action_selection_strategy: uct
     uct_reward_bound: 250
+    max_playouts: 10000
+    max_depth: 45
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 250
+    max_playouts: 10000
+    max_depth: 45
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 250
+    max_playouts: 10000
+    max_depth: 45
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uct
+    uct_reward_bound: 250
+    max_playouts: 10000
+    max_depth: 45
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
     max_playouts: 2000
     max_depth: 45
     eligibility_lambda: 0.0
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uct
-  #   uct_reward_bound: 250
-  #   max_playouts: 2000
-  #   max_depth: 45
-  #   eligibility_lambda: 0.5
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uct
-  #   uct_reward_bound: 250
-  #   max_playouts: 10000
-  #   max_depth: 45
-  #   eligibility_lambda: 0.9
   - name: utexas_planning::MCTS
-    action_selection_strategy: uct
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
     uct_reward_bound: 250
     max_playouts: 2000
     max_depth: 45
     eligibility_lambda: 1.0
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uniform
-  #   uct_reward_bound: 250
-  #   max_playouts: 2000
-  #   max_depth: 45
-  #   eligibility_lambda: 0.0
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uniform
-  #   uct_reward_bound: 250
-  #   max_playouts: 2000
-  #   max_depth: 45
-  #   eligibility_lambda: 0.5
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uniform
-  #   uct_reward_bound: 250
-  #   max_playouts: 2000
-  #   max_depth: 45
-  #   eligibility_lambda: 0.9
-  # - name: utexas_planning::MCTS
-  #   action_selection_strategy: uniform
-  #   uct_reward_bound: 250
-  #   max_playouts: 2000
-  #   max_depth: 45
-  #   eligibility_lambda: 1.0
