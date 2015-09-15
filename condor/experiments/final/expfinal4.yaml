@@ -1,0 +1,147 @@
+models:
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 7,14,100
+    toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;4,7,-100;10,7,-100
+  #   toroidal: false
+  #   nondeterminism: 0
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 7,14,100;0,7,0;14,7,0
+    toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 7,12,100;0,7,0;1,7,0;13,7,0;14,7,0
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 7,12,100;0,7,0;1,7,0;2,7,0;12,7,0;13,7,0;14,7,0
+  #   toroidal: false
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 7,14,100;0,7,0;1,7,0;2,7,0;3,7,0;11,7,0;12,7,0;13,7,0;14,7,0
+    toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 7,12,100;0,7,0;1,7,0;2,7,0;3,7,0;4,7,0;10,7,0;11,7,0;12,7,0;13,7,0;14,7,0
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 7,12,100;0,7,0;1,7,0;2,7,0;3,7,0;4,7,0;5,7,0;9,7,0;10,7,0;11,7,0;12,7,0;13,7,0;14,7,0
+  #   toroidal: false
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 7,14,100;0,7,0;1,7,0;2,7,0;3,7,0;4,7,0;5,7,0;6,7,0;8,7,0;9,7,0;10,7,0;11,7,0;12,7,0;13,7,0;14,7,0
+    toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;3,7,-100;4,7,-100;5,7,-100;9,7,-100;10,7,-100;11,7,-100
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;6,7,-100;8,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;6,7,-100;8,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100;13,7,-100
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;1,7,-100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;6,7,-100;8,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100;13,7,-100
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;1,7,-100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;6,7,-100;8,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100;13,7,-100;14,7,-100
+  #   toroidal: false
+  # - name: utexas_planning::GridModel
+  #   grid_size: 15
+  #   start_x: 7
+  #   start_y: 0
+  #   terminal_states: 0,12,100;0,7,-100;1,7,-100;2,7,-100;3,7,-100;4,7,-100;5,7,-100;6,7,-100;8,7,-100;9,7,-100;10,7,-100;11,7,-100;12,7,-100;13,7,-100;14,7,-100
+  #   toroidal: false
+planners:
+  # - name: utexas_planning::MCTS
+  #   action_selection_strategy: uct
+  #   uct_reward_bound: 250
+  #   max_playouts: 10000
+  #   max_depth: 45
+  #   eligibility_lambda: 0.0
+  # - name: utexas_planning::MCTS
+  #   action_selection_strategy: uct
+  #   uct_reward_bound: 250
+  #   max_playouts: 10000
+  #   max_depth: 45
+  #   eligibility_lambda: 0.5
+  # - name: utexas_planning::MCTS
+  #   action_selection_strategy: uct
+  #   uct_reward_bound: 250
+  #   max_playouts: 10000
+  #   max_depth: 45
+  #   eligibility_lambda: 0.9
+  # - name: utexas_planning::MCTS
+  #   action_selection_strategy: uct
+  #   uct_reward_bound: 250
+  #   max_playouts: 10000
+  #   max_depth: 45
+  #   eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    action_selection_strategy: uniform
+    uct_reward_bound: 250
+    max_playouts: 2000
+    max_depth: 45
+    eligibility_lambda: 1.0
