@@ -5,12 +5,12 @@ models:
     start_y: 0
     terminal_states: 0,12,100
     toroidal: false
-  # - name: utexas_planning::GridModel
-  #   grid_size: 15
-  #   start_x: 7
-  #   start_y: 0
-  #   terminal_states: 0,12,100;4,7,-100;10,7,-100
-  #   toroidal: false
+  - name: utexas_planning::GridModel
+    grid_size: 15
+    start_x: 7
+    start_y: 0
+    terminal_states: 0,12,100;4,7,-100;10,7,-100
+    toroidal: false
   # - name: utexas_planning::GridModel
   #   grid_size: 15
   #   start_x: 7
