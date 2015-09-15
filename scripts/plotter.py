@@ -85,4 +85,4 @@ if args.plot_type == "3d":
     ax.view_init(elev=float(elev), azim=float(azim))
 
 plt.savefig('out.png',bbox_inches='tight',pad_inches=pad_inches,dpi=100)
-# plt.show()
+plt.show()
