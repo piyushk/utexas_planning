@@ -51,6 +51,7 @@ target_link_libraries(utexas_planning_planners ${CLASS_LOADER_LIBRARY})
 
 add_library(utexas_planning_models SHARED
   src/models/grid_model.cpp
+  src/models/grid_model2.cpp
   src/models/grid_model_3d.cpp
   src/models/light_world.cpp
   src/models/simple_guidance.cpp
