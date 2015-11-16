@@ -22,10 +22,17 @@ namespace utexas_planning {
       typedef boost::shared_ptr<StateNode> Ptr;
       typedef boost::shared_ptr<StateNode const> ConstPtr;
 
-      StateNode() : state_visits(0) {}
+      StateNode() :
+        state_visits(0),
+        max_value(-std::numeric_limits<float>::max()),
+        lambda(1.0f) {}
+
       std::map<Action::ConstPtr, boost::shared_ptr<StateActionNode>, Action::PtrComparator> actions;
       State::ConstPtr state;
       unsigned int state_visits;
+
+      float max_value;
+      float lambda;
   };
 
   class StateActionNode {
@@ -89,6 +96,7 @@ namespace utexas_planning {
       _(int,mean_initial_random_trials,mean_initial_random_trials,5) \
       _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
       _(float,eligibility_lambda,eligibility_lambda,0.0) \
+      _(bool,use_automated_lambda,use_automated_lambda,false) \
 
       Params_STRUCT(PARAMS)
 #undef PARAMS

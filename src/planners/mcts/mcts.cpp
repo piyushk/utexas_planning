@@ -343,7 +343,9 @@ namespace utexas_planning {
     ++(action_info->visits);
     action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
 
-    if (params_.action_selection_strategy == THOMPSON) {
+    if (params_.action_selection_strategy == THOMPSON ||
+        (params_.backup_strategy == ELIGIBILITY_TRACE &&
+         params_.use_automated_lambda)) {
       action_info->sum_squares += backup_value * backup_value;
       action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
       action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
@@ -371,9 +373,31 @@ namespace utexas_planning {
     if (params_.backup_strategy == ELIGIBILITY_TRACE) {
       MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<
                         action_info->visits << ")");
+
+      if (params_.use_automated_lambda) {
+        state_info->max_value = std::max(state_info->max_value, backup_value);
+        state_info->lambda = 0.0f;
+        /* std::cout << "start loop: " << std::endl; */
+        typedef std::pair<const Action::ConstPtr, boost::shared_ptr<StateActionNode> > ActionInfoPair;
+        BOOST_FOREACH(ActionInfoPair &action_pair, state_info->actions) {
+          StateActionNode::Ptr &action = action_pair.second;
+          if (action->variance != 0) { /* requires the action to have at least 2 samples. */
+            float z_score = (state_info->max_value - action->mean_value) / sqrtf(action->variance);
+            float lambda_from_z = 1.0f / expf(z_score);
+            /* std::cout << "lambda_from_z: " << lambda_from_z << "/" << state_info->lambda << std::endl; */
+            state_info->lambda = std::max(state_info->lambda, lambda_from_z);
+          }
+        }
+        // if (state_info->lambda != 1.0f) {
+        //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
+        // }
+      } else {
+        state_info->lambda = params_.eligibility_lambda;
+      }
+
       // Prepare backup using eligiblity trace methodology.
       float max_value = maxValueForState(state_info);
-      backup_value = params_.eligibility_lambda * backup_value + (1.0 - params_.eligibility_lambda) * max_value;
+      backup_value = state_info->lambda * backup_value + (1.0 - state_info->lambda) * max_value;
     } else {
       throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
     }
