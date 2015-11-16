@@ -97,6 +97,7 @@ namespace utexas_planning {
       _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
       _(float,eligibility_lambda,eligibility_lambda,0.0) \
       _(bool,use_automated_lambda,use_automated_lambda,false) \
+      _(bool,use_automated_lambda_2,use_automated_lambda_2,false) \
 
       Params_STRUCT(PARAMS)
 #undef PARAMS

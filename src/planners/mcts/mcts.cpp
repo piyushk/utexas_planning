@@ -344,8 +344,7 @@ namespace utexas_planning {
     action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
 
     if (params_.action_selection_strategy == THOMPSON ||
-        (params_.backup_strategy == ELIGIBILITY_TRACE &&
-         params_.use_automated_lambda)) {
+        (params_.backup_strategy == ELIGIBILITY_TRACE && params_.use_automated_lambda)) {
       action_info->sum_squares += backup_value * backup_value;
       action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
       action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
@@ -353,7 +352,8 @@ namespace utexas_planning {
       action_info->variance = std::max(action_info->variance, 1e-10f);
     }
 
-    if (params_.action_selection_strategy == THOMPSON_BETA) {
+    if (params_.action_selection_strategy == THOMPSON_BETA ||
+        (params_.backup_strategy == ELIGIBILITY_TRACE && params_.use_automated_lambda)) {
       float normalized_reward =
         (backup_value - params_.thompson_beta_min_reward) /
         (params_.thompson_beta_max_reward - params_.thompson_beta_min_reward);
@@ -375,22 +375,66 @@ namespace utexas_planning {
                         action_info->visits << ")");
 
       if (params_.use_automated_lambda) {
-        state_info->max_value = std::max(state_info->max_value, backup_value);
+        // state_info->max_value = std::max(state_info->max_value, backup_value);
+        state_info->max_value = maxValueForState(state_info);
         state_info->lambda = 0.0f;
         /* std::cout << "start loop: " << std::endl; */
         typedef std::pair<const Action::ConstPtr, boost::shared_ptr<StateActionNode> > ActionInfoPair;
         BOOST_FOREACH(ActionInfoPair &action_pair, state_info->actions) {
           StateActionNode::Ptr &action = action_pair.second;
-          if (action->variance != 0) { /* requires the action to have at least 2 samples. */
-            float z_score = (state_info->max_value - action->mean_value) / sqrtf(action->variance);
-            float lambda_from_z = 1.0f / expf(z_score);
-            /* std::cout << "lambda_from_z: " << lambda_from_z << "/" << state_info->lambda << std::endl; */
-            state_info->lambda = std::max(state_info->lambda, lambda_from_z);
+          if (action->visits >= 2) {
+            if (action->mean_value < state_info->max_value) {
+              float z_score = (state_info->max_value - action->mean_value) / sqrtf(action->variance);
+              float lambda_from_z = 1.0f / expf(z_score);
+              /* std::cout << "lambda_from_z: " << lambda_from_z << "/" << state_info->lambda << std::endl; */
+              state_info->lambda = std::max(state_info->lambda, lambda_from_z);
+            }
+          } else {
+            // Insufficient samples on one of the samples, backpropagate the current value.
+            state_info->lambda = 1.0f;
           }
         }
         // if (state_info->lambda != 1.0f) {
         //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
         // }
+      } else if (params_.use_automated_lambda_2) {
+
+        typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
+        state_info->max_value = -std::numeric_limits<float>::max();
+        float max_alpha, max_beta;
+        BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_info->actions) {
+          float val = getStateActionValue(action_info_pair.second);
+          if (val > state_info->max_value && action->visits >= 2) {
+            state_info->max_value = val;
+            max_alpha = action_info_pair.second->alpha;
+            max_beta = action_info_pair.second->beta;
+          }
+          state_info->max_value = std::max(val, state_info->max_value);
+
+        }
+
+        state_info->max_value = maxValueForState(state_info);
+        state_info->lambda = 0.0f;
+
+        BOOST_FOREACH(Action2StateActionInfoPair &action_pair, state_info->actions) {
+          StateActionNode::Ptr &action = action_pair.second;
+          if (action->visits >= 2) {
+            if (action->mean_value < state_info->max_value) {
+              using bm = boost::math;
+              float kl_divergence = logf(bm::beta(action->alpha, action->beta) / bm::beta(max_alpha, max_beta)) +
+                (max_alpha - action->alpha) * bm::digamma(max_alpha) +
+                (max_beta - action->beta) * bm::digamma(max_beta) +
+                (action->alpha + action->beta - max_alpha - max_beta) * bm::digamma(max_alpha + max_beta);
+              std::cout << "Found KL: " << kl_divergence << std::endl;
+              state_info->lambda = 1.0f;
+            }
+          } else {
+            // Insufficient samples on one of the samples, backpropagate the current value.
+            state_info->lambda = 1.0f;
+            break;
+          }
+        }
+
       } else {
         state_info->lambda = params_.eligibility_lambda;
       }
