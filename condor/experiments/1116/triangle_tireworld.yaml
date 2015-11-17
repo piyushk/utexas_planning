@@ -1,0 +1,13 @@
+models:
+  - name: utexas_planning::RddlModel
+    rddl_domain: triangle_tireworld
+planners:
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 1000 # Doesn't matter.
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: eligibility
+    use_automated_lambda_2: true
+    thompson_beta_min_reward: -40
+    thompson_beta_max_reward: 100
