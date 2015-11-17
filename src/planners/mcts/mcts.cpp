@@ -1,9 +1,14 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <boost/math/special_functions/beta.hpp>
+#include <boost/math/special_functions/digamma.hpp>
+
 #include <class_loader/class_loader.h>
 
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/planners/mcts/mcts.h>
 #include <utexas_planning/planners/random/random_planner.h>
+
 
 #ifdef MCTS_DEBUG
 #define MCTS_DEBUG_OUTPUT(x) std::cout << x << std::endl
@@ -353,7 +358,7 @@ namespace utexas_planning {
     }
 
     if (params_.action_selection_strategy == THOMPSON_BETA ||
-        (params_.backup_strategy == ELIGIBILITY_TRACE && params_.use_automated_lambda)) {
+        (params_.backup_strategy == ELIGIBILITY_TRACE && params_.use_automated_lambda_2)) {
       float normalized_reward =
         (backup_value - params_.thompson_beta_min_reward) /
         (params_.thompson_beta_max_reward - params_.thompson_beta_min_reward);
@@ -404,7 +409,7 @@ namespace utexas_planning {
         float max_alpha, max_beta;
         BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_info->actions) {
           float val = getStateActionValue(action_info_pair.second);
-          if (val > state_info->max_value && action->visits >= 2) {
+          if (val > state_info->max_value && action_info_pair.second->visits >= 2) {
             state_info->max_value = val;
             max_alpha = action_info_pair.second->alpha;
             max_beta = action_info_pair.second->beta;
@@ -414,26 +419,40 @@ namespace utexas_planning {
         }
 
         state_info->max_value = maxValueForState(state_info);
-        state_info->lambda = 0.0f;
+        if (state_info->actions.size() <= 1) {
+          state_info->lambda = 1.0f;
+        } else {
+          state_info->lambda = 0.0f;
 
-        BOOST_FOREACH(Action2StateActionInfoPair &action_pair, state_info->actions) {
-          StateActionNode::Ptr &action = action_pair.second;
-          if (action->visits >= 2) {
-            if (action->mean_value < state_info->max_value) {
-              using bm = boost::math;
-              float kl_divergence = logf(bm::beta(action->alpha, action->beta) / bm::beta(max_alpha, max_beta)) +
-                (max_alpha - action->alpha) * bm::digamma(max_alpha) +
-                (max_beta - action->beta) * bm::digamma(max_beta) +
-                (action->alpha + action->beta - max_alpha - max_beta) * bm::digamma(max_alpha + max_beta);
-              std::cout << "Found KL: " << kl_divergence << std::endl;
+          BOOST_FOREACH(const Action2StateActionInfoPair &action_pair, state_info->actions) {
+            const StateActionNode::ConstPtr &action = action_pair.second;
+            if (action->visits >= 2) {
+              if (action->mean_value < state_info->max_value) {
+                namespace bm = boost::math;
+                float kl_divergence = logf(bm::beta(action->alpha, action->beta) / bm::beta(max_alpha, max_beta)) +
+                  (max_alpha - action->alpha) * bm::digamma(max_alpha) +
+                  (max_beta - action->beta) * bm::digamma(max_beta) +
+                  (action->alpha + action->beta - max_alpha - max_beta) * bm::digamma(max_alpha + max_beta);
+                kl_divergence = std::max(0.0f, kl_divergence);
+                float lambda_from_kl = 1.0f / expf(kl_divergence);
+                // if (lambda_from_kl < 0.1f) {
+                //   std::cout << "lambda_from_kl: " << lambda_from_kl << "," << kl_divergence << std::endl;
+                //   std::cout << "Found KL (" << max_alpha << "," << max_beta << ")->(" << action->alpha << "," << action->beta << "): " << kl_divergence << std::endl;
+                // }
+                /* std::cout << "lambda_from_kl: " << lambda_from_kl << "/" << state_info->lambda << std::endl; */
+                state_info->lambda = std::max(state_info->lambda, lambda_from_kl);
+              }
+            } else {
+              // Insufficient samples on one of the samples, backpropagate the current value.
               state_info->lambda = 1.0f;
+              break;
             }
-          } else {
-            // Insufficient samples on one of the samples, backpropagate the current value.
-            state_info->lambda = 1.0f;
-            break;
           }
         }
+
+        // if (state_info->lambda <= 0.5f) {
+        //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
+        // }
 
       } else {
         state_info->lambda = params_.eligibility_lambda;

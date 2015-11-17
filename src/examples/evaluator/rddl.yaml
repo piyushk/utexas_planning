@@ -1,6 +1,6 @@
 models:
   - name: utexas_planning::RddlModel
-    rddl_domain: academic_advising
+    rddl_domain: elevators
 planners:
   - name: utexas_planning::MCTS
     max_playouts: 10000
@@ -8,3 +8,6 @@ planners:
     max_depth: 1000
     uct_reward_bound: 100
     eligibility_lambda: 0.0
+    use_automated_lambda_2: true
+    thompson_beta_min_reward: -560
+    thompson_beta_max_reward: 0
