@@ -22,17 +22,11 @@ namespace utexas_planning {
       typedef boost::shared_ptr<StateNode> Ptr;
       typedef boost::shared_ptr<StateNode const> ConstPtr;
 
-      StateNode() :
-        state_visits(0),
-        max_value(-std::numeric_limits<float>::max()),
-        lambda(1.0f) {}
+      StateNode() : state_visits(0) {}
 
       std::map<Action::ConstPtr, boost::shared_ptr<StateActionNode>, Action::PtrComparator> actions;
       State::ConstPtr state;
       unsigned int state_visits;
-
-      float max_value;
-      float lambda;
   };
 
   class StateActionNode {
@@ -68,7 +62,11 @@ namespace utexas_planning {
   const std::string RANDOM = "random";
   const std::string HIGHEST_MEAN = "mean";
   const std::string UNIFORM = "uniform";
-  const std::string ELIGIBILITY_TRACE = "eligibility";
+
+  const std::string BACKUP_LAMBDA_SARSA = "backup_lambda_sarsa";
+  const std::string BACKUP_GAMMA_SARSA = "backup_gamma_sarsa";
+  const std::string BACKUP_LAMBDA_Q = "backup_lambda_q";
+  const std::string BACKUP_GAMMA_Q = "backup_gamma_q";
 
   class MCTS : public AbstractPlanner {
 
@@ -94,8 +92,8 @@ namespace utexas_planning {
       _(int,thompson_beta_max_reward,thompson_beta_max_reward,100) \
       _(int,thompson_beta_min_reward,thompson_beta_min_reward,-100) \
       _(int,mean_initial_random_trials,mean_initial_random_trials,5) \
-      _(std::string,backup_strategy,backup_strategy,ELIGIBILITY_TRACE) \
-      _(float,eligibility_lambda,eligibility_lambda,0.0) \
+      _(std::string,backup_strategy,backup_strategy,BACKUP_LAMBDA_Q) \
+      _(float,backup_lambda_value,backup_lambda_value,0.0) \
       _(bool,use_automated_lambda,use_automated_lambda,false) \
       _(bool,use_automated_lambda_2,use_automated_lambda_2,false) \
 
@@ -172,6 +170,11 @@ namespace utexas_planning {
 
       bool verbose_;
 
+      /* Fixed coefficients required for the gamma return. */
+      /* They correspond to Eqn 16 in
+       * http://papers.nips.cc/paper/4472-td_gamma-re-evaluating-complex-backups-in-temporal-difference-learning.pdf
+       * the outer indexing represents different L, and the inner indexing represents different n. */
+      std::vector<std::vector<float> > gamma_return_coefficients_;
   };
 
 } /* utexas_planning */

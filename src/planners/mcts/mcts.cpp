@@ -35,6 +35,40 @@ namespace utexas_planning {
     rng_ = rng;
     verbose_ = verbose;
     start_action_available_ = false;
+
+    // Compute gamma return coefficients up to max depth.
+    if (params_.backup_strategy == BACKUP_GAMMA_SARSA ||
+        params_.backup_strategy == BACKUP_GAMMA_Q) {
+
+      if (params_.backup_gamma_max_depth <= 0) {
+        params_.backup_gamma_max_depth = params_.max_depth;
+      }
+
+      if (params_.backup_gamma_max_depth <= 0) {
+        throw IncorrectUsageException("MCTS: Both backup_gamma_max_depth and max_depth cannot be <= 0 when gamma " +
+                                      "backup strategy is used. You should at-least set backup_gamma_max_depth");
+      }
+
+      gamma_return_coefficients_.resize(params_.backup_gamma_max_depth);
+      for (int L = 1; L <= params_.backup_gamma_max_depth; ++L) {
+        gamma_return_coefficients_[L - 1].resize(L);
+        float weight_sum = 0;
+        for (int n = 1; n <= L; ++n) {
+          float weight;
+          if (params_.gamma == 0.0f) {
+            weight = 1.0f / n;
+          } else {
+            weight = (1.0f - powf(params_.gamma, 2)) / (1.0f - powf(params_.gamma, 2n));
+          }
+          weight_sum += weight;
+          gamma_return_coefficients_[L - 1][n - 1] = weight;
+        }
+        for (int n = 1; n <= L; ++n) {
+          gamma_return_coefficients_[L - 1][n - 1] /= weight_sum;
+        }
+      }
+
+    }
   }
 
   void MCTS::search(const State::ConstPtr& start_state,
@@ -150,17 +184,88 @@ namespace utexas_planning {
       }
 
       MCTS_DEBUG_OUTPUT("------------ BACKPROPAGATION --------------");
-      float backup_value = 0;
 
-      MCTS_DEBUG_OUTPUT("At final discretized state: " << *discretized_state << " the backprop value is " << backup_value);
 
-      for (int step = history.size() - 1; step >= 0; --step) {
-        backup_value = history[step].reward + params_.gamma * backup_value;
-        if (history[step].state) {
-          MCTS_DEBUG_OUTPUT("  Updating state-action " << *(history[step].state->state) << " " <<
-                            *(history[step].action) << " with backup value " << backup_value);
-          updateState(history[step], backup_value);
+      if (params_.backup_strategy == BACKUP_LAMBDA_Q ||
+          params_.backup_strategy == BACKUP_LAMBDA_SARSA) {
+
+        float backup_value = 0;
+
+        MCTS_DEBUG_OUTPUT("At final discretized state: " << *discretized_state << " the backprop value is " << backup_value);
+
+        for (int step = history.size() - 1; step >= 0; --step) {
+          backup_value = history[step].reward + params_.gamma * backup_value;
+          if (history[step].state) {
+            MCTS_DEBUG_OUTPUT("  Updating state-action " << *(history[step].state->state) << " " <<
+                              *(history[step].action) << " with backup value " << backup_value);
+            updateState(history[step], backup_value);
+
+            // MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<
+            //                   action_info->visits << ")");
+
+            // Prepare backup using eligiblity trace methodology.
+            StateNode::Ptr& state_info = history[step].state;
+            float interpolation_value;
+            if (params_.backup_strategy == BACKUP_LAMBDA_Q) {
+              interpolation_value = maxValueForState(state_info);
+            } else { /* params_.backup_strategy == BACKUP_SARSA_Q */
+              // Get the up-to-date value for the state-action.
+              StateActionNode::Ptr& action_info = state_info->actions[history[step].action];
+              interpolation_value = action_info->mean_value;
+            }
+
+            // Update the backup value.
+            backup_value =
+              (params_.backup_lambda_value * value_sample) +
+              ((1.0 - params_.backup_lambda_value) * interpolation_value);
+          }
         }
+
+      } else if (params_.backup_strategy == BACKUP_GAMMA_Q ||
+                 params_.backup_strategy == BACKUP_GAMMA_SARSA) {
+
+        std::vector<float> return_array(history.size(), 0.0f);
+        float last_interpolation_value = 0.0f;
+
+        for (int step = history.size() - 1; step >= 0; --step) {
+          for (int step_diff = 0; step_diff < history.size() - step; ++step_diff) {
+            return_array[step_diff] += history[step].reward;
+          }
+          return_array[history.size() - 1 - step] += last_interpolation_value;
+
+          if (history[step].state) {
+
+            float sample_value = 0.0f;
+            for (int mult_idx = 0; mult_idx < history.size() - step; ++mult_idx) {
+              sample_value += return_array[mult_idx] * gamma_return_coefficients_[history.size() - step - 1][mult_idx];
+            }
+
+            MCTS_DEBUG_OUTPUT("  Updating state-action " << *(history[step].state->state) << " " <<
+                              *(history[step].action) << " with sample value " << sample_value);
+            updateState(history[step], sample_value);
+
+            // MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<
+            //                   action_info->visits << ")");
+
+            // Prepare backup using eligiblity trace methodology.
+            StateNode::Ptr& state_info = history[step].state;
+            float interpolation_value;
+            if (params_.backup_strategy == BACKUP_GAMMA_Q) {
+              last_interpolation_value = maxValueForState(state_info);
+            } else /* params_.backup_strategy == BACKUP_SARSA_Q */ {
+              // Get the up-to-date value for the state-action.
+              StateActionNode::Ptr& action_info = state_info->actions[history[step].action];
+              last_interpolation_value = action_info->mean_value;
+            }
+
+          } else {
+            // Provide the monte carlo estimate for the last return value if this state is not yet being tracked.
+            last_interpolation_value = return_array[0];
+          }
+        }
+
+      } else /* unknown backup strategy - probably set incorrectly in params file */ {
+        throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
       }
 
       ++current_playouts;
@@ -337,7 +442,7 @@ namespace utexas_planning {
     return best_actions[rng_->randomInt(best_actions.size() - 1)];
   }
 
-  void MCTS::updateState(HistoryStep& step, float& backup_value) {
+  void MCTS::updateState(HistoryStep& step, float& value_sample) {
 
     /* Update mean value for this action. */
     StateNode::Ptr& state_info = step.state;
@@ -346,28 +451,26 @@ namespace utexas_planning {
     MCTS_DEBUG_OUTPUT("  Original value, variance and visits for this state-action: " << action_info->mean_value <<
                       "+-" << action_info->variance << " (" << action_info->visits << ")");
     ++(action_info->visits);
-    action_info->mean_value += (1.0 / action_info->visits) * (backup_value - action_info->mean_value);
+    action_info->mean_value += (1.0 / action_info->visits) * (value_sample - action_info->mean_value);
 
-    if (params_.action_selection_strategy == THOMPSON ||
-        (params_.backup_strategy == ELIGIBILITY_TRACE && params_.use_automated_lambda)) {
-      action_info->sum_squares += backup_value * backup_value;
+    if (params_.action_selection_strategy == THOMPSON) {
+      action_info->sum_squares += value_sample * value_sample;
       action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
       action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
       // Always ensure that variance is positive. Due to floating point arithmetic, sometimes it turns up to be negative.
       action_info->variance = std::max(action_info->variance, 1e-10f);
     }
 
-    if (params_.action_selection_strategy == THOMPSON_BETA ||
-        (params_.backup_strategy == ELIGIBILITY_TRACE && params_.use_automated_lambda_2)) {
+    if (params_.action_selection_strategy == THOMPSON_BETA) {
       float normalized_reward =
-        (backup_value - params_.thompson_beta_min_reward) /
+        (value_sample - params_.thompson_beta_min_reward) /
         (params_.thompson_beta_max_reward - params_.thompson_beta_min_reward);
       if (normalized_reward < 0.0f) {
-        std::cerr << "Received reward: " << backup_value <<
+        std::cerr << "Received reward: " << value_sample <<
           " below specified min: " << params_.thompson_beta_min_reward << std::endl;
         normalized_reward = 0.0f;
       } else if (normalized_reward > 1.0f) {
-        std::cerr << "Received reward: " << backup_value <<
+        std::cerr << "Received reward: " << value_sample <<
           " above specified max: " << params_.thompson_beta_max_reward << std::endl;
         normalized_reward = 1.0f;
       }
@@ -375,95 +478,6 @@ namespace utexas_planning {
       action_info->beta += (1.0f - normalized_reward);
     }
 
-    if (params_.backup_strategy == ELIGIBILITY_TRACE) {
-      MCTS_DEBUG_OUTPUT("    After update: " << action_info->mean_value << "+-" << action_info->variance << " (" <<
-                        action_info->visits << ")");
-
-      if (params_.use_automated_lambda) {
-        // state_info->max_value = std::max(state_info->max_value, backup_value);
-        state_info->max_value = maxValueForState(state_info);
-        state_info->lambda = 0.0f;
-        /* std::cout << "start loop: " << std::endl; */
-        typedef std::pair<const Action::ConstPtr, boost::shared_ptr<StateActionNode> > ActionInfoPair;
-        BOOST_FOREACH(ActionInfoPair &action_pair, state_info->actions) {
-          StateActionNode::Ptr &action = action_pair.second;
-          if (action->visits >= 2) {
-            if (action->mean_value < state_info->max_value) {
-              float z_score = (state_info->max_value - action->mean_value) / sqrtf(action->variance);
-              float lambda_from_z = 1.0f / expf(z_score);
-              /* std::cout << "lambda_from_z: " << lambda_from_z << "/" << state_info->lambda << std::endl; */
-              state_info->lambda = std::max(state_info->lambda, lambda_from_z);
-            }
-          } else {
-            // Insufficient samples on one of the samples, backpropagate the current value.
-            state_info->lambda = 1.0f;
-          }
-        }
-        // if (state_info->lambda != 1.0f) {
-        //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
-        // }
-      } else if (params_.use_automated_lambda_2) {
-
-        typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
-        state_info->max_value = -std::numeric_limits<float>::max();
-        float max_alpha, max_beta;
-        BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_info->actions) {
-          float val = getStateActionValue(action_info_pair.second);
-          if (val > state_info->max_value && action_info_pair.second->visits >= 2) {
-            state_info->max_value = val;
-            max_alpha = action_info_pair.second->alpha;
-            max_beta = action_info_pair.second->beta;
-          }
-          state_info->max_value = std::max(val, state_info->max_value);
-
-        }
-
-        state_info->max_value = maxValueForState(state_info);
-        if (state_info->actions.size() <= 1) {
-          state_info->lambda = 1.0f;
-        } else {
-          state_info->lambda = 0.0f;
-
-          BOOST_FOREACH(const Action2StateActionInfoPair &action_pair, state_info->actions) {
-            const StateActionNode::ConstPtr &action = action_pair.second;
-            if (action->visits >= 2) {
-              if (action->mean_value < state_info->max_value) {
-                namespace bm = boost::math;
-                float kl_divergence = logf(bm::beta(action->alpha, action->beta) / bm::beta(max_alpha, max_beta)) +
-                  (max_alpha - action->alpha) * bm::digamma(max_alpha) +
-                  (max_beta - action->beta) * bm::digamma(max_beta) +
-                  (action->alpha + action->beta - max_alpha - max_beta) * bm::digamma(max_alpha + max_beta);
-                kl_divergence = std::max(0.0f, kl_divergence);
-                float lambda_from_kl = 1.0f / expf(kl_divergence);
-                // if (lambda_from_kl < 0.1f) {
-                //   std::cout << "lambda_from_kl: " << lambda_from_kl << "," << kl_divergence << std::endl;
-                //   std::cout << "Found KL (" << max_alpha << "," << max_beta << ")->(" << action->alpha << "," << action->beta << "): " << kl_divergence << std::endl;
-                // }
-                /* std::cout << "lambda_from_kl: " << lambda_from_kl << "/" << state_info->lambda << std::endl; */
-                state_info->lambda = std::max(state_info->lambda, lambda_from_kl);
-              }
-            } else {
-              // Insufficient samples on one of the samples, backpropagate the current value.
-              state_info->lambda = 1.0f;
-              break;
-            }
-          }
-        }
-
-        // if (state_info->lambda <= 0.5f) {
-        //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
-        // }
-
-      } else {
-        state_info->lambda = params_.eligibility_lambda;
-      }
-
-      // Prepare backup using eligiblity trace methodology.
-      float max_value = maxValueForState(state_info);
-      backup_value = state_info->lambda * backup_value + (1.0 - state_info->lambda) * max_value;
-    } else {
-      throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
-    }
 
   }
 
@@ -490,3 +504,82 @@ namespace utexas_planning {
 } /* utexas_planning */
 
 CLASS_LOADER_REGISTER_CLASS(utexas_planning::MCTS, utexas_planning::AbstractPlanner);
+
+      // NOTE: DEPRECATED Automated lambda per node code.
+
+      // if (params_.use_automated_lambda) {
+      //   // state_info->max_value = std::max(state_info->max_value, value_sample);
+      //   state_info->max_value = maxValueForState(state_info);
+      //   state_info->lambda = 0.0f;
+      //   /* std::cout << "start loop: " << std::endl; */
+      //   typedef std::pair<const Action::ConstPtr, boost::shared_ptr<StateActionNode> > ActionInfoPair;
+      //   BOOST_FOREACH(ActionInfoPair &action_pair, state_info->actions) {
+      //     StateActionNode::Ptr &action = action_pair.second;
+      //     if (action->visits >= 2) {
+      //       if (action->mean_value < state_info->max_value) {
+      //         float z_score = (state_info->max_value - action->mean_value) / sqrtf(action->variance);
+      //         float lambda_from_z = 1.0f / expf(z_score);
+      //         /* std::cout << "lambda_from_z: " << lambda_from_z << "/" << state_info->lambda << std::endl; */
+      //         state_info->lambda = std::max(state_info->lambda, lambda_from_z);
+      //       }
+      //     } else {
+      //       // Insufficient samples on one of the samples, backpropagate the current value.
+      //       state_info->lambda = 1.0f;
+      //     }
+      //   }
+      //   // if (state_info->lambda != 1.0f) {
+      //   //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
+      //   // }
+      // } else if (params_.use_automated_lambda_2) {
+
+      //   typedef std::pair<Action::ConstPtr, StateActionNode::ConstPtr> Action2StateActionInfoPair;
+      //   state_info->max_value = -std::numeric_limits<float>::max();
+      //   float max_alpha, max_beta;
+      //   BOOST_FOREACH(const Action2StateActionInfoPair& action_info_pair, state_info->actions) {
+      //     float val = getStateActionValue(action_info_pair.second);
+      //     if (val > state_info->max_value && action_info_pair.second->visits >= 2) {
+      //       state_info->max_value = val;
+      //       max_alpha = action_info_pair.second->alpha;
+      //       max_beta = action_info_pair.second->beta;
+      //     }
+      //     state_info->max_value = std::max(val, state_info->max_value);
+
+      //   }
+
+      //   state_info->max_value = maxValueForState(state_info);
+      //   if (state_info->actions.size() <= 1) {
+      //     state_info->lambda = 1.0f;
+      //   } else {
+      //     state_info->lambda = 0.0f;
+
+      //     BOOST_FOREACH(const Action2StateActionInfoPair &action_pair, state_info->actions) {
+      //       const StateActionNode::ConstPtr &action = action_pair.second;
+      //       if (action->visits >= 2) {
+      //         if (action->mean_value < state_info->max_value) {
+      //           namespace bm = boost::math;
+      //           float kl_divergence = logf(bm::beta(action->alpha, action->beta) / bm::beta(max_alpha, max_beta)) +
+      //             (max_alpha - action->alpha) * bm::digamma(max_alpha) +
+      //             (max_beta - action->beta) * bm::digamma(max_beta) +
+      //             (action->alpha + action->beta - max_alpha - max_beta) * bm::digamma(max_alpha + max_beta);
+      //           kl_divergence = std::max(0.0f, kl_divergence);
+      //           float lambda_from_kl = 1.0f / expf(kl_divergence);
+      //           // if (lambda_from_kl < 0.1f) {
+      //           //   std::cout << "lambda_from_kl: " << lambda_from_kl << "," << kl_divergence << std::endl;
+      //           //   std::cout << "Found KL (" << max_alpha << "," << max_beta << ")->(" << action->alpha << "," << action->beta << "): " << kl_divergence << std::endl;
+      //           // }
+      //           /* std::cout << "lambda_from_kl: " << lambda_from_kl << "/" << state_info->lambda << std::endl; */
+      //           state_info->lambda = std::max(state_info->lambda, lambda_from_kl);
+      //         }
+      //       } else {
+      //         // Insufficient samples on one of the samples, backpropagate the current value.
+      //         state_info->lambda = 1.0f;
+      //         break;
+      //       }
+      //     }
+      //   }
+
+      //   // if (state_info->lambda <= 0.5f) {
+      //   //   std::cout << "selecting lambda: " << state_info->lambda << std::endl;
+      //   // }
+
+      // } else {
