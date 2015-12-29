@@ -94,8 +94,7 @@ namespace utexas_planning {
       _(int,mean_initial_random_trials,mean_initial_random_trials,5) \
       _(std::string,backup_strategy,backup_strategy,BACKUP_LAMBDA_Q) \
       _(float,backup_lambda_value,backup_lambda_value,0.0) \
-      _(bool,use_automated_lambda,use_automated_lambda,false) \
-      _(bool,use_automated_lambda_2,use_automated_lambda_2,false) \
+      _(unsigned int,backup_gamma_max_depth,backup_gamma_max_depth,100) \
 
       Params_STRUCT(PARAMS)
 #undef PARAMS

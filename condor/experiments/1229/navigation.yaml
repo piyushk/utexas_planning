@@ -1,0 +1,80 @@
+models:
+  - name: utexas_planning::RddlModel
+    rddl_domain: navigation
+planners:
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_gamma_sarsa
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    eligibility_lambda: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_sarsa
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_sarsa
+    eligibility_lambda: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_sarsa
+    eligibility_lambda: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_sarsa
+    eligibility_lambda: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    # All RDDL domains have a horizon. Setting this value only makes sense if you're setting it less than the horizon.
+    max_depth: 40
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_sarsa
+    eligibility_lambda: 1.0

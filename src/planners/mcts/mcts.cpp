@@ -45,27 +45,40 @@ namespace utexas_planning {
       }
 
       if (params_.backup_gamma_max_depth <= 0) {
-        throw IncorrectUsageException("MCTS: Both backup_gamma_max_depth and max_depth cannot be <= 0 when gamma " +
+        throw IncorrectUsageException("MCTS: Both backup_gamma_max_depth and max_depth cannot be <= 0 when gamma "
                                       "backup strategy is used. You should at-least set backup_gamma_max_depth");
       }
 
       gamma_return_coefficients_.resize(params_.backup_gamma_max_depth);
+      /* std::cout << "Printing gamma return coefficients: " << std::endl; */
       for (int L = 1; L <= params_.backup_gamma_max_depth; ++L) {
         gamma_return_coefficients_[L - 1].resize(L);
         float weight_sum = 0;
         for (int n = 1; n <= L; ++n) {
           float weight;
-          if (params_.gamma == 0.0f) {
+          if (params_.gamma == 1.0f) {
             weight = 1.0f / n;
           } else {
-            weight = (1.0f - powf(params_.gamma, 2)) / (1.0f - powf(params_.gamma, 2n));
+            weight = (1.0f - powf(params_.gamma, 2)) / (1.0f - powf(params_.gamma, 2 * n));
           }
           weight_sum += weight;
           gamma_return_coefficients_[L - 1][n - 1] = weight;
         }
+        // if (L < 5) {
+        //   std::cout << "L=" << L << ": ";
+        // }
         for (int n = 1; n <= L; ++n) {
           gamma_return_coefficients_[L - 1][n - 1] /= weight_sum;
+          // if (L < 5) {
+          //   std::cout << gamma_return_coefficients_[L - 1][n - 1] << " ";
+          // }
         }
+        // if (L < 5) {
+        //   std::cout << std::endl;
+        // }
+        // if (L == 4) {
+        //   throw std::runtime_error("blah!");
+        // }
       }
 
     }
@@ -186,8 +199,7 @@ namespace utexas_planning {
       MCTS_DEBUG_OUTPUT("------------ BACKPROPAGATION --------------");
 
 
-      if (params_.backup_strategy == BACKUP_LAMBDA_Q ||
-          params_.backup_strategy == BACKUP_LAMBDA_SARSA) {
+      if (params_.backup_strategy == BACKUP_LAMBDA_Q || params_.backup_strategy == BACKUP_LAMBDA_SARSA) {
 
         float backup_value = 0;
 
@@ -216,13 +228,12 @@ namespace utexas_planning {
 
             // Update the backup value.
             backup_value =
-              (params_.backup_lambda_value * value_sample) +
+              (params_.backup_lambda_value * backup_value) +
               ((1.0 - params_.backup_lambda_value) * interpolation_value);
           }
         }
 
-      } else if (params_.backup_strategy == BACKUP_GAMMA_Q ||
-                 params_.backup_strategy == BACKUP_GAMMA_SARSA) {
+      } else if (params_.backup_strategy == BACKUP_GAMMA_Q || params_.backup_strategy == BACKUP_GAMMA_SARSA) {
 
         std::vector<float> return_array(history.size(), 0.0f);
         float last_interpolation_value = 0.0f;
@@ -269,6 +280,9 @@ namespace utexas_planning {
       }
 
       ++current_playouts;
+      // if (current_playouts == 10) {
+      //   throw std::runtime_error("blah!");
+      // }
       current_time = boost::posix_time::microsec_clock::local_time();
     }
 
