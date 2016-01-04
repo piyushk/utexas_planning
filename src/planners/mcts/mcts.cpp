@@ -281,9 +281,9 @@ namespace utexas_planning {
       }
 
       ++current_playouts;
-      if (current_playouts == 20) {
-        throw std::runtime_error("blah!");
-      }
+      // if (current_playouts == 20) {
+      //   throw std::runtime_error("blah!");
+      // }
       current_time = boost::posix_time::microsec_clock::local_time();
     }
 
