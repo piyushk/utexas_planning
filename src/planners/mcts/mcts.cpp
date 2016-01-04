@@ -9,11 +9,11 @@
 #include <utexas_planning/planners/mcts/mcts.h>
 #include <utexas_planning/planners/random/random_planner.h>
 
-/* #ifdef MCTS_DEBUG */
+#ifdef MCTS_DEBUG
 #define MCTS_DEBUG_OUTPUT(x) std::cout << x << std::endl
-// #else
-// #define MCTS_DEBUG_OUTPUT(x) ((void) 0)
-// #endif
+#else
+#define MCTS_DEBUG_OUTPUT(x) ((void) 0)
+#endif
 
 #define MCTS_VERBOSE_OUTPUT(x) if (verbose_) std::cout << x << std::endl
 
@@ -281,9 +281,9 @@ namespace utexas_planning {
       }
 
       ++current_playouts;
-      if (current_playouts == 20) {
-        throw std::runtime_error("blah!");
-      }
+      // if (current_playouts == 20) {
+      //   throw std::runtime_error("blah!");
+      // }
       current_time = boost::posix_time::microsec_clock::local_time();
     }
 
