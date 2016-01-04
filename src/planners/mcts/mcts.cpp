@@ -9,7 +9,6 @@
 #include <utexas_planning/planners/mcts/mcts.h>
 #include <utexas_planning/planners/random/random_planner.h>
 
-
 #ifdef MCTS_DEBUG
 #define MCTS_DEBUG_OUTPUT(x) std::cout << x << std::endl
 #else
@@ -247,8 +246,10 @@ namespace utexas_planning {
           if (history[step].state) {
 
             float sample_value = 0.0f;
+            /* std::cout << "Calculating sample value: " << std::endl; */
             for (int mult_idx = 0; mult_idx < history.size() - step; ++mult_idx) {
-              sample_value += return_array[mult_idx] * gamma_return_coefficients_[history.size() - step - 1][mult_idx];
+              /* std::cout << "    " << return_array[mult_idx] << " " << gamma_return_coefficients_[history.size() - step - 1][history.size() - step - 1 - mult_idx] << std::endl; */
+              sample_value += return_array[mult_idx] * gamma_return_coefficients_[history.size() - step - 1][history.size() - step - 1 - mult_idx];
             }
 
             MCTS_DEBUG_OUTPUT("  Updating state-action " << *(history[step].state->state) << " " <<
@@ -280,9 +281,9 @@ namespace utexas_planning {
       }
 
       ++current_playouts;
-      // if (current_playouts == 10) {
-      //   throw std::runtime_error("blah!");
-      // }
+      if (current_playouts == 20) {
+        throw std::runtime_error("blah!");
+      }
       current_time = boost::posix_time::microsec_clock::local_time();
     }
 
@@ -462,10 +463,13 @@ namespace utexas_planning {
     StateNode::Ptr& state_info = step.state;
     ++(state_info->state_visits);
     StateActionNode::Ptr& action_info = state_info->actions[step.action];
-    MCTS_DEBUG_OUTPUT("  Original value, variance and visits for this state-action: " << action_info->mean_value <<
-                      "+-" << action_info->variance << " (" << action_info->visits << ")");
+    MCTS_DEBUG_OUTPUT("  Original value and visits for this state-action: " << action_info->mean_value <<
+                      " (" << action_info->visits << ")");
     ++(action_info->visits);
     action_info->mean_value += (1.0 / action_info->visits) * (value_sample - action_info->mean_value);
+
+    MCTS_DEBUG_OUTPUT("    Updated value and visits for this state-action: " << action_info->mean_value <<
+                      " (" << action_info->visits << ")");
 
     if (params_.action_selection_strategy == THOMPSON) {
       action_info->sum_squares += value_sample * value_sample;
