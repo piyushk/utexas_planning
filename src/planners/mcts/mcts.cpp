@@ -277,7 +277,8 @@ namespace utexas_planning {
         }
 
       } else /* unknown backup strategy - probably set incorrectly in params file */ {
-        throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
+        throw IncorrectUsageException(std::string("MCTS: Unknown backup strategy provided in parameter set: ") +
+                                      params_.backup_strategy);
       }
 
       ++current_playouts;
@@ -399,6 +400,7 @@ namespace utexas_planning {
     std::vector<Action::ConstPtr> best_actions;
 
     if (params_.action_selection_strategy == UCT ||
+        params_.action_selection_strategy == UCT_TUNED ||
         params_.action_selection_strategy == THOMPSON ||
         params_.action_selection_strategy == THOMPSON_BETA ||
         params_.action_selection_strategy == HIGHEST_MEAN ||
@@ -455,7 +457,8 @@ namespace utexas_planning {
       }
 
     } else {
-      throw IncorrectUsageException("MCTS: Unknown backup strategy provided in parameter set.");
+      throw IncorrectUsageException(std::string("MCTS: Unknown action selection strategy provided in parameter set: ") +
+                                    params_.action_selection_strategy);
     }
 
     /* std::cout << best_actions.size() << std::endl; */
