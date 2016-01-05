@@ -57,6 +57,7 @@ namespace utexas_planning {
 
   const int NO_MAX_PLAYOUTS = -1;
   const std::string UCT = "uct";
+  const std::string UCT_TUNED = "uct_tuned";
   const std::string THOMPSON = "thompson";
   const std::string THOMPSON_BETA = "thompson_beta";
   const std::string RANDOM = "random";

@@ -418,6 +418,11 @@ namespace utexas_planning {
               // UCT comptues the planning value as the upper confidence bound.
               planning_value = action_info_pair.second->mean_value +
                 params_.uct_reward_bound * sqrtf(logf(state_node->state_visits) / action_info_pair.second->visits);
+            } else if (params_.action_selection_strategy == UCT_TUNED) {
+              float reward_bound = (action_info_pair.second->variance +
+                                    sqrtf((2 * logf(state_node->state_visits)) / action_info_pair.second->visits));
+              planning_value = (action_info_pair.second->mean_value +
+                                sqrtf(params_.uct_reward_bound * (logf(state_node->state_visits) / action_info_pair.second->visits)));
             } else if (params_.action_selection_strategy == UNIFORM) {
               planning_value = 1e5f / (1 + action_info_pair.second->visits);
             } else {
@@ -426,7 +431,7 @@ namespace utexas_planning {
               if (params_.action_selection_strategy == THOMPSON) {
                 if (action_info_pair.second->visits >= params_.thompson_initial_random_trials) {
                   planning_value = rng_->normalFloat(action_info_pair.second->mean_value,
-                                                     sqrtf(action_info_pair.second->variance));
+                                                     action_info_pair.second->variance);
                 }
               } else if (params_.action_selection_strategy == THOMPSON_BETA) {
                 planning_value = rng_->betaFloat(action_info_pair.second->alpha,
@@ -471,13 +476,11 @@ namespace utexas_planning {
     MCTS_DEBUG_OUTPUT("    Updated value and visits for this state-action: " << action_info->mean_value <<
                       " (" << action_info->visits << ")");
 
-    if (params_.action_selection_strategy == THOMPSON) {
-      action_info->sum_squares += value_sample * value_sample;
-      action_info->variance = (action_info->sum_squares / (action_info->visits * action_info->visits));
-      action_info->variance -= ((action_info->mean_value * action_info->mean_value) / (action_info->visits));
-      // Always ensure that variance is positive. Due to floating point arithmetic, sometimes it turns up to be negative.
-      action_info->variance = std::max(action_info->variance, 1e-10f);
-    }
+    action_info->sum_squares += value_sample * value_sample;
+    action_info->variance = (action_info->sum_squares / action_info->visits);
+    action_info->variance -= (action_info->mean_value * action_info->mean_value) / action_info->visits;
+    // Always ensure that variance is positive to avoid floating point arithmetic issues.
+    action_info->variance = std::max(action_info->variance, 0.0f);
 
     if (params_.action_selection_strategy == THOMPSON_BETA) {
       float normalized_reward =
