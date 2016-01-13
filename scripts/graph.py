@@ -46,9 +46,9 @@ def get_formatted_float(f):
     s = "%.2f"%f
     return s.rstrip('0').rstrip('.') if '.' in s else s
 
-def draw_bar_chart(samples, top_level_names, second_level_names=None,
+def draw_bar_chart(args, samples, top_level_names, second_level_names=None,
                    title=None, xlabel=None, ylabel=None, color=None,
-                   bottom=None, yticklabels=None, legend_loc=None):
+                   bottom=None, yticklabels=None):
 
     # So, samples can either contain a list of lists. The top level list
     # contains top level groups, and the second level list contains actual
@@ -141,13 +141,15 @@ def draw_bar_chart(samples, top_level_names, second_level_names=None,
         ax.set_yticklabels(yticklabels)
 
     if top_level_names:
-        if legend_loc is None:
-            legend_loc = 'upper center'
-        ax.legend(rects, top_level_names, mode='expand', ncol=2, loc=legend_loc)
+        if args.legend_loc is not 'none' and args.legend_loc is not 'None':
+            if args.expand_legend:
+                ax.legend(rects, top_level_names, mode='expand', ncol=args.legend_cols, loc=args.legend_loc)
+            else:
+                ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc)
 
     return fig, ax, rects, means, sigs
 
-def draw_line_graph(samples, top_level_names, second_level_names=None,
+def draw_line_graph(args, samples, top_level_names, second_level_names=None,
                     title=None, xlabel=None, ylabel=None, yticklabels=None):
 
     # So, samples can either contain a list of lists. The top level list
@@ -164,12 +166,23 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
     top_level_methods = len(samples)
 
     if second_level_grouping_available:
-        second_level_methods = len(samples[0])
-        samples2 = samples
-    else:
-        # Create artificial second level grouping
+
         second_level_methods = 1
-        samples2 = [[samples[i]] for i in range(top_level_methods)]
+        for i in range(top_level_methods):
+            if len(samples[i]) != 1 and second_level_methods != 1 and len(samples[i]) != second_level_methods:
+                raise ValueError('Unable to group data for line graph')
+            second_level_methods = max(second_level_methods, len(samples[i]))
+
+        samples2 = samples
+
+        if second_level_methods != 1:
+            for i in range(top_level_methods):
+                if len(samples2[i]) == 1:
+                    for j in range(second_level_methods - 1):
+                        samples2[i].append(samples2[i][0])
+
+    else:
+        raise ValueError('No second level grouping available for line plot')
 
     for i in range(top_level_methods):
         means.append([])
@@ -185,21 +198,21 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
     fig, ax = plt.subplots()
     rects = []
     for i in range(top_level_methods):
-        # if top_level_names[i] != "UCT":
-        #     rect, = ax.plot(np.arange(0, second_level_methods), means[i],
-        #                     color=LINE_COLORS[i%len(LINE_COLORS)],
-        #                     dashes=LINE_HATCH[i%len(LINE_HATCH)],
-        #                     linewidth = 2)
-        # else:
-        displacement = 0
-        rect = ax.errorbar(np.arange(0, second_level_methods) + displacement,
-                           means[i],
-                           color=LINE_COLORS[i%len(LINE_COLORS)],
-                           dashes=LINE_HATCH[i%len(LINE_HATCH)],
-                           yerr=confs[i],
-                           linewidth=2,
-                           elinewidth=1,
-                           capthick=1)
+        if args.no_error_bars:
+            rect, = ax.plot(np.arange(0, second_level_methods),
+                            means[i],
+                            color=LINE_COLORS[i%len(LINE_COLORS)],
+                            dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                            linewidth=2)
+        else:
+            rect = ax.errorbar(np.arange(0, second_level_methods),
+                               means[i],
+                               color=LINE_COLORS[i%len(LINE_COLORS)],
+                               dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                               yerr=confs[i],
+                               linewidth=2,
+                               elinewidth=1,
+                               capthick=1)
 
         rects.append(rect)
 
@@ -216,17 +229,21 @@ def draw_line_graph(samples, top_level_names, second_level_names=None,
         if second_level_names:
             ax.set_xticklabels(second_level_names)
 
-
     if yticklabels:
         ax.set_yticklabels(yticklabels)
-    ax.legend(rects, top_level_names, ncol=1, loc='upper right', handlelength=4)
 
-    plt.xlim([0,9.0])
-    # plt.ylim([-40,100])
+    if args.legend_loc is not 'none' and args.legend_loc is not 'None':
+        if args.expand_legend:
+            ax.legend(rects, top_level_names, mode='expand', ncol=args.legend_cols, loc=args.legend_loc, handlelength=4)
+        else:
+            ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc, handlelength=4)
+
+    # TODO parametrize this!
+    plt.xlim([-0.1,10.1])
 
     return fig, ax, rects, means, None
 
-def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None,
+def draw_3d_bar_chart(args, samples, top_level_names=None, second_level_names=None,
                       title=None, xlabel=None, ylabel=None, zlabel=None,
                       flip_y=True, third_level_names=None):
 
@@ -315,14 +332,14 @@ def draw_3d_bar_chart(samples, top_level_names=None, second_level_names=None,
     tick_multiplier = int(math.ceil(float(top_level_methods)/float(len(top_level_names))))
     ax.set_xticks(tick_multiplier * np.arange(len(top_level_names)) + 0.5)
 
-    xtickrotation = raw_input("Specify rotation for xticklabels [hit enter to use zero]: ")
-    if xtickrotation is not None and xtickrotation != "":
-        xtickrotation = float(xtickrotation)
-    else:
-        xtickrotation = 0.0
+    xtickrotation = 0
+    if args.write_image:
+        xtickrotation = raw_input("Specify rotation for xticklabels [hit enter to use zero]: ")
+        if xtickrotation is not None and xtickrotation != "":
+            xtickrotation = float(xtickrotation)
+
     if top_level_names:
         ax.set_xticklabels(top_level_names, rotation=xtickrotation)
-#    ax.legend(rects, top_level_names, mode='expand', ncol=3)
 
     return fig, ax, rects, means
 
@@ -362,7 +379,7 @@ def get_formatted_combination_name(name_dict, name_mappings=None):
     return formatted_name
 
 def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_filter=None,
-                         attempt_auto_mapping=True, name_mappings=None, legend_loc=None):
+                         attempt_auto_mapping=True, name_mappings=None, args=None):
 
     data_per_file = []
     for file in filename:
@@ -426,12 +443,13 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
                 continue
 
             combination_name = get_formatted_combination_name(combination_name_dict, name_mappings)
-            entered_name = raw_input("Suggested combincation name (Hit Enter to use default, Enter 'skip' to skip this combination)[" + combination_name + "]: ")
-            if entered_name is not None and entered_name != "":
-                if entered_name == 'skip':
-                    continue
-                else:
-                    combination_name = entered_name
+            if args.write_image:
+                entered_name = raw_input("Suggested combination name (Hit Enter to use default, Enter 'skip' to skip this combination)[" + combination_name + "]: ")
+                if entered_name is not None and entered_name != "":
+                    if entered_name == 'skip':
+                        continue
+                    else:
+                        combination_name = entered_name
 
             # Now that we have combination data, apply secondary filtering if necessary
             if secondary_filters is None:
@@ -480,10 +498,10 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
     if plot_type == 'line':
         xlabel = ylabel
         ylabel = zlabel
-        return draw_line_graph(samples, top_level_names, second_level_names, title, xlabel, ylabel)
+        return draw_line_graph(args, samples, top_level_names, second_level_names, title, xlabel, ylabel)
     elif plot_type == '3d':
-        return draw_3d_bar_chart(samples, top_level_names, second_level_names, title, xlabel, ylabel, zlabel)
+        return draw_3d_bar_chart(args, samples, top_level_names, second_level_names, title, xlabel, ylabel, zlabel)
     else:
         xlabel = ylabel
         ylabel = zlabel
-        return draw_bar_chart(samples, top_level_names, second_level_names, title, xlabel, ylabel, legend_loc=legend_loc)
+        return draw_bar_chart(args, samples, top_level_names, second_level_names, title, xlabel, ylabel)
