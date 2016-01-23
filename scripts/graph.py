@@ -141,7 +141,7 @@ def draw_bar_chart(args, samples, top_level_names, second_level_names=None,
         ax.set_yticklabels(yticklabels)
 
     if top_level_names:
-        if args.legend_loc is not 'none' and args.legend_loc is not 'None':
+        if args.legend_loc != 'none' and args.legend_loc != 'None':
             if args.expand_legend:
                 ax.legend(rects, top_level_names, mode='expand', ncol=args.legend_cols, loc=args.legend_loc)
             else:
@@ -198,19 +198,19 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
     fig, ax = plt.subplots()
     rects = []
     for i in range(top_level_methods):
-        if args.no_error_bars:
+        if args.no_error_bars or (args.one_error_bar != i):
             rect, = ax.plot(np.arange(0, second_level_methods),
                             means[i],
                             color=LINE_COLORS[i%len(LINE_COLORS)],
                             dashes=LINE_HATCH[i%len(LINE_HATCH)],
-                            linewidth=2)
+                            linewidth=1)
         else:
             rect = ax.errorbar(np.arange(0, second_level_methods),
                                means[i],
                                color=LINE_COLORS[i%len(LINE_COLORS)],
                                dashes=LINE_HATCH[i%len(LINE_HATCH)],
                                yerr=confs[i],
-                               linewidth=2,
+                               linewidth=1,
                                elinewidth=1,
                                capthick=1)
 
@@ -232,7 +232,7 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
     if yticklabels:
         ax.set_yticklabels(yticklabels)
 
-    if args.legend_loc is not 'none' and args.legend_loc is not 'None':
+    if args.legend_loc != 'none' and args.legend_loc != 'None':
         if args.expand_legend:
             ax.legend(rects, top_level_names, mode='expand', ncol=args.legend_cols, loc=args.legend_loc, handlelength=4)
         else:
@@ -443,7 +443,7 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
                 continue
 
             combination_name = get_formatted_combination_name(combination_name_dict, name_mappings)
-            if args.write_image:
+            if args.write_image and args.legend_loc != "none":
                 entered_name = raw_input("Suggested combination name (Hit Enter to use default, Enter 'skip' to skip this combination)[" + combination_name + "]: ")
                 if entered_name is not None and entered_name != "":
                     if entered_name == 'skip':
@@ -481,10 +481,12 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
                     secondary_combination_name = get_formatted_combination_name(secondary_combination_name_dict, name_mappings)
                     secondary_combination_samples = secondary_combination_data[output].tolist()
 
-                    if is_first_primary_combination:
-                        if ylabel == 'Methods':
+                    # if is_first_primary_combination:
+                    if ylabel == 'Methods':
+                        if secondary_combination_name not in second_level_names:
                             second_level_names.append(secondary_combination_name)
-                        else:
+                    else:
+                        if secondary_combination_name_dict[secondary_filters[0]] not in second_level_names:
                             second_level_names.append(secondary_combination_name_dict[secondary_filters[0]])
                     combination_samples.append(secondary_combination_samples)
 

@@ -24,6 +24,7 @@ parser.add_argument("--write-image", help="Write an image, and ask questions to 
 parser.add_argument("--image-width", help="Image width (smaller means larger text)", type=float, default=5)
 parser.add_argument("--image-height", help="Image height (smaller means larger text)", type=float, default=4)
 parser.add_argument("--no-error-bars", help="Don't draw error bars", action='store_true')
+parser.add_argument("--one-error-bar", help="Only draw error bars for specified line idx", type=int, default=-1)
 
 args = parser.parse_args()
 
