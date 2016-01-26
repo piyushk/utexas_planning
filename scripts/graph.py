@@ -239,7 +239,7 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
             ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc, handlelength=4)
 
     # TODO parametrize this!
-    plt.xlim([-0.1,10.1])
+    plt.xlim([-0.1,15.1])
 
     return fig, ax, rects, means, None
 
