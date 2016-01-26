@@ -15,9 +15,12 @@ find_library(CLASS_LOADER_LIBRARY NAMES class_loader
   HINTS ${CLASS_LOADER_LIBDIR} ${CLASS_LOADER_LIBRARY_DIRS}
 )
 
+find_package(Eigen3 REQUIRED)
+
 include_directories(include/)
 include_directories(${YAML_CPP_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Eigen3_INCLUDE_DIRS})
 include_directories(${CLASS_LOADER_INCLUDE_DIRS})
 
 ## add_definitions(-DMCTS_DEBUG)
@@ -93,6 +96,10 @@ add_executable(evaluator
 target_link_libraries(evaluator utexas_planning_execution)
 target_link_libraries(evaluator utexas_planning_core)
 
+add_executable(least_squares_example
+  src/examples/least_squares.cpp
+)
+
 install(
   TARGETS
     utexas_planning_common
@@ -102,6 +109,7 @@ install(
     utexas_planning_execution
     vi_example
     evaluator
+    least_squares_example
   ## ARCHIVE DESTINATION bin
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

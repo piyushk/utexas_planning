@@ -69,6 +69,9 @@ namespace utexas_planning {
   const std::string BACKUP_LAMBDA_Q = "backup_lambda_q";
   const std::string BACKUP_GAMMA_Q = "backup_gamma_q";
 
+  const std::string BACKUP_OMEGA_SARSA = "backup_omega_sarsa";
+  const std::string BACKUP_OMEGA_Q = "backup_omega_q";
+
   class MCTS : public AbstractPlanner {
 
     public:
@@ -154,6 +157,8 @@ namespace utexas_planning {
       virtual void updateState(HistoryStep& step, float& backup_value);
       virtual StateNode::Ptr getNewStateNode(const State::ConstPtr& state);
 
+      void calculateOmegaWeightsFromParams();
+
       std::string getStateValuesDescription(const State& state);
       std::string getStateTableDescription();
 
@@ -175,6 +180,21 @@ namespace utexas_planning {
        * http://papers.nips.cc/paper/4472-td_gamma-re-evaluating-complex-backups-in-temporal-difference-learning.pdf
        * the outer indexing represents different L, and the inner indexing represents different n. */
       std::vector<std::vector<float> > gamma_return_coefficients_;
+
+      /* Variable coefficients required for the omega return */
+      std::vector<float> omega_return_coefficients_;
+      int omega_max_encountered_trajectory_length_;
+      int omega_num_sample_trajectories_;
+      std::vector<float> omega_nreturn_sum_squares_;
+      std::vector<float> omega_nreturn_sum_;
+      std::vector<float> omega_nreturn_variance_;
+
+      float omega_vl_;
+      float omega_vplus_;
+      float omega_k1_;
+      float omega_k2_;
+      bool omega_values_initialized_;
+
   };
 
 } /* utexas_planning */

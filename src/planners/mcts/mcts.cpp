@@ -5,6 +5,8 @@
 
 #include <class_loader/class_loader.h>
 
+#include <Eigen/Core>
+
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/planners/mcts/mcts.h>
 #include <utexas_planning/planners/random/random_planner.h>
@@ -37,7 +39,9 @@ namespace utexas_planning {
 
     // Compute gamma return coefficients up to max depth.
     if (params_.backup_strategy == BACKUP_GAMMA_SARSA ||
-        params_.backup_strategy == BACKUP_GAMMA_Q) {
+        params_.backup_strategy == BACKUP_GAMMA_Q ||
+        params_.backup_strategy == BACKUP_OMEGA_SARSA ||
+        params_.backup_strategy == BACKUP_OMEGA_Q) {
 
       if (params_.backup_gamma_max_depth <= 0) {
         params_.backup_gamma_max_depth = params_.max_depth;
@@ -79,7 +83,6 @@ namespace utexas_planning {
         //   throw std::runtime_error("blah!");
         // }
       }
-
     }
   }
 
@@ -95,6 +98,14 @@ namespace utexas_planning {
   void MCTS::search(const State::ConstPtr& start_state,
                     float timeout,
                     int max_playouts) {
+
+    /* Re-init omega values every search */
+    omega_values_initialized_ = false;
+    omega_nreturn_sum_.clear();
+    omega_nreturn_sum_squares_.clear();
+    omega_nreturn_variance_.clear();
+    omega_max_encountered_trajectory_length_ = 0;
+    omega_num_sample_trajectories_ = 0;
 
     // Do some basic sanity checks.
     if (timeout <= 0 && max_playouts <= 0) {
@@ -197,6 +208,8 @@ namespace utexas_planning {
 
       MCTS_DEBUG_OUTPUT("------------ BACKPROPAGATION --------------");
 
+      // TODO: Double check to see if the current history length exceeded the omega_max_encountered_trajectory_length,
+      // and if so, recompute the omega weights.
 
       if (params_.backup_strategy == BACKUP_LAMBDA_Q || params_.backup_strategy == BACKUP_LAMBDA_SARSA) {
 
@@ -232,7 +245,8 @@ namespace utexas_planning {
           }
         }
 
-      } else if (params_.backup_strategy == BACKUP_GAMMA_Q || params_.backup_strategy == BACKUP_GAMMA_SARSA) {
+      } else if (params_.backup_strategy == BACKUP_GAMMA_Q || params_.backup_strategy == BACKUP_GAMMA_SARSA ||
+                 params_.backup_strategy == BACKUP_OMEGA_Q || params_.backup_strategy == BACKUP_OMEGA_SARSA) {
 
         std::vector<float> return_array(history.size(), 0.0f);
         float last_interpolation_value = 0.0f;
@@ -243,13 +257,46 @@ namespace utexas_planning {
           }
           return_array[history.size() - 1 - step] += last_interpolation_value;
 
+          if (step == 0 &&
+              (params_.backup_strategy == BACKUP_OMEGA_Q || params_.backup_strategy == BACKUP_OMEGA_SARSA)) {
+
+            // Get the omega nreturn tally to the right point.
+            if (omega_num_sample_trajectories_ == 0) {
+              omega_nreturn_sum_.resize(history.size(), 0.0f);
+              omega_nreturn_sum_squares_.resize(history.size(), 0.0f);
+            } else if (history.size() > omega_max_encountered_trajectory_length_) {
+              omega_nreturn_sum_.resize(history.size(), omega_nreturn_sum_.back());
+              omega_nreturn_sum_squares_.resize(history.size(), omega_nreturn_sum_squares_.back());
+            }
+
+            // Increment the number of trajectories.
+            ++omega_num_sample_trajectories_;
+            // Add to the mean and sum
+            for (int i = 0; i < omega_nreturn_sum_.size(); ++i) {
+              int nreturn_idx = omega_nreturn_sum_.size() - i - 1;
+              if (nreturn_idx >= history.size()) {
+                nreturn_idx = history.size() - 1;
+              }
+              omega_nreturn_sum_[i] += nreturns[nreturn_idx];
+              omega_nreturn_sum_squares_[i] += nreturns[nreturn_idx] * nreturns[nreturn_idx];
+            }
+
+          }
+
           if (history[step].state) {
 
             float sample_value = 0.0f;
             /* std::cout << "Calculating sample value: " << std::endl; */
             for (int mult_idx = 0; mult_idx < history.size() - step; ++mult_idx) {
               /* std::cout << "    " << return_array[mult_idx] << " " << gamma_return_coefficients_[history.size() - step - 1][history.size() - step - 1 - mult_idx] << std::endl; */
-              sample_value += return_array[mult_idx] * gamma_return_coefficients_[history.size() - step - 1][history.size() - step - 1 - mult_idx];
+              float coefficient =
+                gamma_return_coefficients_[history.size() - step - 1][history.size() - step - 1 - mult_idx];
+              if (omega_values_initialized_ &&
+                  (params_.backup_strategy == BACKUP_OMEGA_Q || params_.backup_strategy == BACKUP_OMEGA_SARSA)) {
+                coefficient =
+                  omega_return_coefficients_[history.size() - step - 1 - mult_idx];
+              }
+              sample_value += return_array[mult_idx] * coefficient;
             }
 
             MCTS_DEBUG_OUTPUT("  Updating state-action " << *(history[step].state->state) << " " <<
@@ -282,6 +329,27 @@ namespace utexas_planning {
       }
 
       ++current_playouts;
+      // TODO parametrize based on number of planning simulations.
+      if (current_playouts % 500 == 0) {
+        if (params_.backup_strategy == BACKUP_OMEGA_Q || params_.backup_strategy == BACKUP_OMEGA_SARSA) {
+          omega_nreturn_variance_.resize(omega_nreturn_sum_.size());
+          omega_vplus_ = 0.0f;
+          std::vector xrange(omega_nreturn_sum_.size() - 1);
+          for (int i = 0; i < omega_nreturn_sum_.size(); ++i) {
+            omega_nreturn_variance[i] = (omega_nreturn_sum_squares_[i] - ((omega_nreturn_sum_[i] * omega_nreturn_sum_[i]) / omega_num_sample_trajectories_)) / omega_num_sample_trajectories_;
+            omega_vplus_ = std::max(omega_vplus_, omega_nreturn_variance_[i]);
+            if (i != omega_nreturn_sum_.size() - 1) {
+              xrange[i] = i;
+            } else {
+              // Last variance.
+              omega_vl_ = omega_nreturn_variance_[i];
+            }
+          }
+          leastSquaresExponentialFit2(xrange, omega_nreturn_variance_, omega_k1_, omega_k2);
+          omega_values_initialized_ = true;
+          calculateOmegaWeightsFromParams();
+        }
+      }
       // if (current_playouts == 20) {
       //   throw std::runtime_error("blah!");
       // }
@@ -523,6 +591,29 @@ namespace utexas_planning {
 
   std::string MCTS::getName() const {
     return std::string("MCTS");
+  }
+
+  void MCTS::calculateOmegaWeightsFromParams() {
+
+    eigen3::Matrix<float, omega_nreturn_variance_.size(), omega_nreturn_variance_.size()> cov;
+    for (int i = 0; i < omega_nreturn_variance_.size() - 1; ++i) {
+      int val = std::min(omega_vplus_, omega_k1_ * exp(omega_k2_));
+      cov (i,i) = val;
+      for (int j = i + 1; j < omega_nreturn_variance_.size(); ++j) {
+        cov(i,j) = val;
+        cov(j,i) = val;
+      }
+    }
+    cov(omega_nreturn_variance_.size() - 1.  omega_nreturn_variance_.size() - 1) = omega_vl_;
+    eigen3::Matrix<float, omega_nreturn_variance_.size(), omega_nreturn_variance_.size()> cov_inv = cov.inverse();
+
+    float matrix_sum = cov_inv.sum();
+    // TODO change from auto.
+    auto rowwise_sum = cov_inv.rowwise().sum();
+    omega_return_coefficients_.resize(omega_nreturn_variance_.size());
+    for (int i = 0; i < omega_nreturn_variance_.size()) {
+      omega_return_coefficients_[i] = rowwise_sum[i] / matrix_sum;
+    }
   }
 
 } /* utexas_planning */
