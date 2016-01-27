@@ -6,8 +6,10 @@
 #include <class_loader/class_loader.h>
 
 #include <Eigen/Core>
+#include <Eigen/LU>
 
 #include <utexas_planning/common/exceptions.h>
+#include <utexas_planning/common/least_squares.h>
 #include <utexas_planning/planners/mcts/mcts.h>
 #include <utexas_planning/planners/random/random_planner.h>
 
@@ -277,8 +279,8 @@ namespace utexas_planning {
               if (nreturn_idx >= history.size()) {
                 nreturn_idx = history.size() - 1;
               }
-              omega_nreturn_sum_[i] += nreturns[nreturn_idx];
-              omega_nreturn_sum_squares_[i] += nreturns[nreturn_idx] * nreturns[nreturn_idx];
+              omega_nreturn_sum_[i] += return_array[nreturn_idx];
+              omega_nreturn_sum_squares_[i] += return_array[nreturn_idx] * return_array[nreturn_idx];
             }
 
           }
@@ -334,9 +336,9 @@ namespace utexas_planning {
         if (params_.backup_strategy == BACKUP_OMEGA_Q || params_.backup_strategy == BACKUP_OMEGA_SARSA) {
           omega_nreturn_variance_.resize(omega_nreturn_sum_.size());
           omega_vplus_ = 0.0f;
-          std::vector xrange(omega_nreturn_sum_.size() - 1);
+          std::vector<float> xrange(omega_nreturn_sum_.size() - 1);
           for (int i = 0; i < omega_nreturn_sum_.size(); ++i) {
-            omega_nreturn_variance[i] = (omega_nreturn_sum_squares_[i] - ((omega_nreturn_sum_[i] * omega_nreturn_sum_[i]) / omega_num_sample_trajectories_)) / omega_num_sample_trajectories_;
+            omega_nreturn_variance_[i] = (omega_nreturn_sum_squares_[i] - ((omega_nreturn_sum_[i] * omega_nreturn_sum_[i]) / omega_num_sample_trajectories_)) / omega_num_sample_trajectories_;
             omega_vplus_ = std::max(omega_vplus_, omega_nreturn_variance_[i]);
             if (i != omega_nreturn_sum_.size() - 1) {
               xrange[i] = i;
@@ -345,7 +347,7 @@ namespace utexas_planning {
               omega_vl_ = omega_nreturn_variance_[i];
             }
           }
-          leastSquaresExponentialFit2(xrange, omega_nreturn_variance_, omega_k1_, omega_k2);
+          leastSquaresExponentialFit2(xrange, omega_nreturn_variance_, omega_k1_, omega_k2_);
           omega_values_initialized_ = true;
           calculateOmegaWeightsFromParams();
         }
@@ -595,23 +597,22 @@ namespace utexas_planning {
 
   void MCTS::calculateOmegaWeightsFromParams() {
 
-    eigen3::Matrix<float, omega_nreturn_variance_.size(), omega_nreturn_variance_.size()> cov;
+    Eigen::MatrixXf cov(omega_nreturn_variance_.size(), omega_nreturn_variance_.size());
     for (int i = 0; i < omega_nreturn_variance_.size() - 1; ++i) {
-      int val = std::min(omega_vplus_, omega_k1_ * exp(omega_k2_));
+      int val = std::min(omega_vplus_, omega_k1_ * expf(omega_k2_));
       cov (i,i) = val;
       for (int j = i + 1; j < omega_nreturn_variance_.size(); ++j) {
         cov(i,j) = val;
         cov(j,i) = val;
       }
     }
-    cov(omega_nreturn_variance_.size() - 1.  omega_nreturn_variance_.size() - 1) = omega_vl_;
-    eigen3::Matrix<float, omega_nreturn_variance_.size(), omega_nreturn_variance_.size()> cov_inv = cov.inverse();
+    cov(omega_nreturn_variance_.size() - 1,  omega_nreturn_variance_.size() - 1) = omega_vl_;
+    Eigen::MatrixXf cov_inv = cov.inverse();
 
     float matrix_sum = cov_inv.sum();
-    // TODO change from auto.
-    auto rowwise_sum = cov_inv.rowwise().sum();
+    Eigen::VectorXf rowwise_sum = cov_inv.rowwise().sum();
     omega_return_coefficients_.resize(omega_nreturn_variance_.size());
-    for (int i = 0; i < omega_nreturn_variance_.size()) {
+    for (int i = 0; i < omega_nreturn_variance_.size(); ++i) {
       omega_return_coefficients_[i] = rowwise_sum[i] / matrix_sum;
     }
   }
