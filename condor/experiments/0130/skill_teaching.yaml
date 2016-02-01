@@ -1,0 +1,644 @@
+models:
+  - name: utexas_planning::RddlModel
+    rddl_domain: skill_teaching
+planners:
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_gamma_sarsa
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_sarsa
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 5
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 10
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 25
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 50
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 100
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.1
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.3
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.5
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.7
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.9
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 40
+    action_selection_strategy: uct
+    uct_reward_bound: 200
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
