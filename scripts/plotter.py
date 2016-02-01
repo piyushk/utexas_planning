@@ -90,4 +90,6 @@ if args.write_image:
 
     plt.savefig('out.png',bbox_inches='tight',pad_inches=pad_inches,dpi=100)
 
+#plt.setp(ltext, fontsize='small')
+
 plt.show()

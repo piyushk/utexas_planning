@@ -16,9 +16,10 @@ import pandas as pd
 # Keep the following at different length to produce more distinct combinations
 METHOD_COLORS = ['yellow', 'red', 'aqua', 'green', 'lightgray', 'blue']
 METHOD_HATCH = ['/', '\\', 'x', '*', 'o', 'O', '.']
-LINE_COLORS = ['red', 'blue', 'green']
+LINE_COLORS = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
 LINE_HATCH = [(1000000,1),(20,5),(5,5),(15,5,5,5),(15,5,2,5)]
 LINE_STYLES = ['-','--','-.',':']
+LINE_MARKERS = ['<','s','>','*','^','o','v']
 
 def calculate_mean_and_standard_error(data):
     a = 1.0 * np.array(data)
@@ -146,7 +147,6 @@ def draw_bar_chart(args, samples, top_level_names, second_level_names=None,
                 ax.legend(rects, top_level_names, mode='expand', ncol=args.legend_cols, loc=args.legend_loc)
             else:
                 ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc)
-
     return fig, ax, rects, means, sigs
 
 def draw_line_graph(args, samples, top_level_names, second_level_names=None,
@@ -197,18 +197,22 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
     ind = np.arange(second_level_methods)
     fig, ax = plt.subplots()
     rects = []
+    print args.no_error_bars
     for i in range(top_level_methods):
-        if args.no_error_bars or (args.one_error_bar != i):
+        if (args.no_error_bars == True) or (args.one_error_bar != -1 and args.one_error_bar != i):
             rect, = ax.plot(np.arange(0, second_level_methods),
                             means[i],
                             color=LINE_COLORS[i%len(LINE_COLORS)],
-                            dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                            # dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                            marker=LINE_MARKERS[i%len(LINE_MARKERS)],
+                            markersize=4,
                             linewidth=1)
         else:
             rect = ax.errorbar(np.arange(0, second_level_methods),
                                means[i],
                                color=LINE_COLORS[i%len(LINE_COLORS)],
-                               dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                               marker=LINE_MARKERS[i%len(LINE_MARKERS)],
+                            markersize=4,
                                yerr=confs[i],
                                linewidth=1,
                                elinewidth=1,
@@ -234,12 +238,13 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
 
     if args.legend_loc != 'none' and args.legend_loc != 'None':
         if args.expand_legend:
-            ax.legend(rects, top_level_names, mode='expand', ncol=args.legend_cols, loc=args.legend_loc, handlelength=4)
+            ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc,
+                      handlelength=2, prop={'size': 8})
         else:
-            ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc, handlelength=4)
+            ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc, handlelength=2, prop={'size': 11})
 
     # TODO parametrize this!
-    plt.xlim([-0.1,15.1])
+    plt.xlim([-0.1,10.1])
 
     return fig, ax, rects, means, None
 
