@@ -1,0 +1,76 @@
+models:
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 0
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 3
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 6
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 9
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 12
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 15
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 18
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 21
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 24
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 27
+    toroidal: false
+  - name: utexas_planning::GridModel2
+    num_terminal_states: 30
+    toroidal: false
+planners:
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_gamma_q
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.0
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.2
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.4
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.6
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 0.8
+  - name: utexas_planning::MCTS
+    max_playouts: 10000
+    max_depth: 100
+    action_selection_strategy: uniform
+    backup_strategy: backup_lambda_q
+    backup_lambda_value: 1.0
