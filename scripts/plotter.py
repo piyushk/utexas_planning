@@ -88,7 +88,7 @@ if args.write_image:
             elev = 25
         ax.view_init(elev=float(elev), azim=float(azim))
 
-    plt.savefig('out.png',bbox_inches='tight',pad_inches=pad_inches,dpi=100)
+    plt.savefig('out.png',bbox_inches='tight',pad_inches=pad_inches,dpi=300)
 
 #plt.setp(ltext, fontsize='small')
 

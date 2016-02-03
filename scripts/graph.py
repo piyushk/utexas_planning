@@ -16,10 +16,10 @@ import pandas as pd
 # Keep the following at different length to produce more distinct combinations
 METHOD_COLORS = ['yellow', 'red', 'aqua', 'green', 'lightgray', 'blue']
 METHOD_HATCH = ['/', '\\', 'x', '*', 'o', 'O', '.']
-LINE_COLORS = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d', '#666666']
+LINE_COLORS = ['#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e', '#e6ab02', '#a6761d']#, '#666666']
 LINE_HATCH = [(1000000,1),(20,5),(5,5),(15,5,5,5),(15,5,2,5)]
 LINE_STYLES = ['-','--','-.',':']
-LINE_MARKERS = ['<','s','>','*','^','o','v']
+LINE_MARKERS = ['<','s','>','D','^','o','v']
 
 def calculate_mean_and_standard_error(data):
     a = 1.0 * np.array(data)
@@ -203,19 +203,28 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
             rect, = ax.plot(np.arange(0, second_level_methods),
                             means[i],
                             color=LINE_COLORS[i%len(LINE_COLORS)],
-                            # dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                            dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                            # linestyle=LINE_STYLES[i%len(LINE_STYLES)],
                             marker=LINE_MARKERS[i%len(LINE_MARKERS)],
-                            markersize=4,
-                            linewidth=1)
+                            # markersize=6,
+                            markevery=(1,2),
+                            # markevery=[2 - (i+1)%2,2],
+                            linewidth=2)
         else:
             rect = ax.errorbar(np.arange(0, second_level_methods),
                                means[i],
                                color=LINE_COLORS[i%len(LINE_COLORS)],
+                               dashes=LINE_HATCH[i%len(LINE_HATCH)],
+                               # linestyle=LINE_STYLES[i%len(LINE_STYLES)],
                                marker=LINE_MARKERS[i%len(LINE_MARKERS)],
-                            markersize=4,
                                yerr=confs[i],
-                               linewidth=1,
+                               # markersize=6,
+                               linewidth=2,
                                elinewidth=1,
+                               # markevery=[2 - i%2,2],
+                               markevery=(1,2),
+                            # markevery=[2 - (i+1)%2,2],
+                               errorevery=2,
                                capthick=1)
 
         rects.append(rect)
@@ -239,9 +248,9 @@ def draw_line_graph(args, samples, top_level_names, second_level_names=None,
     if args.legend_loc != 'none' and args.legend_loc != 'None':
         if args.expand_legend:
             ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc,
-                      handlelength=2, prop={'size': 8})
+                      handlelength=4, prop={'size': 8})
         else:
-            ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc, handlelength=2, prop={'size': 11})
+            ax.legend(rects, top_level_names, ncol=args.legend_cols, loc=args.legend_loc, handlelength=4, prop={'size': 11})
 
     # TODO parametrize this!
     plt.xlim([-0.1,10.1])
@@ -448,7 +457,7 @@ def draw_from_data_frame(filename, output, plot_type, filter=None, secondary_fil
                 continue
 
             combination_name = get_formatted_combination_name(combination_name_dict, name_mappings)
-            if args.write_image and args.legend_loc != "none":
+            if args.write_image:
                 entered_name = raw_input("Suggested combination name (Hit Enter to use default, Enter 'skip' to skip this combination)[" + combination_name + "]: ")
                 if entered_name is not None and entered_name != "":
                     if entered_name == 'skip':
