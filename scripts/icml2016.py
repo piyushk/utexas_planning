@@ -98,14 +98,27 @@ for model_name in sorted(pd.unique(data.model_name.ravel())):
     table_latex_sig_gamma[model_name].append(p_sig)
 
 print sorted(pd.unique(data.model_name.ravel()))
+headers = [
+    "Monte Carlo",
+    "MaxMCTS($\\lambda$)",
+    "$\\lambda$",
+    "MCTS($\\lambda$)",
+    "$\\lambda$",
+    "MaxMCTS$_\\gamma$",
+    "MCTS$_\\gamma$",
+]
 for row in range(7):
+    print headers[row] + " &",
     for i, model_name in enumerate(sorted(pd.unique(data.model_name.ravel()))):
-        print round(table_latex_data[model_name][row], 2),
-        if table_latex_sig_mc[model_name][row]:
-            print "$^\\ast$",
-        if table_latex_sig_gamma[model_name][row]:
-            print "$^\\dagger$",
+        modifier_str = ""
+        if table_latex_sig_mc[model_name][row] and table_latex_sig_gamma[model_name][row]:
+            modifier_str = "$^{\\ast\\dagger}$"
+        elif table_latex_sig_mc[model_name][row]:
+            modifier_str = "$^{\\ast}$"
+        elif table_latex_sig_gamma[model_name][row]:
+            modifier_str = "$^{\\dagger}$"
+        print str(round(table_latex_data[model_name][row], 2)) + modifier_str,
         if i != num_models - 1:
-            print " & ",
+            print "& ",
     print " \\\\"
 
