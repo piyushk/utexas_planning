@@ -230,20 +230,22 @@ namespace utexas_planning {
             //                   action_info->visits << ")");
 
             // Prepare backup using eligiblity trace methodology.
-            StateNode::Ptr& state_info = history[step].state;
-            float interpolation_value;
-            if (params_.backup_strategy == BACKUP_LAMBDA_Q) {
-              interpolation_value = maxValueForState(state_info);
-            } else { /* params_.backup_strategy == BACKUP_SARSA_Q */
-              // Get the up-to-date value for the state-action.
-              StateActionNode::Ptr& action_info = state_info->actions[history[step].action];
-              interpolation_value = action_info->mean_value;
-            }
+            if (params_.backup_lambda_value != 1.0f) {
+              StateNode::Ptr& state_info = history[step].state;
+              float interpolation_value;
+              if (params_.backup_strategy == BACKUP_LAMBDA_Q) {
+                interpolation_value = maxValueForState(state_info);
+              } else { /* params_.backup_strategy == BACKUP_SARSA_Q */
+                // Get the up-to-date value for the state-action.
+                StateActionNode::Ptr& action_info = state_info->actions[history[step].action];
+                interpolation_value = action_info->mean_value;
+              }
 
-            // Update the backup value.
-            backup_value =
-              (params_.backup_lambda_value * backup_value) +
-              ((1.0 - params_.backup_lambda_value) * interpolation_value);
+              // Update the backup value.
+              backup_value =
+                (params_.backup_lambda_value * backup_value) +
+                ((1.0f - params_.backup_lambda_value) * interpolation_value);
+            }
           }
         }
 

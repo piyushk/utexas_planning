@@ -89,6 +89,11 @@ namespace utexas_planning {
     record.insert(reward_metrics_map.begin(), reward_metrics_map.end());
     record["reward"] = boost::lexical_cast<std::string>(cumulative_reward);
 
+    // Store termination criteria.
+    current_time = boost::posix_time::microsec_clock::local_time();
+    record["time"] = boost::lexical_cast<std::string>((current_time - start_time).total_milliseconds());
+    record["max_trial_depth"] = boost::lexical_cast<std::string>(max_trial_depth);
+
     return record;
 
   }
