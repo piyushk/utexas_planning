@@ -15,6 +15,7 @@ find_library(CLASS_LOADER_LIBRARY NAMES class_loader
   HINTS ${CLASS_LOADER_LIBDIR} ${CLASS_LOADER_LIBRARY_DIRS}
 )
 
+list(APPEND CMAKE_MODULE_PATH ${utexas_planning_SOURCE_DIR}/cmake_modules)
 find_package(Eigen3 REQUIRED)
 
 include_directories(include/)
@@ -114,3 +115,28 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
+install(DIRECTORY include/ DESTINATION include)
+
+# Setup pkg-config for this package.
+
+set(TARGET_NAME ${PROJECT_NAME})
+set(PKGCONFIG_LIBS
+  ${Boost_LIBRARIES}
+  ${YAML_CPP_LIBRARY}
+  ${CLASS_LOADER_LIBRARIES}
+)
+set(PKGCONFIG_LIB_TARGETS
+  "-lutexas_planning_common"
+  "-lutexas_planning_core"
+  "-lutexas_planning_planners"
+  "-lutexas_planning_models"
+  "-lutexas_planning_execution"
+)
+
+# Prepare and install necessary files to support finding of the library
+# using pkg-config
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig/${TARGET_NAME}.pc.in
+${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pc @ONLY)
+
+install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION lib/pkgconfig)
