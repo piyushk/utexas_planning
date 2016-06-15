@@ -14,7 +14,8 @@ namespace utexas_planning {
                                                     int max_trial_depth,
                                                     float max_trial_time,
                                                     bool post_action_processing,
-                                                    bool verbose);
+                                                    bool verbose,
+                                                    bool manual_action_selection);
 
 } /* utexas_planning */
 

@@ -12,7 +12,8 @@ namespace utexas_planning {
                                                     int max_trial_depth,
                                                     float max_trial_time,
                                                     bool post_action_processing,
-                                                    bool verbose) {
+                                                    bool verbose,
+                                                    bool manual_action_selection) {
 
     RewardMetrics::Ptr reward_metrics = model->getRewardMetricsAtEpisodeStart();
     float cumulative_reward = 0.0f;
@@ -28,7 +29,9 @@ namespace utexas_planning {
     int depth_count;
     boost::shared_ptr<RNG> rng(new RNG(seed));
 
-    planner->performEpisodeStartProcessing(state, model->getInitialTimeout());
+    if (!manual_action_selection) {
+      planner->performEpisodeStartProcessing(state, model->getInitialTimeout());
+    }
 
     if (verbose) {
       std::cout << "Testing model " << model->getName() << " using planner " << planner->getName() << std::endl;
@@ -42,9 +45,21 @@ namespace utexas_planning {
     while (!model->isTerminalState(state) &&
            ((max_trial_time == NO_TIMEOUT) || (current_time < end_time)) &&
            ((max_trial_depth == NO_MAX_DEPTH) || (action_count < max_trial_depth))) {
-      action = planner->getBestAction(state);
-      if (verbose) {
-        std::cout << "  Taking action " << *action << std::endl;
+      if (!manual_action_selection) {
+        action = planner->getBestAction(state);
+        if (verbose) {
+          std::cout << "  Taking action " << *action << std::endl;
+        }
+      } else {
+        // List out all actions and ask a user to select an action.
+        std::vector<Action::ConstPtr> actions;
+        model->getActionsAtState(state, actions);
+
+      virtual void getActionsAtState(const State::ConstPtr& state,
+                                     std::vector<Action::ConstPtr>& actions) const = 0;
+
+        
+
       }
       model->takeAction(state,
                         action,
@@ -68,7 +83,7 @@ namespace utexas_planning {
         break;
       }
 
-      if (!(model->isTerminalState(next_state))) {
+      if (!manual_action_selection && !(model->isTerminalState(next_state))) {
         if (post_action_processing) {
           planner->performPostActionProcessing(state, action, post_action_timeout);
         } else {
