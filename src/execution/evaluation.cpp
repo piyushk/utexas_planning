@@ -15,6 +15,8 @@ namespace utexas_planning {
                                                     bool verbose,
                                                     bool manual_action_selection) {
 
+    verbose = (manual_action_selection) ? true : verbose;
+
     RewardMetrics::Ptr reward_metrics = model->getRewardMetricsAtEpisodeStart();
     float cumulative_reward = 0.0f;
 
@@ -54,12 +56,14 @@ namespace utexas_planning {
         // List out all actions and ask a user to select an action.
         std::vector<Action::ConstPtr> actions;
         model->getActionsAtState(state, actions);
-
-      virtual void getActionsAtState(const State::ConstPtr& state,
-                                     std::vector<Action::ConstPtr>& actions) const = 0;
-
-        
-
+        std::cout << "Action choices:" << std::endl;
+        for (unsigned int i = 0; i < actions.size(); ++i) {
+          std::cout << "  " << i << ")" << *(actions[i]) << std::endl;
+        }
+        int choice;
+        std::cout << "Choice: ";
+        std::cin >> choice;
+        action = actions[choice];
       }
       model->takeAction(state,
                         action,
