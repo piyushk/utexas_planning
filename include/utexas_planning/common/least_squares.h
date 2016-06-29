@@ -1,5 +1,5 @@
-#ifndef UTEXAS_PLANNING_UTILS_H_
-#define UTEXAS_PLANNING_UTILS_H_
+#ifndef UTEXAS_PLANNING_LEAST_SQUARES_H
+#define UTEXAS_PLANNING_LEAST_SQUARES_H
 
 #include <math.h>
 #include <vector>
@@ -36,4 +36,4 @@ namespace utexas_planning {
 
 };
 
-#endif /* end of include guard: UTEXAS_PLANNING_UTILS_H_ */
+#endif /* end of include guard: UTEXAS_PLANNING_LEAST_SQUARES_H */

@@ -111,7 +111,8 @@ namespace utexas_planning {
 
     // Do some basic sanity checks.
     if (timeout <= 0 && max_playouts <= 0) {
-      throw IncorrectUsageException("MCTS: either timeout or max_playouts has to be greater than 0 for MCTS search.");
+      return;
+      // throw IncorrectUsageException("MCTS: either timeout or max_playouts has to be greater than 0 for MCTS search.");
     }
 
     int current_playouts = 0;

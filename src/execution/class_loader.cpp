@@ -6,6 +6,8 @@
 
 namespace utexas_planning {
 
+  ClassLoader::ClassLoader() : class_loader_(false) {}
+
   void ClassLoader::addLibraries(const std::vector<std::string>& libraries) {
     BOOST_FOREACH(const std::string& library, libraries) {
       class_loader_.loadLibrary(library);
@@ -48,6 +50,17 @@ namespace utexas_planning {
                                     ". Available classes are " + all_available_classes);
   }
 
-  ClassLoader::ClassLoader() : class_loader_(false) {}
+  Visualizer::Ptr ClassLoader::loadVisualizer(const std::string& visualizer_class) {
+    std::vector<std::string> classes = class_loader_.getAvailableClasses<Visualizer>();
+    BOOST_FOREACH(const std::string& class_name, classes) {
+      if (class_name == visualizer_class) {
+        return class_loader_.createInstance<Visualizer>(class_name);
+      }
+    }
+    std::string all_available_classes = "[" + boost::algorithm::join(classes, ", ") + "]";
+    throw ResourceNotFoundException("ClassLoader: Unable to load requested class " + visualizer_class +
+                                    ". Available classes are " + all_available_classes);
+    
+  }
 
 } /* utexas_planning */

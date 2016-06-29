@@ -7,6 +7,7 @@ namespace utexas_planning {
 
   std::map<std::string, std::string> runSingleTrial(const GenerativeModel::ConstPtr& model,
                                                     const AbstractPlanner::Ptr& planner,
+                                                    const Visualizer::Ptr& visualizer,
                                                     std::string results_directory,
                                                     int seed,
                                                     int max_trial_depth,
@@ -34,6 +35,7 @@ namespace utexas_planning {
     if (!manual_action_selection) {
       planner->performEpisodeStartProcessing(state, model->getInitialTimeout());
     }
+    visualizer->startEpisode(state);
 
     if (verbose) {
       std::cout << "Testing model " << model->getName() << " using planner " << planner->getName() << std::endl;
@@ -86,6 +88,8 @@ namespace utexas_planning {
           ((max_trial_depth != NO_MAX_DEPTH) && (action_count >= max_trial_depth))) {
         break;
       }
+
+      visualizer->updateState(next_state, post_action_timeout);
 
       if (!manual_action_selection && !(model->isTerminalState(next_state))) {
         if (post_action_processing) {

@@ -6,6 +6,7 @@
 #include <string>
 #include <utexas_planning/core/abstract_planner.h>
 #include <utexas_planning/core/generative_model.h>
+#include <utexas_planning/core/visualizer.h>
 #include <yaml-cpp/yaml.h>
 
 namespace utexas_planning {
@@ -31,6 +32,8 @@ namespace utexas_planning {
                                        const YAML::Node& params = YAML::Node(),
                                        const std::string& output_directory = "./",
                                        bool verbose = false);
+
+      Visualizer::Ptr loadVisualizer(const std::string& visualizer_class);
 
     private:
 

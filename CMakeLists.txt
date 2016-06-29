@@ -24,7 +24,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${CLASS_LOADER_INCLUDE_DIRS})
 
-## add_definitions(-DMCTS_DEBUG)
+# add_definitions(-DMCTS_DEBUG)
 
 add_library(utexas_planning_common SHARED
   src/common/farmhash.cc
@@ -36,6 +36,7 @@ add_library(utexas_planning_core SHARED
   src/core/declarative_model.cpp
   src/core/generative_model.cpp
   src/core/state.cpp
+  src/core/visualizer.cpp
 )
 target_link_libraries(utexas_planning_core
   ${Boost_LIBRARIES}
@@ -53,6 +54,13 @@ add_library(utexas_planning_planners SHARED
 target_link_libraries(utexas_planning_planners utexas_planning_core)
 target_link_libraries(utexas_planning_planners ${CLASS_LOADER_LIBRARY})
 target_link_libraries(utexas_planning_planners ${Boost_LIBRARIES})
+
+add_library(utexas_planning_visualizers SHARED
+  src/visualizers/no_visualization.cpp
+)
+target_link_libraries(utexas_planning_visualizers utexas_planning_core)
+target_link_libraries(utexas_planning_visualizers ${CLASS_LOADER_LIBRARY})
+target_link_libraries(utexas_planning_visualizers ${Boost_LIBRARIES})
 
 add_library(utexas_planning_models SHARED
   src/models/grid_model.cpp
@@ -77,6 +85,7 @@ add_library(utexas_planning_models SHARED
 )
 target_link_libraries(utexas_planning_models utexas_planning_core)
 target_link_libraries(utexas_planning_models ${CLASS_LOADER_LIBRARY})
+target_link_libraries(utexas_planning_models ${Boost_LIBRARIES})
 
 add_library(utexas_planning_execution SHARED
   src/execution/class_loader.cpp
@@ -106,6 +115,7 @@ install(
     utexas_planning_common
     utexas_planning_core
     utexas_planning_planners
+    utexas_planning_visualizers
     utexas_planning_models
     utexas_planning_execution
     vi_example
@@ -131,6 +141,7 @@ set(PKGCONFIG_LIB_TARGETS
   "-lutexas_planning_core"
   "-lutexas_planning_planners"
   "-lutexas_planning_models"
+  "-lutexas_planning_visualizers"
   "-lutexas_planning_execution"
 )
 

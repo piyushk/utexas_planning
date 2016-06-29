@@ -15,6 +15,7 @@ using namespace utexas_planning;
 
 YAML::Node experiment_;
 std::string experiment_file_;
+std::string visualizer_class_ = "utexas_planning::NoVisualizer";
 std::string data_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
@@ -36,6 +37,7 @@ int processOptions(int argc, char** argv) {
     ("experiment-file", po::value<std::string>(&experiment_file_)->required(),
      "JSON file containing all the necessary information about this experiment.")
     ("data-directory", po::value<std::string>(&data_directory_), "Data directory (defaults to runtime directory).")
+    ("visualizer", po::value<std::string>(&visualizer_class_), "Dynamically loaded class name for visualizing the domain. Empty means no visuzalization.")
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
     ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
     ("verbose", "Increased verbosity in planner and trial output.")
@@ -82,7 +84,6 @@ int processOptions(int argc, char** argv) {
   experiment_ = YAML::LoadFile(experiment_file_);
 
   /* Create the output directory */
-  data_directory_ = data_directory_;
   if (!boost::filesystem::is_directory(data_directory_) && !boost::filesystem::create_directory(data_directory_)) {
     std::cerr << "Unable to create directory for storing intermediate output and results: " << data_directory_;
     return -1;
@@ -110,7 +111,28 @@ int main(int argc, char** argv) {
   std::string libraries_as_str(libraries_as_char);
   std::vector<std::string> libraries;
   boost::split(libraries, libraries_as_str, boost::is_any_of(",;:"));
+
+  // Convert any directories to actual libraries in the directory.
+  for (std::vector<std::string>::iterator lib_it = libraries.begin(); lib_it != libraries.end(); ) {
+    boost::filesystem::path dir_path(*lib_it);
+    if (boost::filesystem::is_directory(dir_path)) {
+      lib_it = libraries.erase(lib_it);
+      boost::filesystem::recursive_directory_iterator dir_it(dir_path);
+      boost::filesystem::recursive_directory_iterator end_it;
+      while (dir_it != end_it) {
+        if (boost::filesystem::is_regular_file(*dir_it) && dir_it->path().extension() == "*.so")  {
+          libraries.push_back(dir_it->path().string());
+        }
+      }
+    } else {
+      ++lib_it;
+    }
+  }
+
   loader->addLibraries(libraries);
+
+  Visualizer::Ptr visualizer = loader->loadVisualizer(visualizer_class_);
+  visualizer->init(argc, argv);
 
   boost::shared_ptr<RNG> rng(new RNG(seed_));
 
@@ -132,6 +154,7 @@ int main(int argc, char** argv) {
                                                          verbose_);
       records.push_back(runSingleTrial(model,
                                        planner,
+                                       visualizer,
                                        data_directory_,
                                        seed_,
                                        max_trial_depth_,
