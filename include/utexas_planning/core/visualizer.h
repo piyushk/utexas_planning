@@ -16,13 +16,10 @@ namespace utexas_planning {
       virtual void init(int argc, char* argv[]) = 0;
       virtual void startEpisode(const State::ConstPtr& start_state) = 0;
       virtual void updateState(const State::ConstPtr& state, float timeout = 0.0f) = 0;
+      virtual void exec() = 0;
 
-    protected:
-
-      State::ConstPtr current_state_;
-      
   };
-  
+
 } /* utexas_planning */
 
 #endif /* end of include guard: UTEXAS_PLANNING_VISUALIZER_H */

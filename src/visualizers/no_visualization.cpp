@@ -7,6 +7,7 @@ namespace utexas_planning {
   void NoVisualization::init(int argc, char* argv[]) {}
   void NoVisualization::startEpisode(const State::ConstPtr& /* start_state */) {}
   void NoVisualization::updateState(const State::ConstPtr& /* state */, float /* timeout */) {}
+  void NoVisualization::exec() {}
 
 } /* utexas_planning */
 

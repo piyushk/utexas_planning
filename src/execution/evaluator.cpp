@@ -5,6 +5,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
+#include <boost/thread.hpp>
 
 #include <utexas_planning/common/constants.h>
 #include <utexas_planning/common/record_writer.h>
@@ -15,7 +16,7 @@ using namespace utexas_planning;
 
 YAML::Node experiment_;
 std::string experiment_file_;
-std::string visualizer_class_ = "utexas_planning::NoVisualizer";
+std::string visualizer_class_ = "utexas_planning::NoVisualization";
 std::string data_directory_ = ".";      // runtime directory.
 int seed_ = 0;
 int num_instances_ = 1;
@@ -24,6 +25,9 @@ bool manual_ = false;
 bool post_action_processing_ = false;
 int max_trial_depth_ = NO_MAX_DEPTH;
 float max_trial_time_ = NO_TIMEOUT;
+
+ClassLoader::Ptr loader_;
+Visualizer::Ptr visualizer_;
 
 int processOptions(int argc, char** argv) {
 
@@ -37,7 +41,7 @@ int processOptions(int argc, char** argv) {
     ("experiment-file", po::value<std::string>(&experiment_file_)->required(),
      "JSON file containing all the necessary information about this experiment.")
     ("data-directory", po::value<std::string>(&data_directory_), "Data directory (defaults to runtime directory).")
-    ("visualizer", po::value<std::string>(&visualizer_class_), "Dynamically loaded class name for visualizing the domain. Empty means no visuzalization.")
+    ("visualizer_", po::value<std::string>(&visualizer_class_), "Dynamically loaded class name for visualizing the domain. Empty means no visuzalization.")
     ("seed", po::value<int>(&seed_), "Random seed (process number on condor)")
     ("num-instances", po::value<int>(&num_instances_), "Number of Instances")
     ("verbose", "Increased verbosity in planner and trial output.")
@@ -89,7 +93,51 @@ int processOptions(int argc, char** argv) {
     return -1;
   }
 
+  /* Visualization is only supported for one model at a time. */
+  YAML::Node models_yaml = experiment_["models"];
+  if (models_yaml.size() != 1 && visualizer_class_ != "utexas_planning::NoVisualization") {
+    std::cerr << "Visualizing more than one model is not supported through the default evaluator." << std::endl;
+    return -1;
+  }
   return 0;
+}
+
+void runExperiment() {
+
+  boost::shared_ptr<RNG> rng(new RNG(seed_));
+
+  YAML::Node models_yaml = experiment_["models"];
+  YAML::Node planners_yaml = experiment_["planners"];
+  std::vector<std::map<std::string, std::string> > records;
+  for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
+    boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
+    std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
+    GenerativeModel::ConstPtr model = loader_->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
+    for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
+      boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
+      std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
+      AbstractPlanner::Ptr planner = loader_->loadPlanner(planner_name,
+                                                         model,
+                                                         planner_rng,
+                                                         planners_yaml[planner_idx],
+                                                         data_directory_,
+                                                         verbose_);
+      records.push_back(runSingleTrial(model,
+                                       planner,
+                                       visualizer_,
+                                       data_directory_,
+                                       seed_,
+                                       max_trial_depth_,
+                                       max_trial_time_,
+                                       post_action_processing_,
+                                       verbose_,
+                                       manual_));
+    }
+  }
+
+  // Running trials
+  writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);
+
 }
 
 int main(int argc, char** argv) {
@@ -100,7 +148,7 @@ int main(int argc, char** argv) {
   }
 
   // Load all libraries_as_char from environment variable.
-  ClassLoader::Ptr loader(new ClassLoader);
+  loader_.reset(new ClassLoader);
 
   char* libraries_as_char;
   libraries_as_char = getenv("UTEXAS_PLANNING_LIBRARIES");
@@ -129,44 +177,16 @@ int main(int argc, char** argv) {
     }
   }
 
-  loader->addLibraries(libraries);
+  loader_->addLibraries(libraries);
 
-  Visualizer::Ptr visualizer = loader->loadVisualizer(visualizer_class_);
-  visualizer->init(argc, argv);
+  visualizer_ = loader_->loadVisualizer(visualizer_class_);
+  visualizer_->init(argc, argv);
 
-  boost::shared_ptr<RNG> rng(new RNG(seed_));
+  boost::thread experiment_thread(runExperiment);
 
-  YAML::Node models_yaml = experiment_["models"];
-  YAML::Node planners_yaml = experiment_["planners"];
-  std::vector<std::map<std::string, std::string> > records;
-  for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
-    boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
-    std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
-    GenerativeModel::ConstPtr model = loader->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
-    for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
-      boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
-      std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
-      AbstractPlanner::Ptr planner = loader->loadPlanner(planner_name,
-                                                         model,
-                                                         planner_rng,
-                                                         planners_yaml[planner_idx],
-                                                         data_directory_,
-                                                         verbose_);
-      records.push_back(runSingleTrial(model,
-                                       planner,
-                                       visualizer,
-                                       data_directory_,
-                                       seed_,
-                                       max_trial_depth_,
-                                       max_trial_time_,
-                                       post_action_processing_,
-                                       verbose_,
-                                       manual_));
-    }
-  }
+  visualizer_->exec();
 
-  // Running trials
-  writeRecordsAsCSV(data_directory_ + "/result." + boost::lexical_cast<std::string>(seed_), records);
+  experiment_thread.join();
 
   return 0;
 }

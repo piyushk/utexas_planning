@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(utexas_planning)
 
-find_package(Boost REQUIRED COMPONENTS filesystem program_options serialization system)
+find_package(Boost REQUIRED COMPONENTS filesystem program_options serialization system thread)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YAML_CPP REQUIRED yaml-cpp>=0.5)
