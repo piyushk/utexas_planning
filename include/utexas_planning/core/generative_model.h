@@ -9,6 +9,7 @@
 #include <utexas_planning/core/action.h>
 #include <utexas_planning/core/reward_metrics.h>
 #include <utexas_planning/core/state.h>
+#include <utexas_planning/core/visualizer.h>
 
 #include <yaml-cpp/yaml.h>
 
@@ -60,6 +61,8 @@ namespace utexas_planning {
       virtual float getInitialTimeout() const;
       virtual std::map<std::string, std::string> getParamsAsMap() const;
       virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart() const;
+
+      virtual void initializeVisualizer() const;
 
   };
 
