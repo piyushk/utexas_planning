@@ -110,7 +110,7 @@ namespace utexas_planning {
     omega_num_sample_trajectories_ = 0;
 
     // Do some basic sanity checks.
-    if (timeout <= 0 && max_playouts <= 0) {
+    if (timeout <= 0.0f && max_playouts <= 0) {
       return;
       // throw IncorrectUsageException("MCTS: either timeout or max_playouts has to be greater than 0 for MCTS search.");
     }
