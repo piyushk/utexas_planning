@@ -62,7 +62,7 @@ namespace utexas_planning {
       virtual std::map<std::string, std::string> getParamsAsMap() const;
       virtual RewardMetrics::Ptr getRewardMetricsAtEpisodeStart() const;
 
-      virtual void initializeVisualizer() const;
+      virtual void initializeVisualizer(const Visualizer::Ptr& visualizer) const;
 
   };
 

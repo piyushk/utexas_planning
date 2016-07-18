@@ -37,6 +37,6 @@ namespace utexas_planning {
     return RewardMetrics::Ptr(new RewardMetrics);
   }
 
-  void GenerativeModel::initializeVisualizer() const {}
+  void GenerativeModel::initializeVisualizer(const Visualizer::Ptr& visualizer) const {}
 
 } /* utexas_planning */

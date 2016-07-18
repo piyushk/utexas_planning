@@ -94,11 +94,11 @@ int processOptions(int argc, char** argv) {
   }
 
   /* Visualization is only supported for one model at a time. */
-  YAML::Node models_yaml = experiment_["models"];
-  if (models_yaml.size() != 1 && visualizer_class_ != "utexas_planning::NoVisualization") {
-    std::cerr << "Visualizing more than one model is not supported through the default evaluator." << std::endl;
-    return -1;
-  }
+  // YAML::Node models_yaml = experiment_["models"];
+  // if (models_yaml.size() != 1 && visualizer_class_ != "utexas_planning::NoVisualization") {
+  //   std::cerr << "Visualizing more than one model is not supported through the default evaluator." << std::endl;
+  //   return -1;
+  // }
   return 0;
 }
 
@@ -113,6 +113,7 @@ void runExperiment() {
     boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
     GenerativeModel::ConstPtr model = loader_->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
+    model->initializeVisualizer(visualizer_);
     for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
       boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
       std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
@@ -157,27 +158,27 @@ int main(int argc, char** argv) {
     return -1;
   }
   std::string libraries_as_str(libraries_as_char);
-  std::vector<std::string> libraries;
+  std::vector<std::string> libraries, libraries_filtered;
   boost::split(libraries, libraries_as_str, boost::is_any_of(",;:"));
 
   // Convert any directories to actual libraries in the directory.
-  for (std::vector<std::string>::iterator lib_it = libraries.begin(); lib_it != libraries.end(); ) {
+  for (std::vector<std::string>::iterator lib_it = libraries.begin(); lib_it != libraries.end(); ++lib_it) {
     boost::filesystem::path dir_path(*lib_it);
     if (boost::filesystem::is_directory(dir_path)) {
-      lib_it = libraries.erase(lib_it);
       boost::filesystem::recursive_directory_iterator dir_it(dir_path);
       boost::filesystem::recursive_directory_iterator end_it;
       while (dir_it != end_it) {
-        if (boost::filesystem::is_regular_file(*dir_it) && dir_it->path().extension() == "*.so")  {
-          libraries.push_back(dir_it->path().string());
+        if (boost::filesystem::is_regular_file(*dir_it) && dir_it->path().extension() == ".so")  {
+          libraries_filtered.push_back(boost::filesystem::canonical(dir_it->path()).string());
         }
+        ++dir_it;
       }
     } else {
-      ++lib_it;
+      libraries_filtered.push_back(*lib_it);
     }
   }
 
-  loader_->addLibraries(libraries);
+  loader_->addLibraries(libraries_filtered);
 
   visualizer_ = loader_->loadVisualizer(visualizer_class_);
   visualizer_->init(argc, argv);
