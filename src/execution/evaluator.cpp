@@ -1,14 +1,13 @@
 #include<fstream>
 #include<cstdlib>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
 
 #include <utexas_planning/common/constants.h>
 #include <utexas_planning/common/record_writer.h>
+#include <utexas_planning/common/utils.h>
 #include <utexas_planning/execution/class_loader.h>
 #include <utexas_planning/execution/evaluation.h>
 
@@ -150,35 +149,8 @@ int main(int argc, char** argv) {
 
   // Load all libraries_as_char from environment variable.
   loader_.reset(new ClassLoader);
-
-  char* libraries_as_char;
-  libraries_as_char = getenv("UTEXAS_PLANNING_LIBRARIES");
-  if (libraries_as_char == NULL) {
-    std::cerr << "UTEXAS_PLANNING_LIBRARIES environment variable not set!" << std::endl;
-    return -1;
-  }
-  std::string libraries_as_str(libraries_as_char);
-  std::vector<std::string> libraries, libraries_filtered;
-  boost::split(libraries, libraries_as_str, boost::is_any_of(",;:"));
-
-  // Convert any directories to actual libraries in the directory.
-  for (std::vector<std::string>::iterator lib_it = libraries.begin(); lib_it != libraries.end(); ++lib_it) {
-    boost::filesystem::path dir_path(*lib_it);
-    if (boost::filesystem::is_directory(dir_path)) {
-      boost::filesystem::recursive_directory_iterator dir_it(dir_path);
-      boost::filesystem::recursive_directory_iterator end_it;
-      while (dir_it != end_it) {
-        if (boost::filesystem::is_regular_file(*dir_it) && dir_it->path().extension() == ".so")  {
-          libraries_filtered.push_back(boost::filesystem::canonical(dir_it->path()).string());
-        }
-        ++dir_it;
-      }
-    } else {
-      libraries_filtered.push_back(*lib_it);
-    }
-  }
-
-  loader_->addLibraries(libraries_filtered);
+  std::vector<std::string> libraries = getLibrariesFromEnvironment();
+  loader_->addLibraries(libraries);
 
   visualizer_ = loader_->loadVisualizer(visualizer_class_);
   visualizer_->init(argc, argv);

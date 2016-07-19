@@ -44,6 +44,13 @@ target_link_libraries(utexas_planning_core
   utexas_planning_common
 )
 
+add_library(utexas_planning_execution SHARED
+  src/execution/class_loader.cpp
+  src/execution/evaluation.cpp
+)
+target_link_libraries(utexas_planning_execution utexas_planning_core)
+target_link_libraries(utexas_planning_execution ${CLASS_LOADER_LIBRARY})
+
 add_library(utexas_planning_planners SHARED
   src/planners/random/random_planner.cpp
   src/planners/mcts/mcts.cpp
@@ -52,6 +59,7 @@ add_library(utexas_planning_planners SHARED
   src/planners/vi/tabular_estimator.cpp
 )
 target_link_libraries(utexas_planning_planners utexas_planning_core)
+target_link_libraries(utexas_planning_planners utexas_planning_execution)
 target_link_libraries(utexas_planning_planners ${CLASS_LOADER_LIBRARY})
 target_link_libraries(utexas_planning_planners ${Boost_LIBRARIES})
 
@@ -86,13 +94,6 @@ add_library(utexas_planning_models SHARED
 target_link_libraries(utexas_planning_models utexas_planning_core)
 target_link_libraries(utexas_planning_models ${CLASS_LOADER_LIBRARY})
 target_link_libraries(utexas_planning_models ${Boost_LIBRARIES})
-
-add_library(utexas_planning_execution SHARED
-  src/execution/class_loader.cpp
-  src/execution/evaluation.cpp
-)
-target_link_libraries(utexas_planning_execution utexas_planning_core)
-target_link_libraries(utexas_planning_execution ${CLASS_LOADER_LIBRARY})
 
 add_executable(vi_example
   src/examples/vi/vi_example.cpp

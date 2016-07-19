@@ -10,8 +10,8 @@
 
 #include <utexas_planning/common/exceptions.h>
 #include <utexas_planning/common/least_squares.h>
+#include <utexas_planning/common/utils.h>
 #include <utexas_planning/planners/mcts/mcts.h>
-#include <utexas_planning/planners/random/random_planner.h>
 
 #ifdef MCTS_DEBUG
 #define MCTS_DEBUG_OUTPUT(x) std::cout << x << std::endl
@@ -31,9 +31,24 @@ namespace utexas_planning {
     model_ = model;
     params_.fromYaml(params);
 
-    // TODO parametrize the default planner using ClassLoader
-    default_planner_.reset(new RandomPlanner);
-    default_planner_->init(model, params, output_directory, rng);
+    YAML::Node default_policy_params;
+    if (params["default_policy_params"]) {
+      default_policy_params = params["default_policy_params"];
+    }
+
+    loader_.reset(new ClassLoader);
+    std::vector<std::string> libraries = getLibrariesFromEnvironment();
+    loader_->addLibraries(libraries);
+    default_planner_ = loader_->loadPlanner(params_.default_policy,
+                                            model,
+                                            rng,
+                                            default_policy_params,
+                                            output_directory + "/default",
+                                            false);
+
+    if (!default_planner_) {
+      throw std::runtime_error("default planner pointer is empty");
+    }
 
     rng_ = rng;
     verbose_ = verbose;

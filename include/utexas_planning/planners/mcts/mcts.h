@@ -11,6 +11,7 @@
 #include <utexas_planning/core/abstract_planner.h>
 #include <utexas_planning/core/action.h>
 #include <utexas_planning/core/state.h>
+#include <utexas_planning/execution/class_loader.h>
 
 namespace utexas_planning {
 
@@ -99,6 +100,7 @@ namespace utexas_planning {
       _(std::string,backup_strategy,backup_strategy,BACKUP_LAMBDA_Q) \
       _(float,backup_lambda_value,backup_lambda_value,0.0) \
       _(unsigned int,backup_gamma_max_depth,backup_gamma_max_depth,100) \
+      _(std::string,default_policy,default_policy,"utexas_planning::RandomPlanner") \
 
       Params_STRUCT(PARAMS)
 #undef PARAMS
@@ -163,6 +165,7 @@ namespace utexas_planning {
       std::string getStateTableDescription();
 
       GenerativeModel::ConstPtr model_;
+      ClassLoader::Ptr loader_;
       AbstractPlanner::Ptr default_planner_;
 
       StateNode::Ptr root_node_;
