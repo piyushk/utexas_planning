@@ -148,8 +148,8 @@ namespace utexas_planning {
 
       // Version of the code with no max depth (and hence no pre-cached history memory).
       for (unsigned int depth = 0;
-           ((params_.max_depth == 0) || (depth < params_.max_depth) &&
-            (timeout <= 0.0) || (current_time < end_time));
+           (((params_.max_depth == 0) || (depth < params_.max_depth)) &&
+            ((timeout <= 0.0) || (current_time < end_time)));
            depth += depth_count) {
 
         // Select action, take it and update the model with the action taken in simulation.
