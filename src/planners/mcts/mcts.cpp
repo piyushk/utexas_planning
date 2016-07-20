@@ -184,6 +184,18 @@ namespace utexas_planning {
           std::stringstream ss;
           ss << "MCTS: Action " << *action << " being executed at state " << *state << " is not a valid action. " <<
             "This can also happen due to incorrect initialization in getNewStateNode()." << std::endl;
+          std::cerr << "Available actions: " << std::endl;
+          typedef std::pair<const boost::shared_ptr<const utexas_planning::Action>, boost::shared_ptr<utexas_planning::StateActionNode> > A2SAPair;
+          BOOST_FOREACH(const A2SAPair& p, state_node->actions) {
+            std::cerr << "  " << *(p.first) << std::endl;
+          }
+
+          std::cerr << "Available actions: " << std::endl;
+          std::vector<Action::ConstPtr> actions;
+          model_->getActionsAtState(state, actions);
+          BOOST_FOREACH(const Action::ConstPtr& a, actions) {
+            std::cerr << "  " << *a << std::endl;
+          }
           throw IncorrectUsageException(ss.str());
         }
 
