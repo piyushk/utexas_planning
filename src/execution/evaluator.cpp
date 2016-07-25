@@ -111,17 +111,29 @@ void runExperiment() {
   for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
     boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
-    GenerativeModel::ConstPtr model = loader_->loadModel(model_name, model_rng, models_yaml[model_idx], data_directory_);
+    GenerativeModel::ConstPtr model = loader_->loadModel(model_name, 
+                                                         model_rng, 
+                                                         models_yaml[model_idx], 
+                                                         data_directory_);
     model->initializeVisualizer(visualizer_);
     for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
       boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
       std::string planner_name = planners_yaml[planner_idx]["name"].as<std::string>();
+      GenerativeModel::ConstPtr planner_model = model;
+      if (planners_yaml[planner_idx]["model"]) {
+        boost::shared_ptr<RNG> planner_model_rng(new RNG(rng->randomInt()));
+        std::string planner_model_name = models_yaml[model_idx]["name"].as<std::string>();
+        planner_model = loader_->loadModel(planner_model_name, 
+                                           planner_model_rng, 
+                                           planners_yaml[planner_idx]["model"], 
+                                           data_directory_);
+      }
       AbstractPlanner::Ptr planner = loader_->loadPlanner(planner_name,
-                                                         model,
-                                                         planner_rng,
-                                                         planners_yaml[planner_idx],
-                                                         data_directory_,
-                                                         verbose_);
+                                                          planner_model,
+                                                          planner_rng,
+                                                          planners_yaml[planner_idx],
+                                                          data_directory_,
+                                                          verbose_);
       records.push_back(runSingleTrial(model,
                                        planner,
                                        visualizer_,
