@@ -1,0 +1,15 @@
+<package format="2">
+  <name>utexas_planning</name>
+  <version>1.2.4</version>
+  <description>
+    This package provides foo capability.
+  </description>
+  <maintainer email="piyushk@gmail.com">Piyush Khandelwal</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>cmake</buildtool_depend>
+  <depend>boost</depend>
+  <depend>class_loader</depend>
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
