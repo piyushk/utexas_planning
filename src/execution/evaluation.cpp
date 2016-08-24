@@ -41,14 +41,14 @@ namespace utexas_planning {
       std::cout << "Testing model " << model->getName() << " using planner " << planner->getName() << std::endl;
       std::cout << "  Start State: " << *state << std::endl;
     }
-    int action_count = 0;
+    int current_depth = 0;
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::ptime end_time = start_time + boost::posix_time::milliseconds(max_trial_time * 1000);
     boost::posix_time::ptime current_time = start_time;
 
     while (!model->isTerminalState(state) &&
            ((max_trial_time == NO_TIMEOUT) || (current_time < end_time)) &&
-           ((max_trial_depth == NO_MAX_DEPTH) || (action_count < max_trial_depth))) {
+           ((max_trial_depth == NO_MAX_DEPTH) || (current_depth < max_trial_depth))) {
       if (!manual_action_selection) {
         action = planner->getBestAction(state);
         if (verbose) {
@@ -80,12 +80,12 @@ namespace utexas_planning {
       }
       cumulative_reward += reward;
 
-      ++action_count;
+      current_depth += depth_count;
       current_time = boost::posix_time::microsec_clock::local_time();
 
       // Only perform search for next state, if
       if (((max_trial_time != NO_TIMEOUT) && (current_time >= end_time)) ||
-          ((max_trial_depth != NO_MAX_DEPTH) && (action_count >= max_trial_depth))) {
+          ((max_trial_depth != NO_MAX_DEPTH) && (current_depth >= max_trial_depth))) {
         break;
       }
 
