@@ -362,7 +362,7 @@ namespace utexas_planning {
     post_action_timeout = params_.per_step_planning_time;
   }
 
-  State::ConstPtr SimpleGuidanceModel::getStartState(long seed) const {
+  State::ConstPtr SimpleGuidanceModel::getStartState(long seed) {
     RNG rng(seed);
     int idx = rng.randomInt(complete_state_vector_.size() - 1);
     while (isTerminalState(complete_state_vector_[idx])) {

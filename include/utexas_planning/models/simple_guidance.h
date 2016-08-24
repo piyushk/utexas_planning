@@ -107,7 +107,7 @@ namespace utexas_planning {
                               float& post_action_timeout,
                               boost::shared_ptr<RNG> rng) const;
 
-      virtual State::ConstPtr getStartState(long seed) const;
+      virtual State::ConstPtr getStartState(long seed);
 
       virtual float getInitialTimeout() const;
       virtual std::map<std::string, std::string> getParamsAsMap() const;

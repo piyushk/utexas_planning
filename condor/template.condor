@@ -9,7 +9,7 @@
 +Project = "AI_ROBOTICS"
 
 Executable = /u/piyushk/utexas_planning/utexas_planning/condor/condor_runner.sh
-Requirements = Arch == "X86_64"
+Requirements = Arch == "X86_64" && Memory >= 8000
 
 Error = logs/err.$(Process)
 Output = logs/out.$(Process)

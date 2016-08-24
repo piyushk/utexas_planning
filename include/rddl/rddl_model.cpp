@@ -267,7 +267,7 @@ namespace utexas_planning {
     depth_count = 1;
   }
 
-  State::ConstPtr RddlModel::getStartState(long seed) const {
+  State::ConstPtr RddlModel::getStartState(long seed) {
     return start_state_;
   }
 

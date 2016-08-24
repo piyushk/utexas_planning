@@ -257,7 +257,7 @@ namespace utexas_planning {
     post_action_timeout = params_.per_step_planning_time;
   }
 
-  State::ConstPtr GridModel3D::getStartState(long seed) const {
+  State::ConstPtr GridModel3D::getStartState(long seed) {
     RNG rng(seed);
     int idx;
     if ((params_.start_x > 0 && params_.start_x < params_.grid_size) &&

@@ -349,7 +349,7 @@ namespace utexas_planning {
     post_action_timeout = params_.per_step_planning_time;
   }
 
-  State::ConstPtr LightWorldModel::getStartState(long seed) const {
+  State::ConstPtr LightWorldModel::getStartState(long seed) {
     LightWorldState start_state;
     start_state.x = params_.start_x;
     start_state.y = params_.start_y;

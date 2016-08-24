@@ -111,10 +111,10 @@ void runExperiment() {
   for (unsigned model_idx = 0; model_idx < models_yaml.size(); ++model_idx) {
     boost::shared_ptr<RNG> model_rng(new RNG(rng->randomInt()));
     std::string model_name = models_yaml[model_idx]["name"].as<std::string>();
-    GenerativeModel::ConstPtr model = loader_->loadModel(model_name, 
-                                                         model_rng, 
-                                                         models_yaml[model_idx], 
-                                                         data_directory_);
+    GenerativeModel::Ptr model = loader_->loadModel(model_name, 
+                                                    model_rng, 
+                                                    models_yaml[model_idx], 
+                                                    data_directory_);
     model->initializeVisualizer(visualizer_);
     for (unsigned planner_idx = 0; planner_idx < planners_yaml.size(); ++planner_idx) {
       boost::shared_ptr<RNG> planner_rng(new RNG(rng->randomInt()));
@@ -134,16 +134,20 @@ void runExperiment() {
                                                           planners_yaml[planner_idx],
                                                           data_directory_,
                                                           verbose_);
-      records.push_back(runSingleTrial(model,
-                                       planner,
-                                       visualizer_,
-                                       data_directory_,
-                                       seed_,
-                                       max_trial_depth_,
-                                       max_trial_time_,
-                                       post_action_processing_,
-                                       verbose_,
-                                       manual_));
+      std::map<std::string, std::string> results = runSingleTrial(model,
+                                                                  planner,
+                                                                  visualizer_,
+                                                                  data_directory_,
+                                                                  seed_,
+                                                                  max_trial_depth_,
+                                                                  max_trial_time_,
+                                                                  post_action_processing_,
+                                                                  verbose_,
+                                                                  manual_);
+      if (planners_yaml[planner_idx]["alias"]) {
+        results["alias"] = planners_yaml[planner_idx]["alias"].as<std::string>();
+      }
+      records.push_back(results);
     }
   }
 

@@ -56,7 +56,7 @@ namespace utexas_planning {
       virtual void getActionsAtState(const State::ConstPtr& state,
                                      std::vector<Action::ConstPtr>& actions) const = 0;
 
-      virtual State::ConstPtr getStartState(long seed) const = 0;
+      virtual State::ConstPtr getStartState(long seed) = 0;
 
       virtual float getInitialTimeout() const;
       virtual std::map<std::string, std::string> getParamsAsMap() const;
