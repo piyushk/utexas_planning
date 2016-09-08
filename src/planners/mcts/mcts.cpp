@@ -484,8 +484,18 @@ namespace utexas_planning {
   void MCTS::performPostActionProcessing(const State::ConstPtr& state,
                                          const Action::ConstPtr& action,
                                          float timeout) {
-    // TODO also lookup past search history.
-    restart();
+    State::Ptr discretized_state = state->clone();
+    if (root_node_) {
+      if (discretized_state != root_node_->state) {
+        StateActionNode::ConstPtr action_node = root_node_->actions.find(action)->second;
+        if (action_node->next_states.find(discretized_state) != action_node->next_states.end()) {
+          root_node_ = action_node->next_states.find(discretized_state)->second;
+        } else {
+          restart();
+        }
+      } 
+    }
+    last_action_selected_ = action;
     search(state, action, timeout, params_.max_playouts);
   }
 
