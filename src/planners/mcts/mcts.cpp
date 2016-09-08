@@ -461,7 +461,7 @@ namespace utexas_planning {
   void MCTS::performPreActionProcessing(const State::ConstPtr& start_state,
                                         const Action::ConstPtr& prev_action,
                                         float timeout) {
-
+    /* std::cout << "pre called" << std::endl; */
     // TODO discretize this state.
     State::Ptr discretized_state = start_state->clone();
     if (root_node_) {
@@ -479,15 +479,17 @@ namespace utexas_planning {
 
     last_action_selected_.reset();
     search(start_state, timeout, params_.max_playouts);
+    /* std::cout << "pre end: " << bool(root_node_) << std::endl; */
   }
 
   void MCTS::performPostActionProcessing(const State::ConstPtr& state,
                                          const Action::ConstPtr& action,
                                          float timeout) {
+    // std::cout << "post called with state " << *state << std::endl;
     State::Ptr discretized_state = state->clone();
     if (root_node_) {
-      if (discretized_state != root_node_->state) {
-        StateActionNode::ConstPtr action_node = root_node_->actions.find(action)->second;
+      if (!(*discretized_state == *root_node_->state)) {
+        StateActionNode::ConstPtr action_node = root_node_->actions.find(last_action_selected_)->second;
         if (action_node->next_states.find(discretized_state) != action_node->next_states.end()) {
           root_node_ = action_node->next_states.find(discretized_state)->second;
         } else {
@@ -497,6 +499,7 @@ namespace utexas_planning {
     }
     last_action_selected_ = action;
     search(state, action, timeout, params_.max_playouts);
+    // std::cout << "post end: " << bool(root_node_) << std::endl;
   }
 
   void MCTS::restart() {
