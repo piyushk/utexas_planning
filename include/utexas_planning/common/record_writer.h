@@ -8,6 +8,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
@@ -39,7 +40,13 @@ namespace utexas_planning {
         if (value_iter == record.end()) {
           vals.push_back("0");
         } else {
-          vals.push_back(value_iter->second);
+          try {
+            boost::lexical_cast<float>(value_iter->second);
+            vals.push_back(value_iter->second);
+          } catch(const boost::bad_lexical_cast &) {
+            // Non numerical/boolean type. Enclose within quotes
+            vals.push_back("\"" + value_iter->second + "\"");
+          }
         }
       }
       ofs << boost::algorithm::join(vals, ",") << std::endl;
